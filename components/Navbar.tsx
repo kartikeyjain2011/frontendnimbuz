@@ -1,17 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+  useUser,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/nextjs";
 
 const links = [
-  { label: "Library", href: "#library" },
-  { label: "How it works", href: "#how-it-works" },
-  { label: "Devices", href: "#devices" },
-  { label: "Performance", href: "#performance" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Library", href: "/#library" },
+  { label: "How it works", href: "/#how-it-works" },
+  { label: "Devices", href: "/#devices" },
+  { label: "Performance", href: "/#performance" },
+  { label: "Pricing", href: "/#pricing" },
 ];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const { isSignedIn, isLoaded } = useUser();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -27,12 +35,12 @@ export default function Navbar() {
       }`}
     >
       <nav className="container-px flex items-center justify-between h-16 md:h-20">
-        <a href="#top" className="flex items-center gap-2 group">
+        <Link href="/" className="flex items-center gap-2 group">
           <span className="relative w-2.5 h-2.5 rounded-full bg-cyan shadow-glow animate-flicker" />
           <span className="font-display font-semibold text-lg tracking-tight text-ink">
             NIMBUS
           </span>
-        </a>
+        </Link>
 
         <ul className="hidden lg:flex items-center gap-9">
           {links.map((l) => (
@@ -48,18 +56,30 @@ export default function Navbar() {
         </ul>
 
         <div className="flex items-center gap-3">
-          <a
-            href="#pricing"
-            className="hidden sm:inline-block text-sm text-muted hover:text-ink transition-colors"
-          >
-            Sign in
-          </a>
-          <a
-            href="#pricing"
-            className="inline-flex items-center rounded-full bg-ink text-void text-sm font-medium px-4 py-2 hover:bg-cyan transition-colors"
-          >
-            Start streaming
-          </a>
+          {isLoaded && isSignedIn ? (
+            <>
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center rounded-full bg-cyan/10 border border-cyan/30 text-cyan text-sm font-medium px-4 py-1.5 hover:bg-cyan/20 transition-colors"
+              >
+                Dashboard
+              </Link>
+              <UserButton />
+            </>
+          ) : (
+            <>
+              <SignInButton mode="modal" fallbackRedirectUrl="/dashboard">
+                <button className="hidden sm:inline-block text-sm text-muted hover:text-ink transition-colors cursor-pointer">
+                  Sign in
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal" fallbackRedirectUrl="/dashboard">
+                <button className="inline-flex items-center rounded-full bg-ink text-void text-sm font-medium px-4 py-2 hover:bg-cyan hover:text-void transition-colors cursor-pointer">
+                  Start streaming
+                </button>
+              </SignUpButton>
+            </>
+          )}
         </div>
       </nav>
     </header>
