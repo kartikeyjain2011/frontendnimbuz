@@ -53,7 +53,7 @@ export default function SingleGamePage() {
     setIsProcessing(true);
 
     const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_nimbus_demo_key",
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_TIQY8CAZ52qCin",
       amount: priceInPaise,
       currency: "INR",
       name: "NIMBUS Cloud Gaming",
@@ -121,17 +121,17 @@ export default function SingleGamePage() {
       <div className="flex items-center justify-between">
         <Link
           href="/dashboard/store"
-          className="inline-flex items-center gap-2 text-xs font-mono text-muted hover:text-cyan transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-mono text-muted hover:text-ink transition-colors"
         >
           ← Back to Game Store
         </Link>
 
         {isOwned ? (
-          <span className="text-xs font-mono text-emerald-400 bg-emerald-400/10 border border-emerald-400/30 px-3 py-1 rounded-full font-bold">
+          <span className="text-xs font-mono text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full font-bold">
             ✓ OWNED IN LIBRARY
           </span>
         ) : (
-          <span className="text-xs font-mono text-cyan bg-cyan/10 border border-cyan/30 px-3 py-1 rounded-full">
+          <span className="text-xs font-mono text-ink bg-black/5 border border-black/15 px-3 py-1 rounded-full">
             STORE ITEM • ₹{priceInINR.toLocaleString()}
           </span>
         )}
@@ -162,18 +162,18 @@ export default function SingleGamePage() {
         </div>
 
         {/* Content detail sidebar card */}
-        <div className="lg:w-1/3 p-6 lg:p-8 flex flex-col justify-between space-y-6 bg-surface">
+        <div className="lg:w-1/3 p-6 lg:p-8 flex flex-col justify-between space-y-6 bg-white border-t lg:border-t-0 lg:border-l border-black/10">
           <div className="space-y-3">
             <div className="flex items-center justify-between text-xs font-mono text-muted">
               <span>{game.genre}</span>
-              <span className="text-amber-400 font-bold">★ {game.rating}</span>
+              <span className="text-amber-500 font-bold">★ {game.rating}</span>
             </div>
 
             <h1 className="text-2xl lg:text-3xl font-display font-bold text-ink leading-tight">
               {game.title}
             </h1>
 
-            <div className="space-y-1.5 text-xs font-mono text-muted border-t border-line/60 pt-4">
+            <div className="space-y-1.5 text-xs font-mono text-muted border-t border-black/10 pt-4">
               <div className="flex justify-between">
                 <span>Publisher:</span>
                 <span className="text-ink">{game.publisher}</span>
@@ -188,24 +188,24 @@ export default function SingleGamePage() {
               </div>
               <div className="flex justify-between">
                 <span>Max Resolution:</span>
-                <span className="text-cyan font-semibold">{game.resolution}</span>
+                <span className="text-ink font-semibold">{game.resolution}</span>
               </div>
             </div>
           </div>
 
           {/* CTA Section */}
-          <div className="space-y-3 pt-4 border-t border-line/60">
+          <div className="space-y-3 pt-4 border-t border-black/10">
             {isOwned ? (
               <div className="space-y-2">
                 <Link
                   href="/dashboard/cloud-pc"
-                  className="w-full py-4 rounded-xl bg-cyan text-void font-mono font-bold text-xs shadow-glow hover:opacity-95 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-4 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all flex items-center justify-center gap-2"
                 >
                   <span>🖥️ LAUNCH ON CLOUD PC NOW</span>
                 </Link>
                 <Link
                   href="/dashboard/my-games"
-                  className="w-full py-2.5 rounded-lg text-xs font-mono text-center block bg-surface border border-line text-muted hover:text-ink transition-colors"
+                  className="w-full py-2.5 rounded-lg text-xs font-mono text-center block bg-white border border-black/10 text-muted hover:text-ink transition-colors"
                 >
                   View in My Games Library
                 </Link>
@@ -218,19 +218,19 @@ export default function SingleGamePage() {
                     {game.originalPrice && (
                       <span className="line-through text-muted mr-2">${game.originalPrice.toFixed(2)}</span>
                     )}
-                    <span className="text-xl font-bold text-cyan">${game.price.toFixed(2)}</span>
-                    <span className="text-emerald-400 text-[11px] block">(₹{priceInINR.toLocaleString()} INR)</span>
+                    <span className="text-xl font-bold text-ink">${game.price.toFixed(2)}</span>
+                    <span className="text-emerald-600 text-[11px] block">(₹{priceInINR.toLocaleString()} INR)</span>
                   </div>
                 </div>
 
                 <button
                   onClick={handleRazorpayBuy}
                   disabled={isProcessing}
-                  className="w-full py-4 rounded-xl bg-gradient-to-r from-cyan via-cyan to-emerald-400 text-void font-mono font-bold text-xs shadow-glow hover:opacity-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="w-full py-4 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {isProcessing ? (
                     <>
-                      <span className="w-4 h-4 border-2 border-void border-t-transparent rounded-full animate-spin" />
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       <span>LAUNCHING RAZORPAY...</span>
                     </>
                   ) : (
@@ -247,7 +247,7 @@ export default function SingleGamePage() {
 
       {/* Description & Specs Grid */}
       <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 rounded-xl bg-surface border border-line p-6 space-y-4">
+        <div className="lg:col-span-2 rounded-xl bg-white border border-black/10 p-6 space-y-4">
           <h2 className="text-lg font-display font-bold text-ink">
             About {game.title}
           </h2>
@@ -255,7 +255,7 @@ export default function SingleGamePage() {
             {game.description}
           </p>
 
-          <div className="pt-4 border-t border-line/60 space-y-3">
+          <div className="pt-4 border-t border-black/10 space-y-3">
             <span className="text-xs font-mono uppercase tracking-wider text-muted block">
               Feature Tags
             </span>
@@ -263,7 +263,7 @@ export default function SingleGamePage() {
               {game.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-3 py-1 rounded-full bg-void border border-line text-xs font-mono text-cyan"
+                  className="px-3 py-1 rounded-full bg-deep border border-black/10 text-xs font-mono text-ink"
                 >
                   #{tag}
                 </span>
@@ -273,23 +273,23 @@ export default function SingleGamePage() {
         </div>
 
         {/* Cloud Stream Specs */}
-        <div className="rounded-xl bg-surface border border-line p-6 space-y-4 flex flex-col justify-between">
+        <div className="rounded-xl bg-white border border-black/10 p-6 space-y-4 flex flex-col justify-between">
           <div className="space-y-3">
             <h2 className="text-lg font-display font-bold text-ink">
               Cloud PC Allocation
             </h2>
 
             <div className="space-y-3 font-mono text-xs">
-              <div className="p-3 rounded-lg bg-void/80 border border-line">
-                <span className="text-cyan block text-[10px] uppercase">Allocated GPU Node:</span>
+              <div className="p-3 rounded-lg bg-deep border border-black/10">
+                <span className="text-muted block text-[10px] uppercase">Allocated GPU Node:</span>
                 <span className="text-ink font-semibold">{game.reqGpu}</span>
               </div>
-              <div className="p-3 rounded-lg bg-void/80 border border-line">
-                <span className="text-cyan block text-[10px] uppercase">RAM Allocation:</span>
+              <div className="p-3 rounded-lg bg-deep border border-black/10">
+                <span className="text-muted block text-[10px] uppercase">RAM Allocation:</span>
                 <span className="text-ink font-semibold">{game.reqRam}</span>
               </div>
-              <div className="p-3 rounded-lg bg-void/80 border border-line">
-                <span className="text-cyan block text-[10px] uppercase">NVMe Storage:</span>
+              <div className="p-3 rounded-lg bg-deep border border-black/10">
+                <span className="text-muted block text-[10px] uppercase">NVMe Storage:</span>
                 <span className="text-ink font-semibold">{game.reqStorage}</span>
               </div>
             </div>
@@ -297,7 +297,7 @@ export default function SingleGamePage() {
 
           <Link
             href="/dashboard/cloud-pc"
-            className="w-full py-3 rounded-lg bg-cyan/10 border border-cyan/40 text-cyan hover:bg-cyan hover:text-void font-mono font-bold text-xs text-center transition-all block"
+            className="w-full py-3 rounded-lg bg-ink text-white hover:bg-black/80 font-mono font-bold text-xs text-center transition-all block"
           >
             🖥️ VIEW VIRTUAL GPU DESKTOP
           </Link>
@@ -306,14 +306,14 @@ export default function SingleGamePage() {
 
       {/* Activation Key Modal */}
       {showKeyModal && (
-        <div className="fixed inset-0 z-50 bg-void/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-surface border border-emerald-400/60 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-glow text-center animate-in zoom-in-95">
-            <div className="w-16 h-16 rounded-full bg-emerald-400/20 border border-emerald-400 flex items-center justify-center mx-auto text-2xl text-emerald-400">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-emerald-200 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-xl text-center">
+            <div className="w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-400 flex items-center justify-center mx-auto text-2xl text-emerald-500">
               ✓
             </div>
 
             <div className="space-y-2">
-              <span className="text-xs font-mono uppercase text-emerald-400">Razorpay Payment Verified</span>
+              <span className="text-xs font-mono uppercase text-emerald-600">Razorpay Payment Verified</span>
               <h3 className="text-2xl font-display font-bold text-ink">
                 {game.title}
               </h3>
@@ -322,9 +322,9 @@ export default function SingleGamePage() {
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-void border border-emerald-400/30 space-y-2">
+            <div className="p-4 rounded-xl bg-deep border border-black/10 space-y-2">
               <span className="text-[10px] font-mono text-muted uppercase block">Digital Key Code</span>
-              <div className="font-mono font-bold text-cyan text-lg tracking-widest">
+              <div className="font-mono font-bold text-ink text-lg tracking-widest">
                 {activationKey}
               </div>
             </div>
@@ -332,13 +332,13 @@ export default function SingleGamePage() {
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Link
                 href="/dashboard/cloud-pc"
-                className="flex-1 py-3 rounded-xl bg-cyan text-void font-mono font-bold text-xs shadow-glow hover:opacity-90 transition-all text-center"
+                className="flex-1 py-3 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all text-center"
               >
                 🖥️ LAUNCH ON CLOUD PC
               </Link>
               <button
                 onClick={() => setShowKeyModal(false)}
-                className="px-6 py-3 rounded-xl bg-surface border border-line text-muted hover:text-ink font-mono text-xs cursor-pointer"
+                className="px-6 py-3 rounded-xl bg-white border border-black/15 text-muted hover:text-ink font-mono text-xs cursor-pointer"
               >
                 Close
               </button>

@@ -8,19 +8,21 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        void: "#000000",
-        deep: "#0A0A0C",
-        panel: "#141416",
-        line: "rgba(255, 255, 255, 0.12)",
-        ink: "#FFFFFF",
-        muted: "#A1A1AA",
+        // Light theme remap — white-dominant
+        void: "#FFFFFF",           // was pure black → now pure white (backgrounds)
+        deep: "#F8F8FA",           // was near-black → lightest off-white
+        panel: "#F1F1F5",          // was dark panel → very light gray panel
+        surface: "#FFFFFF",        // cards / surfaces = white
+        line: "rgba(0,0,0,0.10)", // borders = subtle black lines
+        ink: "#0A0A0C",            // primary text = near-black
+        muted: "#6B6B80",          // secondary text = mid-gray
         cyan: {
-          DEFAULT: "#FFFFFF",
-          dim: "#71717A",
+          DEFAULT: "#111111",      // accent = almost black (was white)
+          dim: "#888888",
         },
         magenta: {
-          DEFAULT: "#E4E4E7",
-          dim: "#52525B",
+          DEFAULT: "#222222",
+          dim: "#AAAAAA",
         },
       },
       fontFamily: {
@@ -30,15 +32,15 @@ const config: Config = {
       },
       backgroundImage: {
         "aurora-1":
-          "radial-gradient(60% 60% at 20% 10%, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 60%)",
+          "radial-gradient(60% 60% at 20% 10%, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0) 60%)",
         "aurora-2":
-          "radial-gradient(50% 50% at 85% 30%, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 60%)",
+          "radial-gradient(50% 50% at 85% 30%, rgba(0,0,0,0.03) 0%, rgba(0,0,0,0) 60%)",
         "grain-line":
-          "linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 100%)",
+          "linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0) 100%)",
       },
       boxShadow: {
-        glow: "0 0 40px rgba(255,255,255,0.25)",
-        "glow-magenta": "0 0 30px rgba(255,255,255,0.18)",
+        glow: "0 2px 24px rgba(0,0,0,0.10)",
+        "glow-magenta": "0 2px 20px rgba(0,0,0,0.08)",
       },
       animation: {
         flicker: "flicker 3.2s ease-in-out infinite",

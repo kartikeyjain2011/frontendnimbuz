@@ -100,7 +100,7 @@ export default function StorePage() {
 
     if (paymentMethod === "razorpay") {
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_nimbus_demo_key",
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_TIQY8CAZ52qCin",
         amount: priceInPaise,
         currency: "INR",
         name: "NIMBUS Cloud Gaming Store",
@@ -168,10 +168,10 @@ export default function StorePage() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono uppercase tracking-wider text-cyan px-2 py-0.5 bg-cyan/10 border border-cyan/30 rounded">
+            <span className="text-xs font-mono uppercase tracking-wider text-ink px-2 py-0.5 bg-black/5 border border-black/15 rounded">
               Nimbus Digital Marketplace
             </span>
-            <span className="text-xs font-mono text-emerald-400">● Razorpay Enabled</span>
+            <span className="text-xs font-mono text-emerald-600">● Razorpay Enabled</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-display font-bold text-ink mt-1">
             Cloud Game Store
@@ -181,10 +181,10 @@ export default function StorePage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-4 bg-surface border border-line p-3.5 rounded-2xl font-mono text-xs shrink-0">
-          <div className="px-3 border-r border-line/60">
+        <div className="flex items-center gap-4 bg-white border border-black/10 p-3.5 rounded-2xl font-mono text-xs shrink-0 shadow-sm">
+          <div className="px-3 border-r border-black/10">
             <span className="text-muted block text-[10px]">NIMBUS CREDITS</span>
-            <span className="text-emerald-400 font-bold text-sm">
+            <span className="text-emerald-600 font-bold text-sm">
               ${cloudCredits.toFixed(2)}
             </span>
           </div>
@@ -192,8 +192,8 @@ export default function StorePage() {
             onClick={() => setShowOnlyWishlist(!showOnlyWishlist)}
             className={`px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
               showOnlyWishlist
-                ? "bg-cyan text-void font-bold border-cyan shadow-glow"
-                : "bg-void/60 text-muted hover:text-ink border-line"
+                ? "bg-ink text-white font-bold border-ink shadow-sm"
+                : "bg-deep text-muted hover:text-ink border-black/10"
             }`}
           >
             ★ Wishlist ({wishlistCount})
@@ -202,7 +202,7 @@ export default function StorePage() {
       </div>
 
       {/* Featured Banner */}
-      <section className="relative rounded-2xl bg-gradient-to-r from-deep via-surface to-panel border border-cyan/30 p-8 overflow-hidden shadow-glow">
+      <section className="relative rounded-2xl bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border border-black/20 p-8 overflow-hidden shadow-glow">
         <div className="absolute right-0 top-0 bottom-0 w-full lg:w-1/2 opacity-25 lg:opacity-50 pointer-events-none">
           <img
             src={featuredGame.banner}
@@ -213,30 +213,30 @@ export default function StorePage() {
 
         <div className="relative z-10 space-y-4 max-w-xl">
           <div className="flex items-center gap-3">
-            <span className="bg-red-500 text-ink text-[11px] font-mono font-bold px-2.5 py-1 rounded-md uppercase tracking-wider animate-pulse">
+            <span className="bg-red-500 text-white text-[11px] font-mono font-bold px-2.5 py-1 rounded-md uppercase tracking-wider animate-pulse">
               FLASH SALE -{featuredGame.discount}% OFF
             </span>
-            <span className="text-xs font-mono text-cyan flex items-center gap-1">
+            <span className="text-xs font-mono text-white/70 flex items-center gap-1">
               <span>⏱️</span> Razorpay Instant Checkout
             </span>
           </div>
 
           <Link href={`/dashboard/games/${featuredGame.id}`} className="block group">
-            <h2 className="text-2xl sm:text-3xl font-display font-bold text-ink leading-tight group-hover:text-cyan transition-colors">
+            <h2 className="text-2xl sm:text-3xl font-display font-bold text-white leading-tight group-hover:text-white/80 transition-colors">
               {featuredGame.title}
             </h2>
           </Link>
 
-          <p className="text-muted text-xs font-mono line-clamp-2">
+          <p className="text-white/60 text-xs font-mono line-clamp-2">
             {featuredGame.description}
           </p>
 
           <div className="flex items-center gap-4 pt-2">
             <div className="font-mono">
-              <span className="text-xs text-muted line-through mr-2">
+              <span className="text-xs text-white/50 line-through mr-2">
                 ${featuredGame.originalPrice?.toFixed(2)}
               </span>
-              <span className="text-2xl font-bold text-cyan">
+              <span className="text-2xl font-bold text-white">
                 ${featuredGame.price.toFixed(2)}
               </span>
             </div>
@@ -244,13 +244,13 @@ export default function StorePage() {
             <div className="flex gap-2">
               <Link
                 href={`/dashboard/games/${featuredGame.id}`}
-                className="px-4 py-3 rounded-xl bg-surface border border-line text-ink font-mono font-bold text-xs hover:border-cyan transition-all"
+                className="px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-mono font-bold text-xs hover:bg-white/20 transition-all"
               >
                 Inspect Game Page →
               </Link>
               <button
                 onClick={() => setCheckoutGame(featuredGame)}
-                className="px-6 py-3 rounded-xl bg-cyan text-void font-mono font-bold text-xs shadow-glow hover:opacity-90 transition-all cursor-pointer flex items-center gap-2"
+                className="px-6 py-3 rounded-xl bg-white text-gray-900 font-mono font-bold text-xs shadow-glow hover:opacity-90 transition-all cursor-pointer flex items-center gap-2"
               >
                 <span>💳</span>
                 <span>BUY NOW</span>
@@ -269,7 +269,7 @@ export default function StorePage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search store by game title, genre, publisher..."
-              className="w-full bg-surface border border-line rounded-xl pl-10 pr-4 py-2.5 text-xs font-mono text-ink placeholder:text-muted focus:border-cyan focus:outline-none transition-colors"
+              className="w-full bg-white border border-black/10 rounded-xl pl-10 pr-4 py-2.5 text-xs font-mono text-ink placeholder:text-muted focus:border-black/40 focus:outline-none transition-colors"
             />
             <svg
               className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
@@ -285,7 +285,7 @@ export default function StorePage() {
             <select
               value={selectedGenre}
               onChange={(e) => setSelectedGenre(e.target.value)}
-              className="w-full bg-surface border border-line rounded-xl px-4 py-2.5 text-xs font-mono text-ink focus:border-cyan focus:outline-none cursor-pointer"
+              className="w-full bg-white border border-black/10 rounded-xl px-4 py-2.5 text-xs font-mono text-ink focus:border-black/40 focus:outline-none cursor-pointer"
             >
               <option value="All">All Genres</option>
               <option value="Action RPG">Action RPG</option>
@@ -302,7 +302,7 @@ export default function StorePage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="w-full bg-surface border border-line rounded-xl px-4 py-2.5 text-xs font-mono text-ink focus:border-cyan focus:outline-none cursor-pointer"
+              className="w-full bg-white border border-black/10 rounded-xl px-4 py-2.5 text-xs font-mono text-ink focus:border-black/40 focus:outline-none cursor-pointer"
             >
               <option value="featured">Sort by: Featured & Popular</option>
               <option value="discount">Sort by: Highest Discount</option>
@@ -313,7 +313,7 @@ export default function StorePage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-line/40">
+        <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-black/10">
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
             <span className="text-[11px] font-mono text-muted uppercase mr-1">Platform:</span>
             {["All", "Steam", "Epic", "Xbox", "GOG"].map((st) => (
@@ -322,8 +322,8 @@ export default function StorePage() {
                 onClick={() => setSelectedStore(st)}
                 className={`px-3 py-1 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
                   selectedStore === st
-                    ? "bg-cyan/20 border border-cyan text-cyan font-bold"
-                    : "bg-surface border border-line text-muted hover:text-ink"
+                    ? "bg-ink text-white border border-ink font-bold"
+                    : "bg-white border border-black/10 text-muted hover:text-ink"
                 }`}
               >
                 {st}
@@ -337,7 +337,7 @@ export default function StorePage() {
                 type="checkbox"
                 checked={showOnlyOnSale}
                 onChange={(e) => setShowOnlyOnSale(e.target.checked)}
-                className="rounded border-line bg-void text-cyan focus:ring-0"
+                className="rounded border-black/20 bg-white text-ink focus:ring-0"
               />
               <span>On Sale Only</span>
             </label>
@@ -370,7 +370,7 @@ export default function StorePage() {
             return (
               <div
                 key={game.id}
-                className="rounded-2xl bg-surface border border-line p-4 flex flex-col justify-between hover:border-cyan/50 transition-all duration-300 group space-y-4"
+                className="rounded-2xl bg-white border border-black/10 p-4 flex flex-col justify-between hover:border-black/30 hover:shadow-md transition-all duration-300 group space-y-4"
               >
                 {/* Game Cover Image -> Links to Individual Page */}
                 <Link href={`/dashboard/games/${game.id}`} className="w-full h-48 rounded-xl overflow-hidden relative bg-void block">
@@ -381,11 +381,11 @@ export default function StorePage() {
                   />
 
                   <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-void/80 text-cyan border border-line backdrop-blur-md">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/60 text-white border border-white/10 backdrop-blur-md">
                       {game.store}
                     </span>
                     {game.discount && game.discount > 0 ? (
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-red-500 text-ink">
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-red-500 text-white">
                         -{game.discount}%
                       </span>
                     ) : null}
@@ -399,8 +399,8 @@ export default function StorePage() {
                     }}
                     className={`absolute top-2.5 right-2.5 p-2 rounded-full backdrop-blur-md transition-all cursor-pointer ${
                       game.inWishlist
-                        ? "bg-cyan text-void shadow-glow"
-                        : "bg-void/80 text-muted hover:text-ink border border-line"
+                        ? "bg-ink text-white shadow-sm"
+                        : "bg-black/60 text-white/70 hover:text-white border border-white/10"
                     }`}
                   >
                     ★
@@ -425,11 +425,11 @@ export default function StorePage() {
                   </p>
 
                   <div className="flex flex-wrap gap-1.5 pt-1">
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-void border border-line text-muted">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-deep border border-black/10 text-muted">
                       {game.resolution}
                     </span>
                     {game.rtx && (
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan/10 border border-cyan/30 text-cyan">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/5 border border-black/20 text-ink">
                         RTX READY
                       </span>
                     )}
@@ -452,14 +452,14 @@ export default function StorePage() {
                   {isOwned ? (
                     <Link
                       href={`/dashboard/games/${game.id}`}
-                      className="px-4 py-2 rounded-xl bg-surface border border-emerald-400/50 text-emerald-400 text-xs font-bold flex items-center gap-1.5"
+                      className="px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center gap-1.5"
                     >
                       <span>✓ IN LIBRARY</span>
                     </Link>
                   ) : (
                     <button
                       onClick={() => setCheckoutGame(game)}
-                      className="px-4 py-2 rounded-xl bg-cyan/10 border border-cyan/40 text-cyan hover:bg-cyan hover:text-void text-xs font-bold transition-all cursor-pointer"
+                      className="px-4 py-2 rounded-xl bg-ink text-white hover:bg-black/80 text-xs font-bold transition-all cursor-pointer"
                     >
                       BUY NOW
                     </button>
@@ -473,22 +473,22 @@ export default function StorePage() {
 
       {/* Checkout Modal */}
       {checkoutGame && (
-        <div className="fixed inset-0 z-50 bg-void/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-surface border border-cyan/40 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-glow relative animate-in fade-in">
-            <div className="flex items-center justify-between border-b border-line pb-4">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-black/10 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-xl relative">
+            <div className="flex items-center justify-between border-b border-black/10 pb-4">
               <div>
-                <span className="text-[10px] font-mono text-cyan uppercase tracking-wider">Razorpay Checkout</span>
+                <span className="text-[10px] font-mono text-muted uppercase tracking-wider">Razorpay Checkout</span>
                 <h3 className="text-xl font-display font-bold text-ink">{checkoutGame.title}</h3>
               </div>
               <button
                 onClick={() => setCheckoutGame(null)}
-                className="text-muted hover:text-ink cursor-pointer"
+                className="text-muted hover:text-ink cursor-pointer text-xl leading-none"
               >
                 ✕
               </button>
             </div>
 
-            <div className="p-3 rounded-xl bg-void border border-line flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-deep border border-black/10 flex items-center gap-4">
               <img src={checkoutGame.banner} alt={checkoutGame.title} className="w-16 h-16 rounded-lg object-cover" />
               <div className="min-w-0 flex-1 font-mono text-xs space-y-1">
                 <div className="text-ink font-bold truncate">{checkoutGame.title}</div>
@@ -511,8 +511,8 @@ export default function StorePage() {
                     onClick={() => setPaymentMethod(pm.id as any)}
                     className={`p-2.5 rounded-xl border text-xs font-mono text-left transition-all cursor-pointer ${
                       paymentMethod === pm.id
-                        ? "bg-cyan/20 border-cyan text-cyan font-bold"
-                        : "bg-void border-line text-muted hover:text-ink"
+                        ? "bg-ink text-white border-ink font-bold"
+                        : "bg-deep border-black/10 text-muted hover:text-ink hover:border-black/30"
                     }`}
                   >
                     {pm.label}
@@ -529,31 +529,31 @@ export default function StorePage() {
                   value={promoCode}
                   onChange={(e) => setPromoCode(e.target.value)}
                   placeholder="Try 'NIMBUS20'"
-                  className="flex-1 bg-void border border-line rounded-lg px-3 py-2 text-ink placeholder:text-muted focus:border-cyan focus:outline-none"
+                  className="flex-1 bg-deep border border-black/10 rounded-lg px-3 py-2 text-ink placeholder:text-muted focus:border-black/40 focus:outline-none"
                 />
                 <button
                   onClick={handleApplyPromo}
-                  className="px-4 py-2 bg-surface border border-line text-ink hover:border-cyan rounded-lg text-xs font-bold cursor-pointer"
+                  className="px-4 py-2 bg-white border border-black/20 text-ink hover:bg-deep rounded-lg text-xs font-bold cursor-pointer"
                 >
                   Apply
                 </button>
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-void border border-line space-y-2 font-mono text-xs">
+            <div className="p-4 rounded-xl bg-deep border border-black/10 space-y-2 font-mono text-xs">
               <div className="flex justify-between text-muted">
                 <span>Game Price:</span>
                 <span>${checkoutGame.price.toFixed(2)}</span>
               </div>
               {appliedDiscount > 0 && (
-                <div className="flex justify-between text-emerald-400">
+                <div className="flex justify-between text-emerald-600">
                   <span>Discount (20%):</span>
                   <span>-${(checkoutGame.price * appliedDiscount).toFixed(2)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-ink font-bold text-sm pt-2 border-t border-line">
+              <div className="flex justify-between text-ink font-bold text-sm pt-2 border-t border-black/10">
                 <span>Total Amount:</span>
-                <span className="text-cyan">
+                <span>
                   ${(checkoutGame.price * (1 - appliedDiscount)).toFixed(2)} (₹{Math.round(checkoutGame.price * (1 - appliedDiscount) * 83).toLocaleString()} INR)
                 </span>
               </div>
@@ -562,11 +562,11 @@ export default function StorePage() {
             <button
               disabled={isProcessing}
               onClick={handleCompletePurchase}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan to-emerald-400 text-void font-mono font-bold text-xs shadow-glow hover:opacity-90 transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3.5 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isProcessing ? (
                 <>
-                  <span className="w-4 h-4 border-2 border-void border-t-transparent rounded-full animate-spin" />
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   <span>LAUNCHING PAYMENT GATEWAY...</span>
                 </>
               ) : (
@@ -579,14 +579,14 @@ export default function StorePage() {
 
       {/* Success Modal */}
       {purchasedSuccess && (
-        <div className="fixed inset-0 z-50 bg-void/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-surface border border-emerald-400/60 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-glow text-center animate-in zoom-in-95">
-            <div className="w-16 h-16 rounded-full bg-emerald-400/20 border border-emerald-400 flex items-center justify-center mx-auto text-2xl text-emerald-400">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-emerald-200 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-xl text-center">
+            <div className="w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-400 flex items-center justify-center mx-auto text-2xl text-emerald-500">
               ✓
             </div>
 
             <div className="space-y-2">
-              <span className="text-xs font-mono uppercase text-emerald-400">Razorpay Payment Verified</span>
+              <span className="text-xs font-mono uppercase text-emerald-600">Razorpay Payment Verified</span>
               <h3 className="text-2xl font-display font-bold text-ink">
                 {purchasedSuccess.game.title}
               </h3>
@@ -595,9 +595,9 @@ export default function StorePage() {
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-void border border-emerald-400/30 space-y-2">
+            <div className="p-4 rounded-xl bg-deep border border-black/10 space-y-2">
               <span className="text-[10px] font-mono text-muted uppercase block">Digital Key Code</span>
-              <div className="font-mono font-bold text-cyan text-lg tracking-widest">
+              <div className="font-mono font-bold text-ink text-lg tracking-widest">
                 {purchasedSuccess.key}
               </div>
             </div>
@@ -606,13 +606,13 @@ export default function StorePage() {
               <Link
                 href={`/dashboard/games/${purchasedSuccess.game.id}`}
                 onClick={() => setPurchasedSuccess(null)}
-                className="flex-1 py-3 rounded-xl bg-cyan text-void font-mono font-bold text-xs shadow-glow hover:opacity-90 transition-all text-center"
+                className="flex-1 py-3 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all text-center"
               >
                 🖥️ VIEW GAME PAGE & LAUNCH
               </Link>
               <button
                 onClick={() => setPurchasedSuccess(null)}
-                className="px-6 py-3 rounded-xl bg-surface border border-line text-muted hover:text-ink font-mono text-xs cursor-pointer"
+                className="px-6 py-3 rounded-xl bg-white border border-black/15 text-muted hover:text-ink font-mono text-xs cursor-pointer"
               >
                 Continue Browsing
               </button>
