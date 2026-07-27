@@ -2,10 +2,12 @@
 
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Script from "next/script";
 import { useState, useEffect } from "react";
 import { getGameById, isGamePurchased, markGameAsPurchased, generateActivationKey } from "@/lib/gamesData";
+import { fetchGameDetails, fetchGameScreenshots, type RawgGameScreenshot } from "@/lib/rawg";
+import { getKinguinBuyUrl } from "@/lib/kinguin";
 
 declare global {
   interface Window {
@@ -16,28 +18,118 @@ declare global {
 export default function SingleGamePage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useUser();
-  const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isOwned, setIsOwned] = useState(false);
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [activationKey, setActivationKey] = useState("");
+  
+  // Game details state
+  const [gameData, setGameData] = useState<{
+    title: string;
+    genre: string;
+    publisher: string;
+    releaseYear: string;
+    size: string;
+    resolution: string;
+    rating: string;
+    priceUSD: number;
+    description: string;
+    banner: string;
+    store: string;
+    rtx: boolean;
+    tags: string[];
+  } | null>(null);
 
-  const game = getGameById(id);
+  const [screenshots, setScreenshots] = useState<string[]>([]);
+  const [activeShotIdx, setActiveShotIdx] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (game) {
-      setIsOwned(isGamePurchased(game.id));
-    }
-  }, [game]);
+    if (!id) return;
 
-  if (!game) {
+    // Check local dataset first
+    const localGame = getGameById(id);
+    if (localGame) {
+      setGameData({
+        title: localGame.title,
+        genre: localGame.genre,
+        publisher: localGame.publisher,
+        releaseYear: localGame.releaseYear,
+        size: localGame.size,
+        resolution: localGame.resolution,
+        rating: String(localGame.rating),
+        priceUSD: localGame.price || 29.99,
+        description: localGame.description,
+        banner: localGame.banner,
+        store: localGame.store,
+        rtx: localGame.rtx,
+        tags: localGame.tags,
+      });
+      setIsOwned(isGamePurchased(localGame.id));
+      setLoading(false);
+      return;
+    }
+
+    // Fetch from RAWG API for dynamic RAWG game IDs
+    fetchGameDetails(id).then(async (rawgData) => {
+      if (rawgData) {
+        const rawgShots = await fetchGameScreenshots(rawgData.id);
+        const shotUrls = rawgShots.map((s) => s.image);
+        if (shotUrls.length === 0 && rawgData.background_image) {
+          shotUrls.push(rawgData.background_image);
+        }
+        setScreenshots(shotUrls);
+
+        const calculatedPrice = 19.99 + (rawgData.id % 35);
+
+        setGameData({
+          title: rawgData.name,
+          genre: rawgData.genres?.[0]?.name || "Action",
+          publisher: rawgData.publishers?.[0]?.name || rawgData.developers?.[0]?.name || "Cloud Studio",
+          releaseYear: rawgData.released?.split("-")[0] || "2024",
+          size: "45 GB",
+          resolution: "4K @ 120 FPS",
+          rating: rawgData.rating ? rawgData.rating.toFixed(1) : "4.5",
+          priceUSD: calculatedPrice,
+          description: rawgData.description_raw || `Experience ${rawgData.name} rendered on Nimbus Cloud Gaming nodes with zero lag and native 4K resolution.`,
+          banner: rawgData.background_image || "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80",
+          store: rawgData.parent_platforms?.[0]?.platform?.name || "PC Platform",
+          rtx: true,
+          tags: rawgData.tags?.slice(0, 6).map((t) => t.name) || ["Cloud Ready", "4K 120FPS", "RTX On", "HDR"],
+        });
+
+        setIsOwned(isGamePurchased(String(rawgData.id)));
+      }
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, [id]);
+
+  // Autoplay screenshot sequence
+  useEffect(() => {
+    if (!screenshots || screenshots.length <= 1) return;
+    const timer = setInterval(() => {
+      setActiveShotIdx((prev) => (prev + 1) % screenshots.length);
+    }, 2500);
+    return () => clearInterval(timer);
+  }, [screenshots]);
+
+  if (loading) {
+    return (
+      <div className="space-y-8 py-12 font-mono text-xs">
+        <div className="h-10 bg-black/5 animate-pulse rounded-xl w-48" />
+        <div className="h-96 bg-black/5 animate-pulse rounded-2xl" />
+      </div>
+    );
+  }
+
+  if (!gameData) {
     return (
       <div className="text-center py-20 space-y-4 font-mono">
         <h1 className="text-2xl font-bold text-ink">Game Not Found</h1>
-        <p className="text-sm text-muted">The requested title could not be located in our cloud matrix catalog.</p>
+        <p className="text-sm text-muted">The requested title could not be located in our cloud catalog.</p>
         <Link
           href="/dashboard/store"
-          className="inline-block px-4 py-2 bg-cyan text-void rounded-lg font-semibold text-xs"
+          className="inline-block px-4 py-2 bg-ink text-white rounded-xl font-bold text-xs"
         >
           ← Back to Game Store
         </Link>
@@ -45,9 +137,9 @@ export default function SingleGamePage() {
     );
   }
 
-  // Convert USD price to INR (~₹83 per USD) for Razorpay
-  const priceInINR = Math.round((game.price || 49.99) * 83);
+  const priceInINR = Math.round(gameData.priceUSD * 83);
   const priceInPaise = priceInINR * 100;
+  const kinguinUrl = getKinguinBuyUrl(gameData.title);
 
   const handleRazorpayBuy = () => {
     setIsProcessing(true);
@@ -57,13 +149,13 @@ export default function SingleGamePage() {
       amount: priceInPaise,
       currency: "INR",
       name: "NIMBUS Cloud Gaming",
-      description: `Purchase ${game.title} (Cloud License)`,
-      image: game.banner,
+      description: `Purchase ${gameData.title} (Cloud License)`,
+      image: gameData.banner,
       handler: function (response: any) {
         setIsProcessing(false);
-        markGameAsPurchased(game.id);
+        markGameAsPurchased(String(id));
         setIsOwned(true);
-        const key = generateActivationKey(game.title);
+        const key = generateActivationKey(gameData.title);
         setActivationKey(key);
         setShowKeyModal(true);
       },
@@ -72,9 +164,7 @@ export default function SingleGamePage() {
         email: user?.primaryEmailAddress?.emailAddress || "gamer@nimbus.cloud",
         contact: "9876543210",
       },
-      theme: {
-        color: "#00F0FF",
-      },
+      theme: { color: "#111111" },
       modal: {
         ondismiss: function () {
           setIsProcessing(false);
@@ -86,29 +176,24 @@ export default function SingleGamePage() {
       try {
         const razorpayInstance = new window.Razorpay(options);
         razorpayInstance.open();
+        return;
       } catch (e) {
-        // Fallback test purchase simulation if Razorpay popup is blocked
-        setTimeout(() => {
-          setIsProcessing(false);
-          markGameAsPurchased(game.id);
-          setIsOwned(true);
-          const key = generateActivationKey(game.title);
-          setActivationKey(key);
-          setShowKeyModal(true);
-        }, 1000);
+        // Fallback simulation
       }
-    } else {
-      // Fallback test purchase simulation
-      setTimeout(() => {
-        setIsProcessing(false);
-        markGameAsPurchased(game.id);
-        setIsOwned(true);
-        const key = generateActivationKey(game.title);
-        setActivationKey(key);
-        setShowKeyModal(true);
-      }, 1200);
     }
+
+    // Direct / Fallback Checkout simulation
+    setTimeout(() => {
+      setIsProcessing(false);
+      markGameAsPurchased(String(id));
+      setIsOwned(true);
+      const key = generateActivationKey(gameData.title);
+      setActivationKey(key);
+      setShowKeyModal(true);
+    }, 1200);
   };
+
+  const currentDisplayImg = screenshots.length > 0 ? screenshots[activeShotIdx] : gameData.banner;
 
   return (
     <div className="space-y-8 pb-12">
@@ -121,91 +206,108 @@ export default function SingleGamePage() {
       <div className="flex items-center justify-between">
         <Link
           href="/dashboard/store"
-          className="inline-flex items-center gap-2 text-xs font-mono text-muted hover:text-ink transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-mono text-muted hover:text-ink transition-colors font-semibold"
         >
           ← Back to Game Store
         </Link>
 
         {isOwned ? (
-          <span className="text-xs font-mono text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full font-bold">
+          <span className="text-xs font-mono text-emerald-600 bg-emerald-50 border border-emerald-200 px-3.5 py-1 rounded-full font-bold">
             ✓ OWNED IN LIBRARY
           </span>
         ) : (
-          <span className="text-xs font-mono text-ink bg-black/5 border border-black/15 px-3 py-1 rounded-full">
-            STORE ITEM • ₹{priceInINR.toLocaleString()}
+          <span className="text-xs font-mono text-ink bg-black/5 border border-black/15 px-3 py-1 rounded-full font-semibold">
+            STORE ITEM • ₹{priceInINR.toLocaleString()} INR
           </span>
         )}
       </div>
 
       {/* Main Game Hero Header */}
-      <div className="relative rounded-2xl overflow-hidden border border-line bg-surface flex flex-col lg:flex-row shadow-glow">
-        {/* Banner image */}
-        <div className="lg:w-2/3 h-80 lg:h-[460px] relative bg-void overflow-hidden">
+      <div className="relative rounded-2xl overflow-hidden border border-black/10 bg-white flex flex-col lg:flex-row shadow-sm">
+        {/* Banner image with autoplay reels */}
+        <div className="lg:w-2/3 h-80 lg:h-[460px] relative bg-black overflow-hidden">
           <img
-            src={game.banner}
-            alt={game.title}
-            className="w-full h-full object-cover"
+            src={currentDisplayImg}
+            alt={gameData.title}
+            className="w-full h-full object-cover transition-all duration-700"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/30 to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-surface/40 lg:to-surface" />
 
-          {/* Badges */}
+          {/* Autoplay Reel Badge */}
           <div className="absolute top-4 left-4 flex gap-2">
-            <span className="bg-void/80 backdrop-blur-md text-ink text-xs font-mono px-3 py-1 rounded border border-line">
-              {game.store} Platform
+            <span className="bg-black/70 backdrop-blur-md text-white text-xs font-mono px-3 py-1 rounded border border-white/10 flex items-center gap-1.5 font-semibold">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> STREAM REEL
             </span>
-            {game.rtx && (
-              <span className="bg-void/80 backdrop-blur-md text-cyan text-xs font-mono px-3 py-1 rounded border border-cyan/30">
+            {gameData.rtx && (
+              <span className="bg-black/70 backdrop-blur-md text-white text-xs font-mono px-3 py-1 rounded border border-white/10">
                 RAY TRACING READY
               </span>
             )}
           </div>
+
+          {/* Screenshot dots */}
+          {screenshots.length > 1 && (
+            <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg text-white font-mono text-xs">
+              <span>GAMEPLAY REEL ({activeShotIdx + 1}/{screenshots.length})</span>
+              <div className="flex gap-1">
+                {screenshots.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveShotIdx(i)}
+                    className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                      i === activeShotIdx ? "bg-white w-4" : "bg-white/40 w-1.5"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Content detail sidebar card */}
         <div className="lg:w-1/3 p-6 lg:p-8 flex flex-col justify-between space-y-6 bg-white border-t lg:border-t-0 lg:border-l border-black/10">
           <div className="space-y-3">
             <div className="flex items-center justify-between text-xs font-mono text-muted">
-              <span>{game.genre}</span>
-              <span className="text-amber-500 font-bold">★ {game.rating}</span>
+              <span>{gameData.genre}</span>
+              <span className="text-amber-500 font-bold">★ {gameData.rating}</span>
             </div>
 
             <h1 className="text-2xl lg:text-3xl font-display font-bold text-ink leading-tight">
-              {game.title}
+              {gameData.title}
             </h1>
 
             <div className="space-y-1.5 text-xs font-mono text-muted border-t border-black/10 pt-4">
               <div className="flex justify-between">
                 <span>Publisher:</span>
-                <span className="text-ink">{game.publisher}</span>
+                <span className="text-ink font-semibold">{gameData.publisher}</span>
               </div>
               <div className="flex justify-between">
                 <span>Release Year:</span>
-                <span className="text-ink">{game.releaseYear}</span>
+                <span className="text-ink font-semibold">{gameData.releaseYear}</span>
               </div>
               <div className="flex justify-between">
                 <span>Install Size:</span>
-                <span className="text-ink">{game.size}</span>
+                <span className="text-ink font-semibold">{gameData.size}</span>
               </div>
               <div className="flex justify-between">
                 <span>Max Resolution:</span>
-                <span className="text-ink font-semibold">{game.resolution}</span>
+                <span className="text-ink font-semibold">{gameData.resolution}</span>
               </div>
             </div>
           </div>
 
           {/* CTA Section */}
-          <div className="space-y-3 pt-4 border-t border-black/10">
+          <div className="space-y-3 pt-4 border-t border-black/10 font-mono">
             {isOwned ? (
               <div className="space-y-2">
                 <Link
                   href="/dashboard/cloud-pc"
-                  className="w-full py-4 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-4 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all flex items-center justify-center gap-2 shadow-sm"
                 >
                   <span>🖥️ LAUNCH ON CLOUD PC NOW</span>
                 </Link>
                 <Link
                   href="/dashboard/my-games"
-                  className="w-full py-2.5 rounded-lg text-xs font-mono text-center block bg-white border border-black/10 text-muted hover:text-ink transition-colors"
+                  className="w-full py-2.5 rounded-xl text-xs font-mono text-center block bg-deep border border-black/10 text-muted hover:text-ink transition-colors font-semibold"
                 >
                   View in My Games Library
                 </Link>
@@ -215,30 +317,29 @@ export default function SingleGamePage() {
                 <div className="font-mono text-xs text-muted flex justify-between items-center">
                   <span>Price:</span>
                   <div className="text-right">
-                    {game.originalPrice && (
-                      <span className="line-through text-muted mr-2">${game.originalPrice.toFixed(2)}</span>
-                    )}
-                    <span className="text-xl font-bold text-ink">${game.price.toFixed(2)}</span>
-                    <span className="text-emerald-600 text-[11px] block">(₹{priceInINR.toLocaleString()} INR)</span>
+                    <span className="text-xl font-bold text-ink">${gameData.priceUSD.toFixed(2)}</span>
+                    <span className="text-emerald-600 text-[11px] block font-semibold">(₹{priceInINR.toLocaleString()} INR)</span>
                   </div>
                 </div>
 
-                <button
-                  onClick={handleRazorpayBuy}
-                  disabled={isProcessing}
-                  className="w-full py-4 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                >
-                  {isProcessing ? (
-                    <>
-                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>LAUNCHING RAZORPAY...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>💳 BUY NOW WITH RAZORPAY</span>
-                    </>
-                  )}
-                </button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    onClick={handleRazorpayBuy}
+                    disabled={isProcessing}
+                    className="py-3.5 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all cursor-pointer disabled:opacity-50 shadow-sm text-center"
+                  >
+                    {isProcessing ? "PROCESSING..." : "💳 RAZORPAY"}
+                  </button>
+
+                  <a
+                    href={kinguinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-3.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-mono font-bold text-xs transition-all cursor-pointer shadow-sm text-center flex items-center justify-center gap-1"
+                  >
+                    KINGUIN ↗
+                  </a>
+                </div>
               </div>
             )}
           </div>
@@ -247,12 +348,12 @@ export default function SingleGamePage() {
 
       {/* Description & Specs Grid */}
       <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 rounded-xl bg-white border border-black/10 p-6 space-y-4">
+        <div className="lg:col-span-2 rounded-2xl bg-white border border-black/10 p-6 space-y-4 shadow-sm">
           <h2 className="text-lg font-display font-bold text-ink">
-            About {game.title}
+            About {gameData.title}
           </h2>
-          <p className="text-sm text-muted font-body leading-relaxed">
-            {game.description}
+          <p className="text-sm text-muted font-body leading-relaxed whitespace-pre-line">
+            {gameData.description}
           </p>
 
           <div className="pt-4 border-t border-black/10 space-y-3">
@@ -260,10 +361,10 @@ export default function SingleGamePage() {
               Feature Tags
             </span>
             <div className="flex flex-wrap gap-2">
-              {game.tags.map((tag) => (
+              {gameData.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-3 py-1 rounded-full bg-deep border border-black/10 text-xs font-mono text-ink"
+                  className="px-3 py-1 rounded-full bg-deep border border-black/10 text-xs font-mono text-ink font-medium"
                 >
                   #{tag}
                 </span>
@@ -273,33 +374,33 @@ export default function SingleGamePage() {
         </div>
 
         {/* Cloud Stream Specs */}
-        <div className="rounded-xl bg-white border border-black/10 p-6 space-y-4 flex flex-col justify-between">
+        <div className="rounded-2xl bg-white border border-black/10 p-6 space-y-4 flex flex-col justify-between shadow-sm">
           <div className="space-y-3">
             <h2 className="text-lg font-display font-bold text-ink">
               Cloud PC Allocation
             </h2>
 
             <div className="space-y-3 font-mono text-xs">
-              <div className="p-3 rounded-lg bg-deep border border-black/10">
-                <span className="text-muted block text-[10px] uppercase">Allocated GPU Node:</span>
-                <span className="text-ink font-semibold">{game.reqGpu}</span>
+              <div className="p-3 rounded-xl bg-deep border border-black/10">
+                <span className="text-muted block text-[10px] uppercase">Allocated Stream Quality:</span>
+                <span className="text-ink font-semibold">4K @ 120 FPS / HDR</span>
               </div>
-              <div className="p-3 rounded-lg bg-deep border border-black/10">
-                <span className="text-muted block text-[10px] uppercase">RAM Allocation:</span>
-                <span className="text-ink font-semibold">{game.reqRam}</span>
+              <div className="p-3 rounded-xl bg-deep border border-black/10">
+                <span className="text-muted block text-[10px] uppercase">Network Codec:</span>
+                <span className="text-ink font-semibold">AV1 / H.265 WebRTC</span>
               </div>
-              <div className="p-3 rounded-lg bg-deep border border-black/10">
-                <span className="text-muted block text-[10px] uppercase">NVMe Storage:</span>
-                <span className="text-ink font-semibold">{game.reqStorage}</span>
+              <div className="p-3 rounded-xl bg-deep border border-black/10">
+                <span className="text-muted block text-[10px] uppercase">Partner Store Option:</span>
+                <span className="text-orange-600 font-semibold">● Kinguin Store Enabled</span>
               </div>
             </div>
           </div>
 
           <Link
             href="/dashboard/cloud-pc"
-            className="w-full py-3 rounded-lg bg-ink text-white hover:bg-black/80 font-mono font-bold text-xs text-center transition-all block"
+            className="w-full py-3 rounded-xl bg-ink text-white hover:bg-black/80 font-mono font-bold text-xs text-center transition-all block shadow-sm"
           >
-            🖥️ VIEW VIRTUAL GPU DESKTOP
+            🖥️ VIEW VIRTUAL CLOUD DESKTOP
           </Link>
         </div>
       </div>
@@ -313,32 +414,32 @@ export default function SingleGamePage() {
             </div>
 
             <div className="space-y-2">
-              <span className="text-xs font-mono uppercase text-emerald-600">Razorpay Payment Verified</span>
+              <span className="text-xs font-mono uppercase text-emerald-600">Payment Verified</span>
               <h3 className="text-2xl font-display font-bold text-ink">
-                {game.title}
+                {gameData.title}
               </h3>
               <p className="text-xs font-mono text-muted">
-                Game added to your Cloud Library. Pre-installed and ready on your RTX Cloud PC.
+                Game added to your Cloud Library. Pre-installed and ready to stream.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-deep border border-black/10 space-y-2">
-              <span className="text-[10px] font-mono text-muted uppercase block">Digital Key Code</span>
-              <div className="font-mono font-bold text-ink text-lg tracking-widest">
+            <div className="p-4 rounded-xl bg-deep border border-black/10 space-y-2 font-mono">
+              <span className="text-[10px] text-muted uppercase block">Digital Key Code</span>
+              <div className="font-bold text-ink text-lg tracking-widest">
                 {activationKey}
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2 font-mono">
               <Link
                 href="/dashboard/cloud-pc"
-                className="flex-1 py-3 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all text-center"
+                className="flex-1 py-3 rounded-xl bg-ink text-white font-bold text-xs hover:bg-black/80 transition-all text-center"
               >
                 🖥️ LAUNCH ON CLOUD PC
               </Link>
               <button
                 onClick={() => setShowKeyModal(false)}
-                className="px-6 py-3 rounded-xl bg-white border border-black/15 text-muted hover:text-ink font-mono text-xs cursor-pointer"
+                className="px-6 py-3 rounded-xl bg-white border border-black/15 text-muted hover:text-ink text-xs cursor-pointer font-semibold"
               >
                 Close
               </button>

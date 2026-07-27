@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
 import GameLibrary from "@/components/GameLibrary";
+import GameTrailers from "@/components/GameTrailers";
 import DeviceCompat from "@/components/DeviceCompat";
 import Performance from "@/components/Performance";
 import Pricing from "@/components/Pricing";
@@ -16,6 +17,7 @@ export default function Home() {
       <Hero />
       <HowItWorks />
       <GameLibrary />
+      <GameTrailers />
       <DeviceCompat />
       <Performance />
       <Pricing />

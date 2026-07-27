@@ -472,61 +472,8 @@ export default function UpgradePage() {
         })}
       </div>
 
-      {/* ── Pricing Reference Table ── */}
-      <div className="rounded-2xl bg-white border border-black/10 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-black/10 flex items-center gap-3">
-          <span className="font-display font-bold text-ink text-sm">
-            {category === "gaming" ? "🎮 Gaming" : "🖥️ Cloud PC"} — Full Pricing Table
-          </span>
-          <span className="text-[10px] font-mono text-muted px-2 py-0.5 border border-black/10 rounded bg-deep">
-            All amounts in INR (₹)
-          </span>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs font-mono">
-            <thead>
-              <tr className="bg-deep border-b border-black/10">
-                <th className="text-left px-6 py-3 text-muted uppercase tracking-wider text-[10px] font-bold">Tier</th>
-                <th className="text-right px-4 py-3 text-muted uppercase tracking-wider text-[10px] font-bold">1 Month</th>
-                <th className="text-right px-4 py-3 text-muted uppercase tracking-wider text-[10px] font-bold">3 Months <span className="text-emerald-600">−5%</span></th>
-                <th className="text-right px-4 py-3 text-muted uppercase tracking-wider text-[10px] font-bold">6 Months <span className="text-emerald-600">−10%</span></th>
-                <th className="text-right px-4 py-3 text-muted uppercase tracking-wider text-[10px] font-bold">12 Months <span className="text-emerald-600">−15%</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              {activePlans.map((plan, i) => (
-                <tr
-                  key={plan.id}
-                  className={`border-b border-black/5 transition-colors hover:bg-deep/50 ${plan.isPopular ? "bg-ink/[0.03]" : ""}`}
-                >
-                  <td className="px-6 py-3.5">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-ink">{plan.name}</span>
-                      {plan.isPopular && (
-                        <span className="text-[9px] font-bold bg-ink text-white px-1.5 py-0.5 rounded">{plan.badge}</span>
-                      )}
-                      <span className="text-muted">({plan.subtitle})</span>
-                    </div>
-                    <div className="text-muted text-[10px] mt-0.5">{formatINR(plan.monthlyBase)}/mo base</div>
-                  </td>
-                  {CYCLES.map((cycle) => {
-                    const amt = recurringPriceForMonths(plan.monthlyBase, cycle.months, cycle.discount);
-                    const isSelected = billingCycle === cycle.key;
-                    return (
-                      <td key={cycle.key} className={`text-right px-4 py-3.5 ${isSelected ? "font-bold text-ink" : "text-muted"}`}>
-                        {formatINR(amt)}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="px-6 py-3 bg-deep/50 text-[10px] font-mono text-muted">
-          Formula: <code className="text-ink">round(monthly × months × (1 − discount))</code> — paise-precise via <code className="text-ink">recurringPriceForMonths()</code>
-        </div>
-      </div>
+
+
 
       {/* ── Razorpay Payment Methods Banner ── */}
       <div className="rounded-xl bg-white border border-black/10 p-5 flex flex-col md:flex-row items-center justify-between gap-6 font-mono text-xs text-muted shadow-sm">

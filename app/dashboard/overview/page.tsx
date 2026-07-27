@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
-import { gamesList } from "@/lib/gamesData";
+import { fetchTrendingGames, type RawgGame } from "@/lib/rawg";
 
 const nodes = [
   { region: "US-East (N. Virginia)", ping: "4ms", load: "14%", status: "Optimal" },
@@ -10,140 +11,177 @@ const nodes = [
   { region: "AP-East (Tokyo)", ping: "18ms", load: "35%", status: "Good" },
 ];
 
-export default function OverviewPage() {
-  const { user, isLoaded } = useUser();
-  const recentGames = gamesList.slice(0, 3);
+function OverviewGameCard({ game }: { game: RawgGame }) {
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const screenshots = game.short_screenshots?.map((s) => s.image) || [];
+
+  // Autoplay continuous preview
+  useEffect(() => {
+    if (!screenshots || screenshots.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIdx((prev) => (prev + 1) % screenshots.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [screenshots]);
 
   return (
-    <div className="space-y-10">
+    <div className="group relative rounded-xl bg-white border border-black/10 overflow-hidden hover:border-black/30 shadow-sm transition-all duration-300 flex flex-col justify-between">
+      <div className="h-44 relative overflow-hidden bg-black">
+        <img
+          src={screenshots[currentIdx] || game.background_image}
+          alt={game.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+        <div className="absolute top-2 left-2 bg-black/80 backdrop-blur-md text-white text-[10px] font-mono px-2 py-0.5 rounded border border-white/20 flex items-center gap-1.5 font-semibold">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span>LIVE PREVIEW</span>
+        </div>
+        {game.rating > 0 && (
+          <span className="absolute top-2 right-2 bg-black/70 text-white font-mono text-[10px] px-2 py-0.5 rounded font-bold">
+            ★ {game.rating.toFixed(1)}
+          </span>
+        )}
+      </div>
+
+      <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+        <div>
+          <span className="text-[11px] font-mono text-muted">{game.genres[0]?.name || "Action"}</span>
+          <h3 className="font-display font-bold text-ink text-base line-clamp-1 group-hover:text-emerald-600 transition-colors">
+            {game.name}
+          </h3>
+        </div>
+
+        <div className="pt-2 border-t border-black/10 flex items-center justify-between font-mono text-xs">
+          <span className="text-muted">Metacritic: {game.metacritic || "N/A"}</span>
+          <Link
+            href="/dashboard/upgrade"
+            className="px-3 py-1.5 rounded-lg bg-ink text-white font-bold text-[11px] hover:bg-black/80 transition-colors"
+          >
+            ⚡ PLAY NOW
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function OverviewPage() {
+  const { user, isLoaded } = useUser();
+  const [games, setGames] = useState<RawgGame[]>([]);
+  const [loadingGames, setLoadingGames] = useState(true);
+
+  useEffect(() => {
+    fetchTrendingGames(6)
+      .then((data) => {
+        setGames(data);
+        setLoadingGames(false);
+      })
+      .catch(() => setLoadingGames(false));
+  }, []);
+
+  return (
+    <div className="space-y-10 pb-12">
       {/* Welcome Banner */}
-      <section className="relative rounded-2xl bg-gradient-to-r from-cyan/10 via-surface to-surface border border-line p-8 overflow-hidden">
+      <section className="relative rounded-2xl bg-white border border-black/10 p-8 shadow-sm overflow-hidden">
         <div className="relative z-10 space-y-2">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span className="text-xs font-mono uppercase tracking-wider text-cyan">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+            <span className="text-xs font-mono uppercase tracking-wider text-ink font-semibold">
               Cloud Node Ready
             </span>
           </div>
           <h1 className="text-3xl md:text-4xl font-display font-bold text-ink">
             Welcome back,{" "}
-            <span className="text-cyan">
+            <span className="text-ink underline decoration-black/20">
               {isLoaded ? user?.firstName || user?.username || "Gamer" : "Gamer"}
             </span>
           </h1>
-          <p className="text-muted text-sm max-w-xl">
+          <p className="text-muted text-sm max-w-xl font-mono">
             Your Cloud GPU rig is pre-warmed and connected. Zero latency stream ready.
           </p>
         </div>
 
         {/* Quick Stats Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-line/60 font-mono text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-black/10 font-mono text-xs">
           <div>
             <span className="text-muted block mb-1">Server Latency</span>
-            <span className="text-cyan text-base font-semibold">4 ms</span>
+            <span className="text-ink text-base font-semibold">4 ms</span>
           </div>
           <div>
             <span className="text-muted block mb-1">Stream Tier</span>
             <span className="text-ink text-base font-semibold">4K RTX Ultimate</span>
           </div>
           <div>
-            <span className="text-muted block mb-1">Connected GPU</span>
-            <span className="text-ink text-base font-semibold">NVIDIA H100 Node</span>
+            <span className="text-muted block mb-1">Catalog Sync</span>
+            <span className="text-emerald-600 text-base font-semibold">● Connected</span>
           </div>
           <div>
             <span className="text-muted block mb-1">Account Status</span>
-            <span className="text-emerald-400 text-base font-semibold">● Active Pro</span>
+            <span className="text-emerald-600 text-base font-semibold">● Active Pro</span>
           </div>
         </div>
       </section>
 
       {/* Cloud PC Status Quick Banner */}
-      <section className="rounded-xl bg-surface border border-line p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+      <section className="rounded-xl bg-white border border-black/10 p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono uppercase text-cyan px-2 py-0.5 rounded bg-cyan/10 border border-cyan/30">
+            <span className="text-xs font-mono uppercase text-ink px-2 py-0.5 rounded bg-black/5 border border-black/15 font-semibold">
               Personal Windows Rig
             </span>
-            <span className="text-xs font-mono text-emerald-400">● VM Running</span>
+            <span className="text-xs font-mono text-emerald-600 font-semibold">● VM Running</span>
           </div>
           <h2 className="text-xl font-display font-bold text-ink">
-            Titan RTX 4090 Cloud PC
+            Titan Cloud PC Instance
           </h2>
           <p className="text-xs text-muted font-mono">
-            64GB RAM • 2TB NVMe SSD • Parsec / WebRTC Low Latency Stream
+            Parsec & WebRTC Low-Latency Stream Active
           </p>
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
           <Link
             href="/dashboard/cloud-pc"
-            className="w-full md:w-auto px-6 py-3 rounded-lg bg-cyan text-void font-mono font-bold text-xs shadow-glow hover:opacity-90 transition-opacity text-center"
+            className="w-full md:w-auto px-6 py-3 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all text-center"
           >
             🖥️ LAUNCH CLOUD DESKTOP
           </Link>
         </div>
       </section>
 
-      {/* Recent Games / Library Section */}
+      {/* Live Catalog Section */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-display font-bold text-ink">
-            Featured Cloud Titles
-          </h2>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono uppercase text-emerald-600 font-bold">● LIVE REELS</span>
+              <h2 className="text-xl font-display font-bold text-ink">
+                Featured Cloud Titles
+              </h2>
+            </div>
+            <p className="text-xs font-mono text-muted mt-0.5">
+              Continuous live stream previews of ready-to-play cloud titles.
+            </p>
+          </div>
           <Link
             href="/dashboard/library"
-            className="text-xs text-cyan hover:underline font-mono"
+            className="text-xs text-ink hover:underline font-mono font-semibold"
           >
             Browse Full Library →
           </Link>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {recentGames.map((game) => (
-            <Link
-              key={game.id}
-              href={`/dashboard/games/${game.id}`}
-              className="group relative rounded-xl bg-surface border border-line overflow-hidden hover:border-cyan/50 transition-all duration-300 flex flex-col justify-between"
-            >
-              <div className="h-44 relative overflow-hidden bg-void">
-                <img
-                  src={game.banner}
-                  alt={game.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-100"
-                />
-                {game.rtx && (
-                  <span className="absolute top-3 left-3 bg-void/80 backdrop-blur-md text-cyan text-[10px] font-mono px-2 py-0.5 rounded border border-cyan/30">
-                    RAY TRACING ON
-                  </span>
-                )}
-              </div>
-
-              <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
-                <div>
-                  <span className="text-xs font-mono text-muted">{game.genre}</span>
-                  <h3 className="font-display font-semibold text-ink text-lg line-clamp-1 group-hover:text-cyan transition-colors">
-                    {game.title}
-                  </h3>
-                </div>
-
-                <div className="space-y-3 pt-2">
-                  <div className="flex justify-between text-xs font-mono text-muted">
-                    <span>{game.resolution}</span>
-                    <span>{game.size}</span>
-                  </div>
-
-                  <div className="w-full py-2.5 rounded-lg text-xs font-mono font-bold text-center bg-cyan/10 border border-cyan/40 text-cyan group-hover:bg-cyan group-hover:text-void transition-all">
-                    ⚡ UPGRADE TO START PLAYING
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
+          {loadingGames
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-56 rounded-xl bg-black/5 animate-pulse" />
+              ))
+            : games.map((game) => <OverviewGameCard key={game.id} game={game} />)}
         </div>
       </section>
 
       {/* Datacenter Nodes */}
-      <section className="rounded-xl bg-surface border border-line p-6 space-y-4">
+      <section className="rounded-xl bg-white border border-black/10 p-6 space-y-4 shadow-sm">
         <h2 className="text-lg font-display font-bold text-ink">
           Global Cloud Datacenter Nodes
         </h2>
@@ -151,15 +189,15 @@ export default function OverviewPage() {
           {nodes.map((node) => (
             <div
               key={node.region}
-              className="p-4 rounded-lg bg-void/60 border border-line flex items-center justify-between font-mono text-xs"
+              className="p-4 rounded-lg bg-deep border border-black/10 flex items-center justify-between font-mono text-xs"
             >
               <div>
                 <span className="text-ink font-semibold block mb-0.5">{node.region}</span>
                 <span className="text-muted">Load: {node.load}</span>
               </div>
               <div className="text-right">
-                <span className="text-cyan font-bold block">{node.ping}</span>
-                <span className="text-emerald-400">{node.status}</span>
+                <span className="text-ink font-bold block">{node.ping}</span>
+                <span className="text-emerald-600 font-semibold">{node.status}</span>
               </div>
             </div>
           ))}

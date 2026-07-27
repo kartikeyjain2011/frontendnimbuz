@@ -30,16 +30,20 @@ export default function FAQ() {
 
   return (
     <section className="relative py-24 md:py-32 border-t border-line">
-      <div className="container-px max-w-3xl">
-        <div className="flex items-center gap-2 mb-6">
+      <div className="container-px max-w-3xl mx-auto text-center">
+        {/* Centered Section Label */}
+        <div className="flex items-center justify-center gap-2 mb-6">
           <span className="section-label">Questions</span>
-          <span className="signal-line flex-1 max-w-16" />
+          <span className="signal-line max-w-16" />
         </div>
-        <h2 className="font-display font-semibold text-3xl md:text-5xl tracking-tight text-balance">
+        
+        {/* Centered Heading */}
+        <h2 className="font-display font-semibold text-3xl md:text-5xl tracking-tight text-balance mx-auto text-center">
           Before you press play
         </h2>
 
-        <div className="mt-14 divide-y divide-line border-t border-b border-line">
+        {/* Accordion Container */}
+        <div className="mt-14 divide-y divide-line border-t border-b border-line text-left mx-auto">
           {faqs.map((f, i) => {
             const isOpen = open === i;
             return (
@@ -47,13 +51,13 @@ export default function FAQ() {
                 <button
                   onClick={() => setOpen(isOpen ? null : i)}
                   aria-expanded={isOpen}
-                  className="w-full flex items-center justify-between gap-6 py-6 text-left"
+                  className="w-full flex items-center justify-between gap-6 py-6 text-left cursor-pointer"
                 >
                   <span className="font-display font-medium text-lg text-ink">
                     {f.q}
                   </span>
                   <span
-                    className={`shrink-0 w-6 h-6 rounded-full border border-line flex items-center justify-center text-cyan transition-transform duration-300 ${
+                    className={`shrink-0 w-6 h-6 rounded-full border border-line flex items-center justify-center text-ink transition-transform duration-300 ${
                       isOpen ? "rotate-45" : ""
                     }`}
                   >

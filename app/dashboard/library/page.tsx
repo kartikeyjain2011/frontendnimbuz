@@ -1,40 +1,128 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { gamesList, getPurchasedGameIds } from "@/lib/gamesData";
+import { useState, useEffect, useMemo } from "react";
+import { fetchTrendingGames, type RawgGame } from "@/lib/rawg";
+import { getPurchasedGameIds } from "@/lib/gamesData";
 
-const genres = ["All", "Action RPG", "Soulslike", "Sci-Fi RPG", "Racing", "Horror / FPS", "Strategy / RPG"];
-const stores = ["All Stores", "Steam", "Epic", "Xbox", "GOG"];
+const genres = ["All", "Action", "RPG", "Adventure", "Strategy", "Shooter", "Indie"];
+
+function LibraryCard({ game, isPurchased }: { game: RawgGame; isPurchased: boolean }) {
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const screenshots = game.short_screenshots?.map((s) => s.image) || [];
+
+  // Autoplay stream preview
+  useEffect(() => {
+    if (!screenshots || screenshots.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIdx((prev) => (prev + 1) % screenshots.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [screenshots]);
+
+  const priceUSD = (19.99 + (game.id % 40)).toFixed(2);
+  const priceINR = Math.round(parseFloat(priceUSD) * 83).toLocaleString();
+  const genreName = game.genres?.[0]?.name || "Action";
+
+  return (
+    <Link
+      href={`/dashboard/games/${game.id}`}
+      className="group relative rounded-xl bg-white border border-black/10 overflow-hidden hover:border-black/30 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between"
+    >
+      <div className="h-48 relative overflow-hidden bg-black">
+        <img
+          src={screenshots[currentIdx] || game.background_image}
+          alt={game.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+
+        <div className="absolute top-3 left-3 flex gap-2">
+          <span className="bg-black/70 backdrop-blur-md text-white text-[10px] font-mono px-2 py-0.5 rounded border border-white/10">
+            {game.parent_platforms?.[0]?.platform?.name || "PC Cloud"}
+          </span>
+          {isPurchased ? (
+            <span className="bg-emerald-500 text-white font-bold text-[10px] font-mono px-2 py-0.5 rounded">
+              ✓ OWNED
+            </span>
+          ) : (
+            <span className="bg-black/70 backdrop-blur-md text-emerald-400 text-[10px] font-mono px-2 py-0.5 rounded border border-emerald-400/30">
+              RTX READY
+            </span>
+          )}
+        </div>
+
+        {game.rating > 0 && (
+          <span className="absolute top-3 right-3 bg-black/70 text-white font-mono text-[10px] px-2 py-0.5 rounded font-bold">
+            ★ {game.rating.toFixed(1)}
+          </span>
+        )}
+
+        <div className="absolute bottom-2 left-3 flex items-center gap-1.5 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-white text-[10px] font-mono font-semibold">STREAM PREVIEW</span>
+        </div>
+      </div>
+
+      <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
+        <div className="space-y-1">
+          <div className="flex justify-between items-center text-xs font-mono text-muted">
+            <span>{genreName}</span>
+            <span>Released: {game.released?.split("-")[0] || "2024"}</span>
+          </div>
+          <h3 className="font-display font-semibold text-ink text-lg line-clamp-1 group-hover:text-emerald-600 transition-colors">
+            {game.name}
+          </h3>
+        </div>
+
+        <div className="space-y-3 pt-2">
+          <div className="flex justify-between text-xs font-mono text-muted">
+            <span>4K @ 120 FPS</span>
+            <span>Metacritic: {game.metacritic || "N/A"}</span>
+          </div>
+
+          {isPurchased ? (
+            <div className="w-full py-2.5 rounded-lg text-xs font-mono font-bold text-center bg-ink text-white group-hover:bg-black/80 transition-all">
+              🖥️ LAUNCH ON CLOUD PC
+            </div>
+          ) : (
+            <div className="w-full py-2.5 rounded-lg text-xs font-mono font-bold text-center bg-black/5 border border-black/15 text-ink group-hover:bg-ink group-hover:text-white transition-all">
+              ⚡ BUY & PLAY (₹{priceINR})
+            </div>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+}
 
 export default function LibraryPage() {
+  const [games, setGames] = useState<RawgGame[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("All");
-  const [selectedStore, setSelectedStore] = useState("All Stores");
-  const [myGameIds, setMyGameIds] = useState<string[]>([]);
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
 
   useEffect(() => {
-    const pIds = getPurchasedGameIds();
-    setPurchasedIds(pIds);
-    setMyGameIds(pIds);
+    setPurchasedIds(getPurchasedGameIds());
+    fetchTrendingGames(24)
+      .then((res) => {
+        setGames(res);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
-  const toggleMyGame = (e: React.MouseEvent, id: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setMyGameIds((prev) =>
-      prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]
-    );
-  };
-
-  const filteredGames = gamesList.filter((game) => {
-    const matchesSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          game.genre.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesGenre = selectedGenre === "All" || game.genre.includes(selectedGenre);
-    const matchesStore = selectedStore === "All Stores" || game.store === selectedStore;
-    return matchesSearch && matchesGenre && matchesStore;
-  });
+  const filteredGames = useMemo(() => {
+    return games.filter((game) => {
+      const matchesSearch =
+        game.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        game.genres.some((g) => g.name.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesGenre =
+        selectedGenre === "All" ||
+        game.genres.some((g) => g.name.toLowerCase() === selectedGenre.toLowerCase());
+      return matchesSearch && matchesGenre;
+    });
+  }, [games, searchQuery, selectedGenre]);
 
   return (
     <div className="space-y-8 pb-12">
@@ -45,29 +133,29 @@ export default function LibraryPage() {
             Cloud Game Library
           </h1>
           <p className="text-muted text-sm font-mono mt-1">
-            Browse 2,500+ cloud-ready titles. Purchased store games sync automatically to your library.
+            Browse 2,500+ cloud-ready titles with continuous stream previews.
           </p>
         </div>
 
-        {/* Sync accounts button */}
+        {/* Linked Accounts */}
         <div className="flex items-center gap-3">
           <span className="text-xs font-mono text-muted hidden sm:inline">Linked Accounts:</span>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded bg-surface border border-line text-xs font-mono text-cyan flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" /> Steam
+            <span className="px-2.5 py-1 rounded bg-white border border-black/10 text-xs font-mono text-ink flex items-center gap-1.5 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" /> Steam
             </span>
-            <span className="px-2.5 py-1 rounded bg-surface border border-line text-xs font-mono text-cyan flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" /> Epic Games
+            <span className="px-2.5 py-1 rounded bg-white border border-black/10 text-xs font-mono text-ink flex items-center gap-1.5 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" /> Epic Games
             </span>
-            <span className="px-2.5 py-1 rounded bg-surface border border-line text-xs font-mono text-muted flex items-center gap-1.5 opacity-60">
-              <span className="w-2 h-2 rounded-full bg-line" /> Xbox
+            <span className="px-2.5 py-1 rounded bg-deep border border-black/10 text-xs font-mono text-muted flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-black/20" /> Xbox
             </span>
           </div>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="space-y-4 rounded-xl bg-surface border border-line p-5">
+      <div className="space-y-4 rounded-xl bg-white border border-black/10 p-5 shadow-sm">
         <div className="flex flex-col md:flex-row items-center gap-4">
           <div className="relative flex-1 w-full">
             <svg
@@ -83,22 +171,8 @@ export default function LibraryPage() {
               placeholder="Search by game title, genre, or tag..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-void/80 border border-line rounded-lg pl-10 pr-4 py-2.5 text-xs font-mono text-ink placeholder:text-muted focus:border-cyan focus:outline-none transition-colors"
+              className="w-full bg-deep border border-black/10 rounded-lg pl-10 pr-4 py-2.5 text-xs font-mono text-ink placeholder:text-muted focus:border-black/40 focus:outline-none transition-colors"
             />
-          </div>
-
-          <div className="flex items-center gap-2 w-full md:w-auto">
-            <select
-              value={selectedStore}
-              onChange={(e) => setSelectedStore(e.target.value)}
-              className="bg-void/80 border border-line rounded-lg px-3 py-2.5 text-xs font-mono text-ink focus:border-cyan focus:outline-none transition-colors cursor-pointer w-full md:w-auto"
-            >
-              {stores.map((s) => (
-                <option key={s} value={s} className="bg-panel text-ink">
-                  {s}
-                </option>
-              ))}
-            </select>
           </div>
         </div>
 
@@ -110,8 +184,8 @@ export default function LibraryPage() {
               onClick={() => setSelectedGenre(genre)}
               className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all whitespace-nowrap cursor-pointer ${
                 selectedGenre === genre
-                  ? "bg-cyan text-void font-semibold"
-                  : "bg-void/60 text-muted hover:text-ink hover:bg-surface border border-line"
+                  ? "bg-ink text-white font-semibold shadow-sm"
+                  : "bg-deep text-muted hover:text-ink border border-black/10"
               }`}
             >
               {genre}
@@ -121,91 +195,14 @@ export default function LibraryPage() {
       </div>
 
       {/* Catalog Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredGames.map((game) => {
-          const inMyGames = myGameIds.includes(game.id);
-          const isOwned = purchasedIds.includes(game.id);
-
-          return (
-            <Link
-              key={game.id}
-              href={`/dashboard/games/${game.id}`}
-              className="group relative rounded-xl bg-surface border border-line overflow-hidden hover:border-cyan/60 transition-all duration-300 flex flex-col justify-between"
-            >
-              <div className="h-48 relative overflow-hidden bg-void">
-                <img
-                  src={game.banner}
-                  alt={game.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-85 group-hover:opacity-100"
-                />
-
-                <div className="absolute top-3 left-3 flex gap-2">
-                  <span className="bg-void/80 backdrop-blur-md text-ink text-[10px] font-mono px-2 py-0.5 rounded border border-line">
-                    {game.store}
-                  </span>
-                  {isOwned ? (
-                    <span className="bg-emerald-400/90 text-void font-bold text-[10px] font-mono px-2 py-0.5 rounded shadow-glow">
-                      ✓ OWNED
-                    </span>
-                  ) : (
-                    game.rtx && (
-                      <span className="bg-void/80 backdrop-blur-md text-cyan text-[10px] font-mono px-2 py-0.5 rounded border border-cyan/30">
-                        RTX ON
-                      </span>
-                    )
-                  )}
-                </div>
-
-                <button
-                  onClick={(e) => toggleMyGame(e, game.id)}
-                  title={inMyGames ? "Remove from My Games" : "Add to My Games"}
-                  className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md transition-all cursor-pointer ${
-                    inMyGames
-                      ? "bg-cyan text-void"
-                      : "bg-void/80 text-muted hover:text-ink border border-line"
-                  }`}
-                >
-                  <svg className="w-3.5 h-3.5" fill={inMyGames ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                  </svg>
-                </button>
-              </div>
-
-              <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
-                <div className="space-y-1">
-                  <div className="flex justify-between items-center text-xs font-mono text-muted">
-                    <span>{game.genre}</span>
-                    <span className="text-amber-400">★ {game.rating}</span>
-                  </div>
-                  <h3 className="font-display font-semibold text-ink text-lg line-clamp-1 group-hover:text-cyan transition-colors">
-                    {game.title}
-                  </h3>
-                </div>
-
-                <div className="space-y-3 pt-2">
-                  <div className="flex justify-between text-xs font-mono text-muted">
-                    <span>{game.resolution}</span>
-                    <span>{game.size}</span>
-                  </div>
-
-                  {isOwned ? (
-                    <div className="w-full py-2.5 rounded-lg text-xs font-mono font-bold text-center bg-cyan text-void shadow-glow group-hover:opacity-90 transition-all">
-                      🖥️ LAUNCH ON CLOUD PC
-                    </div>
-                  ) : (
-                    <div className="w-full py-2.5 rounded-lg text-xs font-mono font-bold text-center bg-cyan/10 border border-cyan/40 text-cyan group-hover:bg-cyan group-hover:text-void transition-all">
-                      ⚡ BUY & PLAY (₹{Math.round(game.price * 83).toLocaleString()})
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-
-      {filteredGames.length === 0 && (
-        <div className="text-center py-16 rounded-xl bg-surface border border-line space-y-3">
+      {loading ? (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-72 rounded-xl bg-black/5 animate-pulse" />
+          ))}
+        </div>
+      ) : filteredGames.length === 0 ? (
+        <div className="text-center py-16 rounded-xl bg-white border border-black/10 space-y-3 shadow-sm">
           <p className="text-sm font-mono text-muted">
             No games found matching your search parameters.
           </p>
@@ -213,12 +210,21 @@ export default function LibraryPage() {
             onClick={() => {
               setSearchQuery("");
               setSelectedGenre("All");
-              setSelectedStore("All Stores");
             }}
-            className="text-xs text-cyan hover:underline font-mono cursor-pointer"
+            className="text-xs text-ink hover:underline font-mono cursor-pointer font-bold"
           >
             Reset Filters
           </button>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredGames.map((game) => (
+            <LibraryCard
+              key={game.id}
+              game={game}
+              isPurchased={purchasedIds.includes(String(game.id))}
+            />
+          ))}
         </div>
       )}
     </div>

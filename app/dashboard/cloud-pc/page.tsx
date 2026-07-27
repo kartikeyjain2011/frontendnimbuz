@@ -1,54 +1,69 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 
-const rigs = [
+// ── Session Plans (no hardware specs) ──────────────────────────
+const SESSION_PLANS = [
   {
-    id: "rtx-4090",
-    name: "Titan RTX 4090 Rig",
-    gpu: "NVIDIA GeForce RTX 4090 (24GB VRAM)",
-    cpu: "Intel Core i9-14900K (24 Cores)",
-    ram: "64 GB DDR5 6000MHz",
-    storage: "2 TB NVMe SSD (Gen 4)",
-    tier: "Pro Ultimate",
-    active: true,
+    id: "essential",
+    label: "Essential",
+    tag: "1080p · 60 FPS",
+    description: "Everyday gaming and light productivity.",
+    emoji: "🟢",
   },
   {
-    id: "h100-node",
-    name: "H100 Enterprise Node",
-    gpu: "NVIDIA H100 Tensor Core (80GB VRAM)",
-    cpu: "AMD EPYC 9654 (96 Cores)",
-    ram: "128 GB ECC DDR5",
-    storage: "4 TB Enterprise NVMe",
-    tier: "Enterprise Workstation",
-    active: false,
+    id: "extra",
+    label: "Extra",
+    tag: "1440p · 120 FPS",
+    description: "Smooth high-refresh gameplay and multitasking.",
+    emoji: "🔵",
   },
   {
-    id: "rtx-4080",
-    name: "Pro Gamer Rig",
-    gpu: "NVIDIA GeForce RTX 4080 Super (16GB)",
-    cpu: "AMD Ryzen 7 7800X3D",
-    ram: "32 GB DDR5 5600MHz",
-    storage: "1 TB NVMe SSD",
-    tier: "Standard Pro",
-    active: false,
+    id: "premium",
+    label: "Premium",
+    tag: "4K · 120 FPS",
+    description: "Ultra-clarity streaming for AAA titles and creative work.",
+    emoji: "⭐",
   },
+];
+
+// ── Quick-access apps ───────────────────────────────────────────
+const QUICK_APPS = [
+  { icon: "🎮", name: "Steam",       status: "Installed" },
+  { icon: "🟣", name: "Epic Games",  status: "Installed" },
+  { icon: "🟤", name: "GOG Galaxy",  status: "Installed" },
+  { icon: "💬", name: "Discord",     status: "Running" },
+  { icon: "📹", name: "OBS Studio",  status: "Installed" },
+  { icon: "🎨", name: "Adobe CC",    status: "Not installed" },
 ];
 
 export default function CloudPCPage() {
   const [vmStatus, setVmStatus] = useState<"Running" | "Suspended" | "Stopped">("Running");
-  const [selectedRig, setSelectedRig] = useState("rtx-4090");
-  const [resolution, setResolution] = useState("4K (3840x2160)");
+  const [selectedPlan, setSelectedPlan] = useState("extra");
+  const [resolution, setResolution] = useState("1440p (QHD)");
   const [fps, setFps] = useState("120 FPS");
   const [bitrate, setBitrate] = useState(75);
-  const [lowLatencyMode, setLowLatencyMode] = useState(true);
+  const [lowLatency, setLowLatency] = useState(true);
   const [isBenchmarking, setIsBenchmarking] = useState(false);
   const [benchmarkResult, setBenchmarkResult] = useState<{
-    ping: string;
-    jitter: string;
-    bandwidth: string;
-    score: string;
+    ping: string; jitter: string; bandwidth: string; score: string;
   } | null>(null);
+
+  // Simulated live uptime counter
+  const [uptime, setUptime] = useState(0);
+  useEffect(() => {
+    if (vmStatus !== "Running") return;
+    const id = setInterval(() => setUptime((t) => t + 1), 1000);
+    return () => clearInterval(id);
+  }, [vmStatus]);
+
+  const formatUptime = (s: number) => {
+    const h = String(Math.floor(s / 3600)).padStart(2, "0");
+    const m = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
+    const sec = String(s % 60).padStart(2, "0");
+    return `${h}:${m}:${sec}`;
+  };
 
   const runBenchmark = () => {
     setIsBenchmarking(true);
@@ -59,172 +74,164 @@ export default function CloudPCPage() {
         ping: "4.2 ms",
         jitter: "0.4 ms",
         bandwidth: "480 Mbps",
-        score: "99.8% - Optimal for 4K 120FPS HDR Streaming",
+        score: "99.8% — Optimal for 4K 120 FPS HDR Streaming",
       });
     }, 1800);
   };
 
   return (
-    <div className="space-y-10">
-      {/* Header section */}
+    <div className="space-y-8 pb-12">
+
+      {/* ── Page header ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold text-ink">
-            Cloud PC Control Panel
-          </h1>
+          <h1 className="text-3xl font-display font-bold text-ink">Cloud PC</h1>
           <p className="text-muted text-sm font-mono mt-1">
-            Manage your dedicated virtual gaming workstation and streaming hardware parameters.
+            Stream your personal cloud desktop from anywhere, on any device.
           </p>
         </div>
 
-        {/* VM State Controls */}
-        <div className="flex items-center gap-3 bg-surface border border-line p-2.5 rounded-xl font-mono text-xs">
-          <div className="flex items-center gap-2 pr-3 border-r border-line">
+        {/* VM state controls */}
+        <div className="flex items-center gap-2 bg-white border border-black/10 p-2 rounded-2xl font-mono text-xs shadow-sm">
+          <div className="flex items-center gap-2 px-3 border-r border-black/10">
             <span
               className={`w-2.5 h-2.5 rounded-full ${
                 vmStatus === "Running"
-                  ? "bg-emerald-400 animate-pulse"
+                  ? "bg-emerald-500 animate-pulse"
                   : vmStatus === "Suspended"
                   ? "bg-amber-400"
                   : "bg-red-500"
               }`}
             />
             <span className="text-ink font-semibold">{vmStatus}</span>
+            {vmStatus === "Running" && (
+              <span className="text-muted tabular-nums">{formatUptime(uptime)}</span>
+            )}
           </div>
-
           <button
-            onClick={() => setVmStatus("Running")}
-            className="px-3 py-1.5 rounded bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/30 transition-colors cursor-pointer"
+            onClick={() => { setVmStatus("Running"); }}
+            className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors cursor-pointer"
           >
             Start
           </button>
           <button
             onClick={() => setVmStatus("Suspended")}
-            className="px-3 py-1.5 rounded bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 transition-colors cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer"
           >
             Suspend
           </button>
           <button
             onClick={() => setVmStatus("Stopped")}
-            className="px-3 py-1.5 rounded bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30 transition-colors cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-colors cursor-pointer"
           >
             Reboot
           </button>
         </div>
       </div>
 
-      {/* Main Stream Launcher Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-surface via-surface to-cyan/10 border border-cyan/40 p-8 flex flex-col lg:flex-row items-center justify-between gap-6">
-        <div className="space-y-2">
-          <span className="text-xs font-mono uppercase tracking-widest text-cyan">
-            Active Workstation Stream
-          </span>
-          <h2 className="text-2xl md:text-3xl font-display font-bold text-ink">
-            Windows 11 Gaming Rig Connected
+      {/* ── Hero launch banner ── */}
+      <div className="rounded-2xl bg-ink text-white p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 overflow-hidden relative">
+        {/* Decorative rings */}
+        <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full border border-white/5" />
+        <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full border border-white/8" />
+
+        <div className="space-y-2 relative">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-xs font-mono text-white/50 uppercase tracking-widest">Desktop Ready</span>
+          </div>
+          <h2 className="text-2xl md:text-3xl font-display font-bold">
+            Your Cloud Desktop is Live
           </h2>
-          <p className="text-muted text-xs font-mono max-w-xl">
-            Stream your full Windows desktop environment directly in browser or via NIMBUS Desktop App with native controller pass-through.
+          <p className="text-white/60 text-xs font-mono max-w-md">
+            Stream full Windows 11 in-browser or via NIMBUS App — with native controller, keyboard & mouse pass-through.
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-          <button className="px-6 py-3.5 rounded-xl bg-cyan text-void font-mono font-bold text-xs shadow-glow hover:opacity-90 transition-all text-center cursor-pointer">
-            ⚡ LAUNCH FULL DESKTOP STREAM
+        <div className="flex flex-col sm:flex-row gap-3 relative shrink-0">
+          <button className="px-6 py-3.5 rounded-xl bg-white text-ink font-mono font-bold text-xs hover:bg-white/90 transition-all cursor-pointer flex items-center gap-2">
+            <span>⚡</span> Launch Desktop
           </button>
-          <button className="px-5 py-3.5 rounded-xl bg-void/80 text-ink border border-line hover:border-cyan/40 font-mono text-xs transition-colors cursor-pointer">
-            🖥️ Open RDP / Parsec Config
+          <button className="px-5 py-3.5 rounded-xl border border-white/20 text-white/80 hover:border-white/40 hover:text-white font-mono text-xs transition-colors cursor-pointer">
+            🖥️ Open via RDP / Parsec
           </button>
         </div>
       </div>
 
-      {/* Cloud Rig Hardware Profile Selector */}
+      {/* ── Session plan selector ── */}
       <section className="space-y-4">
-        <h2 className="text-xl font-display font-bold text-ink">
-          Hardware Hardware Rig Configuration
-        </h2>
+        <div>
+          <h2 className="text-xl font-display font-bold text-ink">Active Session Plan</h2>
+          <p className="text-muted text-xs font-mono mt-1">
+            Switch your streaming quality on the fly — no restart needed.
+          </p>
+        </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {rigs.map((rig) => {
-            const isSelected = selectedRig === rig.id;
-
+        <div className="grid sm:grid-cols-3 gap-4">
+          {SESSION_PLANS.map((plan) => {
+            const isActive = selectedPlan === plan.id;
             return (
-              <div
-                key={rig.id}
-                onClick={() => setSelectedRig(rig.id)}
-                className={`rounded-xl p-6 border transition-all cursor-pointer flex flex-col justify-between space-y-4 ${
-                  isSelected
-                    ? "bg-surface border-cyan shadow-glow"
-                    : "bg-surface/60 border-line hover:border-line/80"
+              <button
+                key={plan.id}
+                onClick={() => setSelectedPlan(plan.id)}
+                className={`rounded-xl p-5 border text-left transition-all cursor-pointer space-y-3 ${
+                  isActive
+                    ? "bg-ink text-white border-ink shadow-md"
+                    : "bg-white border-black/10 hover:border-black/25 hover:shadow-sm text-ink"
                 }`}
               >
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs font-mono text-cyan uppercase tracking-wider">
-                      {rig.tier}
+                <div className="flex items-center justify-between">
+                  <span className="text-xl">{plan.emoji}</span>
+                  {isActive && (
+                    <span className="text-[10px] font-mono font-bold bg-white text-ink px-2 py-0.5 rounded-full">
+                      ACTIVE
                     </span>
-                    {isSelected && (
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan text-void font-bold">
-                        ACTIVE RIG
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="text-lg font-display font-bold text-ink">{rig.name}</h3>
+                  )}
                 </div>
-
-                <div className="space-y-2 font-mono text-xs text-muted border-t border-line/50 pt-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-cyan">GPU:</span>
-                    <span className="text-ink line-clamp-1">{rig.gpu}</span>
+                <div>
+                  <div className={`font-display font-bold text-lg ${isActive ? "text-white" : "text-ink"}`}>
+                    {plan.label}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-cyan">CPU:</span>
-                    <span className="text-ink line-clamp-1">{rig.cpu}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-cyan">RAM:</span>
-                    <span className="text-ink">{rig.ram}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-cyan">SSD:</span>
-                    <span className="text-ink">{rig.storage}</span>
+                  <div className={`text-[11px] font-mono font-semibold mt-0.5 ${isActive ? "text-white/60" : "text-muted"}`}>
+                    {plan.tag}
                   </div>
                 </div>
-
-                <button
-                  className={`w-full py-2 rounded-lg text-xs font-mono font-medium transition-all ${
-                    isSelected
-                      ? "bg-cyan/10 border border-cyan text-cyan"
-                      : "bg-void border border-line text-muted hover:text-ink"
-                  }`}
-                >
-                  {isSelected ? "Selected Hardware Rig" : "Switch to this Rig"}
-                </button>
-              </div>
+                <p className={`text-xs font-mono leading-snug ${isActive ? "text-white/70" : "text-muted"}`}>
+                  {plan.description}
+                </p>
+              </button>
             );
           })}
         </div>
+
+        <p className="text-xs font-mono text-muted">
+          Want a higher tier?{" "}
+          <Link href="/dashboard/upgrade" className="text-ink underline underline-offset-2 hover:opacity-70 transition-opacity">
+            Upgrade your plan →
+          </Link>
+        </p>
       </section>
 
-      {/* Streaming & Video Resolution Settings */}
-      <section className="grid lg:grid-cols-2 gap-8">
-        <div className="rounded-xl bg-surface border border-line p-6 space-y-6">
-          <h2 className="text-lg font-display font-bold text-ink">
-            Stream Parameters & Video Encoding
-          </h2>
+      {/* ── Stream settings + Network diagnostics ── */}
+      <section className="grid lg:grid-cols-2 gap-6">
 
-          <div className="space-y-4 font-mono text-xs">
+        {/* Stream settings */}
+        <div className="rounded-2xl bg-white border border-black/10 p-6 space-y-6 shadow-sm">
+          <h2 className="text-lg font-display font-bold text-ink">Stream Settings</h2>
+
+          <div className="space-y-5 font-mono text-xs">
             {/* Resolution */}
             <div className="space-y-2">
-              <label className="text-muted block">Target Stream Resolution</label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {["1080p (FHD)", "1440p (QHD)", "4K (3840x2160)", "8K Ultra"].map((res) => (
+              <label className="text-muted block">Output Resolution</label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {["1080p (FHD)", "1440p (QHD)", "4K (3840×2160)", "8K Ultra"].map((res) => (
                   <button
                     key={res}
                     onClick={() => setResolution(res)}
-                    className={`p-2.5 rounded-lg border text-center transition-all cursor-pointer ${
+                    className={`py-2 px-1 rounded-lg border text-center transition-all cursor-pointer text-[11px] ${
                       resolution === res
-                        ? "bg-cyan text-void font-bold border-cyan"
-                        : "bg-void/60 text-muted border-line hover:text-ink"
+                        ? "bg-ink text-white border-ink font-bold"
+                        : "bg-deep text-muted border-black/10 hover:text-ink hover:border-black/25"
                     }`}
                   >
                     {res}
@@ -233,18 +240,18 @@ export default function CloudPCPage() {
               </div>
             </div>
 
-            {/* Frame Rate Cap */}
-            <div className="space-y-2 pt-2">
-              <label className="text-muted block">Max Frame Rate Cap</label>
+            {/* FPS */}
+            <div className="space-y-2">
+              <label className="text-muted block">Frame Rate Cap</label>
               <div className="grid grid-cols-3 gap-2">
                 {["60 FPS", "120 FPS", "240 FPS"].map((rate) => (
                   <button
                     key={rate}
                     onClick={() => setFps(rate)}
-                    className={`p-2.5 rounded-lg border text-center transition-all cursor-pointer ${
+                    className={`py-2.5 rounded-lg border text-center transition-all cursor-pointer ${
                       fps === rate
-                        ? "bg-cyan text-void font-bold border-cyan"
-                        : "bg-void/60 text-muted border-line hover:text-ink"
+                        ? "bg-ink text-white border-ink font-bold"
+                        : "bg-deep text-muted border-black/10 hover:text-ink hover:border-black/25"
                     }`}
                   >
                     {rate}
@@ -254,42 +261,39 @@ export default function CloudPCPage() {
             </div>
 
             {/* Bitrate slider */}
-            <div className="space-y-2 pt-2">
+            <div className="space-y-2">
               <div className="flex justify-between">
                 <label className="text-muted">Target Bitrate</label>
-                <span className="text-cyan font-bold">{bitrate} Mbps</span>
+                <span className="text-ink font-bold">{bitrate} Mbps</span>
               </div>
               <input
-                type="range"
-                min="10"
-                max="150"
-                step="5"
+                type="range" min="10" max="150" step="5"
                 value={bitrate}
                 onChange={(e) => setBitrate(Number(e.target.value))}
-                className="w-full accent-cyan cursor-pointer"
+                className="w-full accent-black cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-muted">
-                <span>10 Mbps (Save data)</span>
-                <span>75 Mbps (Recommended)</span>
-                <span>150 Mbps (Max Quality)</span>
+                <span>10 Mbps</span>
+                <span>75 Mbps (Rec.)</span>
+                <span>150 Mbps</span>
               </div>
             </div>
 
-            {/* Toggles */}
-            <div className="pt-2 flex items-center justify-between border-t border-line/50">
+            {/* Low-latency toggle */}
+            <div className="flex items-center justify-between pt-2 border-t border-black/10">
               <div>
-                <span className="text-ink block font-semibold">Low-Latency WebRTC Mode</span>
-                <span className="text-[11px] text-muted">Sub-5ms ultra-responsive input processing</span>
+                <span className="text-ink font-semibold block">Low-Latency WebRTC Mode</span>
+                <span className="text-[11px] text-muted">Sub-5 ms ultra-responsive input</span>
               </div>
               <button
-                onClick={() => setLowLatencyMode(!lowLatencyMode)}
+                onClick={() => setLowLatency(!lowLatency)}
                 className={`w-12 h-6 rounded-full transition-colors p-1 cursor-pointer ${
-                  lowLatencyMode ? "bg-cyan" : "bg-line"
+                  lowLatency ? "bg-ink" : "bg-black/10"
                 }`}
               >
                 <div
-                  className={`w-4 h-4 rounded-full bg-void transition-transform ${
-                    lowLatencyMode ? "translate-x-6" : "translate-x-0"
+                  className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                    lowLatency ? "translate-x-6" : "translate-x-0"
                   }`}
                 />
               </button>
@@ -297,45 +301,43 @@ export default function CloudPCPage() {
           </div>
         </div>
 
-        {/* Network & Latency Benchmark Tool */}
-        <div className="rounded-xl bg-surface border border-line p-6 space-y-6 flex flex-col justify-between">
-          <div className="space-y-3">
-            <h2 className="text-lg font-display font-bold text-ink">
-              Network & Latency Diagnostic Tool
-            </h2>
+        {/* Network diagnostics */}
+        <div className="rounded-2xl bg-white border border-black/10 p-6 space-y-5 shadow-sm flex flex-col justify-between">
+          <div className="space-y-2">
+            <h2 className="text-lg font-display font-bold text-ink">Network Diagnostics</h2>
             <p className="text-xs text-muted font-mono">
-              Test your connection jitter, WebRTC packet loss, and ping time to your nearest NIMBUS cloud datacenter.
+              Test connection quality to the nearest NIMBUS datacenter node.
             </p>
           </div>
 
-          {/* Benchmark Results Display */}
-          <div className="p-4 rounded-lg bg-void/80 border border-line space-y-3 font-mono text-xs">
+          <div className="p-4 rounded-xl bg-deep border border-black/10 space-y-3 font-mono text-xs flex-1">
             {isBenchmarking ? (
               <div className="py-6 text-center space-y-3">
-                <div className="w-6 h-6 border-2 border-cyan border-t-transparent rounded-full animate-spin mx-auto" />
-                <p className="text-cyan animate-pulse">Pinging US-East Datacenter Nodes...</p>
+                <div className="w-6 h-6 border-2 border-ink border-t-transparent rounded-full animate-spin mx-auto" />
+                <p className="text-muted animate-pulse">Pinging Mumbai Datacenter Node…</p>
               </div>
             ) : benchmarkResult ? (
-              <div className="space-y-2">
-                <div className="flex justify-between py-1 border-b border-line/40">
-                  <span className="text-muted">Round-Trip Latency:</span>
-                  <span className="text-cyan font-bold">{benchmarkResult.ping}</span>
+              <div className="space-y-2.5">
+                <div className="flex justify-between py-1.5 border-b border-black/8">
+                  <span className="text-muted">Round-Trip Latency</span>
+                  <span className="text-ink font-bold">{benchmarkResult.ping}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-line/40">
-                  <span className="text-muted">Network Jitter:</span>
-                  <span className="text-emerald-400 font-bold">{benchmarkResult.jitter}</span>
+                <div className="flex justify-between py-1.5 border-b border-black/8">
+                  <span className="text-muted">Network Jitter</span>
+                  <span className="text-emerald-600 font-bold">{benchmarkResult.jitter}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-line/40">
-                  <span className="text-muted">Available Bandwidth:</span>
+                <div className="flex justify-between py-1.5 border-b border-black/8">
+                  <span className="text-muted">Available Bandwidth</span>
                   <span className="text-ink font-bold">{benchmarkResult.bandwidth}</span>
                 </div>
-                <div className="pt-2 text-emerald-400 text-[11px]">
-                  ✓ {benchmarkResult.score}
+                <div className="pt-1 text-emerald-600 text-[11px] flex items-center gap-1.5">
+                  <span className="font-bold">✓</span> {benchmarkResult.score}
                 </div>
               </div>
             ) : (
-              <div className="py-6 text-center text-muted text-xs">
-                Click below to test live stream quality & network ping.
+              <div className="py-8 text-center text-muted text-xs space-y-2">
+                <div className="text-3xl opacity-30">📡</div>
+                <p>Run a test to check stream readiness.</p>
               </div>
             )}
           </div>
@@ -343,12 +345,83 @@ export default function CloudPCPage() {
           <button
             onClick={runBenchmark}
             disabled={isBenchmarking}
-            className="w-full py-3 rounded-lg bg-ink text-void hover:bg-cyan hover:text-void font-mono font-bold text-xs transition-colors cursor-pointer disabled:opacity-50"
+            className="w-full py-3 rounded-xl bg-ink text-white hover:bg-black/80 font-mono font-bold text-xs transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {isBenchmarking ? "RUNNING DIAGNOSTICS..." : "⚡ RUN NETWORK LATENCY BENCHMARK"}
+            {isBenchmarking ? (
+              <>
+                <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Running diagnostics…</span>
+              </>
+            ) : (
+              "⚡ Run Network Test"
+            )}
           </button>
         </div>
       </section>
+
+      {/* ── Quick-launch apps ── */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-display font-bold text-ink">Installed Apps</h2>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {QUICK_APPS.map((app) => (
+            <button
+              key={app.name}
+              className="rounded-xl bg-white border border-black/10 hover:border-black/25 hover:shadow-sm p-4 flex flex-col items-center gap-2 transition-all cursor-pointer group"
+            >
+              <span className="text-2xl group-hover:scale-110 transition-transform">{app.icon}</span>
+              <span className="text-xs font-mono font-semibold text-ink">{app.name}</span>
+              <span
+                className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                  app.status === "Running"
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    : app.status === "Installed"
+                    ? "bg-deep text-muted border border-black/10"
+                    : "bg-red-50 text-red-500 border border-red-200"
+                }`}
+              >
+                {app.status}
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Access methods ── */}
+      <section className="rounded-2xl bg-deep border border-black/10 p-6 grid sm:grid-cols-3 gap-6">
+        {[
+          {
+            icon: "🌐",
+            title: "Browser Stream",
+            desc: "No download required. Launch directly from Chrome, Edge, or Safari.",
+            action: "Open in Browser",
+          },
+          {
+            icon: "📱",
+            title: "NIMBUS Mobile App",
+            desc: "Stream on iOS or Android with touch controls and gamepad support.",
+            action: "Download App",
+          },
+          {
+            icon: "🖥️",
+            title: "Desktop Client",
+            desc: "Full-res streaming via the NIMBUS Desktop App for Windows & macOS.",
+            action: "Get Desktop App",
+          },
+        ].map((method) => (
+          <div key={method.title} className="space-y-3">
+            <div className="text-2xl">{method.icon}</div>
+            <div>
+              <h3 className="font-display font-bold text-ink text-sm">{method.title}</h3>
+              <p className="text-xs font-mono text-muted mt-1 leading-relaxed">{method.desc}</p>
+            </div>
+            <button className="text-xs font-mono text-ink underline underline-offset-2 hover:opacity-60 transition-opacity cursor-pointer">
+              {method.action} →
+            </button>
+          </div>
+        ))}
+      </section>
+
     </div>
   );
 }

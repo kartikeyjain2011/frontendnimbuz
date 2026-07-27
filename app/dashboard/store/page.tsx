@@ -4,9 +4,9 @@ import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import Script from "next/script";
 import { useUser } from "@clerk/nextjs";
+import { fetchTrendingGames, type RawgGame } from "@/lib/rawg";
+import { getKinguinBuyUrl } from "@/lib/kinguin";
 import {
-  gamesList,
-  GameDetail,
   generateActivationKey,
   getPurchasedGameIds,
   markGameAsPurchased,
@@ -18,142 +18,243 @@ declare global {
   }
 }
 
+function StoreGameCard({
+  game,
+  isOwned,
+  onCheckout,
+}: {
+  game: RawgGame;
+  isOwned: boolean;
+  onCheckout: (game: RawgGame) => void;
+}) {
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const screenshots = game.short_screenshots?.map((s) => s.image) || [];
+
+  // Autoplay continuous stream preview
+  useEffect(() => {
+    if (!screenshots || screenshots.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIdx((prev) => (prev + 1) % screenshots.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [screenshots]);
+
+  const priceUSD = 19.99 + (game.id % 35);
+  const discount = (game.id % 3) === 0 ? 20 : 0;
+  const finalPriceUSD = discount > 0 ? priceUSD * 0.8 : priceUSD;
+  const finalPriceINR = Math.round(finalPriceUSD * 83);
+  const kinguinUrl = getKinguinBuyUrl(game.name);
+
+  return (
+    <div className="rounded-2xl bg-white border border-black/10 p-4 flex flex-col justify-between hover:border-black/30 hover:shadow-md transition-all duration-300 group space-y-4">
+      {/* Cover Image with Autoplay Preview */}
+      <Link href={`/dashboard/games/${game.id}`} className="w-full h-48 rounded-xl overflow-hidden relative bg-black block">
+        <img
+          src={screenshots[currentIdx] || game.background_image}
+          alt={game.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+
+        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/60 text-white border border-white/10 backdrop-blur-md">
+            {game.parent_platforms?.[0]?.platform?.name || "PC"}
+          </span>
+          {discount > 0 && (
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-red-500 text-white">
+              -{discount}%
+            </span>
+          )}
+        </div>
+
+        <div className="absolute bottom-2 left-2.5 flex items-center gap-1 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-white text-[10px] font-mono font-semibold">STREAM PREVIEW</span>
+        </div>
+      </Link>
+
+      {/* Metadata */}
+      <div className="space-y-2 flex-1">
+        <div className="flex justify-between items-start">
+          <span className="text-[11px] font-mono text-muted">{game.genres?.[0]?.name || "Action"}</span>
+          <span className="text-[11px] font-mono text-amber-500 font-bold">★ {game.rating?.toFixed(1) || "4.5"}</span>
+        </div>
+
+        <Link href={`/dashboard/games/${game.id}`}>
+          <h3 className="font-display font-bold text-ink text-base line-clamp-1 group-hover:text-emerald-600 transition-colors">
+            {game.name}
+          </h3>
+        </Link>
+
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-deep border border-black/10 text-muted">
+            4K @ 120 FPS
+          </span>
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/5 border border-black/20 text-ink">
+            KINGUIN KEYS READY
+          </span>
+        </div>
+      </div>
+
+      {/* Price & Actions */}
+      <div className="pt-3 border-t border-black/10 space-y-2">
+        <div className="font-mono flex justify-between items-center">
+          <div>
+            {discount > 0 && (
+              <span className="text-[10px] text-muted line-through mr-1">
+                ${priceUSD.toFixed(2)}
+              </span>
+            )}
+            <span className="text-base font-bold text-ink">
+              ${finalPriceUSD.toFixed(2)}
+            </span>
+          </div>
+          <span className="text-xs text-muted font-mono">(₹{finalPriceINR.toLocaleString()} INR)</span>
+        </div>
+
+        {isOwned ? (
+          <span className="w-full py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center justify-center gap-1">
+            ✓ IN LIBRARY
+          </span>
+        ) : (
+          <div className="grid grid-cols-2 gap-2 font-mono">
+            <button
+              onClick={() => onCheckout(game)}
+              className="py-2 rounded-xl bg-ink text-white hover:bg-black/80 text-xs font-bold transition-all cursor-pointer shadow-sm text-center"
+            >
+              RAZORPAY
+            </button>
+            <a
+              href={kinguinUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition-all cursor-pointer shadow-sm text-center flex items-center justify-center gap-1"
+            >
+              KINGUIN ↗
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function StorePage() {
   const { user } = useUser();
-  const [games, setGames] = useState<GameDetail[]>(gamesList);
+  const [games, setGames] = useState<RawgGame[]>([]);
+  const [loading, setLoading] = useState(true);
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState<string>("All");
-  const [selectedStore, setSelectedStore] = useState<string>("All");
-  const [sortBy, setSortBy] = useState<"featured" | "price-low" | "price-high" | "rating" | "discount">("featured");
-  const [showOnlyOnSale, setShowOnlyOnSale] = useState(false);
-  const [showOnlyWishlist, setShowOnlyWishlist] = useState(false);
-
-  // Store Credits
-  const [cloudCredits, setCloudCredits] = useState(120.00);
+  const [sortBy, setSortBy] = useState<"featured" | "price-low" | "price-high" | "rating">("featured");
 
   // Checkout Modal State
-  const [checkoutGame, setCheckoutGame] = useState<GameDetail | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "credits" | "card" | "paypal">("razorpay");
-  const [promoCode, setPromoCode] = useState("");
-  const [appliedDiscount, setAppliedDiscount] = useState(0);
+  const [checkoutGame, setCheckoutGame] = useState<RawgGame | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "kinguin">("razorpay");
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Success Key Modal State
   const [purchasedSuccess, setPurchasedSuccess] = useState<{
-    game: GameDetail;
+    game: RawgGame;
     key: string;
   } | null>(null);
 
   useEffect(() => {
     setPurchasedIds(getPurchasedGameIds());
+    fetchTrendingGames(24)
+      .then((res) => {
+        setGames(res);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
-
-  const toggleWishlist = (id: string) => {
-    setGames((prev) =>
-      prev.map((g) => (g.id === id ? { ...g, inWishlist: !g.inWishlist } : g))
-    );
-  };
 
   const filteredGames = useMemo(() => {
     return games
       .filter((game) => {
         const matchesSearch =
-          game.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          game.genre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          game.publisher.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesGenre = selectedGenre === "All" || game.genre.includes(selectedGenre);
-        const matchesStore = selectedStore === "All" || game.store === selectedStore;
-        const matchesSale = !showOnlyOnSale || (game.isOnSale && (game.discount ?? 0) > 0);
-        const matchesWishlist = !showOnlyWishlist || game.inWishlist;
-
-        return matchesSearch && matchesGenre && matchesStore && matchesSale && matchesWishlist;
+          game.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          game.genres.some((g) => g.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchesGenre =
+          selectedGenre === "All" ||
+          game.genres.some((g) => g.name.toLowerCase() === selectedGenre.toLowerCase());
+        return matchesSearch && matchesGenre;
       })
       .sort((a, b) => {
-        if (sortBy === "price-low") return a.price - b.price;
-        if (sortBy === "price-high") return b.price - a.price;
-        if (sortBy === "discount") return (b.discount || 0) - (a.discount || 0);
-        if (sortBy === "rating") return parseFloat(b.rating) - parseFloat(a.rating);
-        return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
+        const pA = 19.99 + (a.id % 35);
+        const pB = 19.99 + (b.id % 35);
+        if (sortBy === "price-low") return pA - pB;
+        if (sortBy === "price-high") return pB - pA;
+        if (sortBy === "rating") return b.rating - a.rating;
+        return 0;
       });
-  }, [games, searchQuery, selectedGenre, selectedStore, sortBy, showOnlyOnSale, showOnlyWishlist]);
+  }, [games, searchQuery, selectedGenre, sortBy]);
 
-  const wishlistCount = games.filter((g) => g.inWishlist).length;
-  const featuredGame = games.find((g) => g.id === "cyberpunk") || games[0];
-
-  const handleApplyPromo = () => {
-    if (promoCode.trim().toUpperCase() === "NIMBUS20") {
-      setAppliedDiscount(0.20);
-    } else {
-      alert("Invalid promo code. Use NIMBUS20 for 20% OFF!");
-    }
-  };
+  const featuredGame = games[0];
 
   // Launch Razorpay or Process Payment
   const handleCompletePurchase = () => {
     if (!checkoutGame) return;
+
+    if (paymentMethod === "kinguin") {
+      const kUrl = getKinguinBuyUrl(checkoutGame.name);
+      window.open(kUrl, "_blank");
+      setCheckoutGame(null);
+      return;
+    }
+
     setIsProcessing(true);
 
-    const finalUSD = checkoutGame.price * (1 - appliedDiscount);
-    const priceInINR = Math.round(finalUSD * 83);
+    const priceUSD = 19.99 + (checkoutGame.id % 35);
+    const priceInINR = Math.round(priceUSD * 83);
     const priceInPaise = priceInINR * 100;
 
-    if (paymentMethod === "razorpay") {
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_TIQY8CAZ52qCin",
-        amount: priceInPaise,
-        currency: "INR",
-        name: "NIMBUS Cloud Gaming Store",
-        description: `Purchase ${checkoutGame.title}`,
-        image: checkoutGame.banner,
-        handler: function (response: any) {
-          const updatedIds = markGameAsPurchased(checkoutGame.id);
-          setPurchasedIds(updatedIds);
-          const generatedKey = generateActivationKey(checkoutGame.title);
-          setPurchasedSuccess({ game: checkoutGame, key: generatedKey });
-          setCheckoutGame(null);
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_TIQY8CAZ52qCin",
+      amount: priceInPaise,
+      currency: "INR",
+      name: "NIMBUS Cloud Store",
+      description: `Purchase ${checkoutGame.name}`,
+      image: checkoutGame.background_image,
+      handler: function (response: any) {
+        const updatedIds = markGameAsPurchased(String(checkoutGame.id));
+        setPurchasedIds(updatedIds);
+        const generatedKey = generateActivationKey(checkoutGame.name);
+        setPurchasedSuccess({ game: checkoutGame, key: generatedKey });
+        setCheckoutGame(null);
+        setIsProcessing(false);
+      },
+      prefill: {
+        name: user?.fullName || user?.firstName || "NIMBUS Gamer",
+        email: user?.primaryEmailAddress?.emailAddress || "gamer@nimbus.cloud",
+        contact: "9876543210",
+      },
+      theme: { color: "#111111" },
+      modal: {
+        ondismiss: function () {
           setIsProcessing(false);
-          setPromoCode("");
-          setAppliedDiscount(0);
         },
-        prefill: {
-          name: user?.fullName || user?.firstName || "NIMBUS Gamer",
-          email: user?.primaryEmailAddress?.emailAddress || "gamer@nimbus.cloud",
-          contact: "9876543210",
-        },
-        theme: { color: "#00F0FF" },
-        modal: {
-          ondismiss: function () {
-            setIsProcessing(false);
-          },
-        },
-      };
+      },
+    };
 
-      if (typeof window !== "undefined" && window.Razorpay) {
-        try {
-          const rzp = new window.Razorpay(options);
-          rzp.open();
-          return;
-        } catch (e) {
-          // fallback
-        }
+    if (typeof window !== "undefined" && window.Razorpay) {
+      try {
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+        return;
+      } catch (e) {
+        // fallback
       }
     }
 
     // Direct / Fallback Checkout simulation
     setTimeout(() => {
-      if (paymentMethod === "credits") {
-        setCloudCredits((prev) => Math.max(0, prev - finalUSD));
-      }
-      const updatedIds = markGameAsPurchased(checkoutGame.id);
+      const updatedIds = markGameAsPurchased(String(checkoutGame.id));
       setPurchasedIds(updatedIds);
 
-      const generatedKey = generateActivationKey(checkoutGame.title);
+      const generatedKey = generateActivationKey(checkoutGame.name);
       setPurchasedSuccess({ game: checkoutGame, key: generatedKey });
       setCheckoutGame(null);
       setIsProcessing(false);
-      setPromoCode("");
-      setAppliedDiscount(0);
     }, 1200);
   };
 
@@ -168,108 +269,96 @@ export default function StorePage() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono uppercase tracking-wider text-ink px-2 py-0.5 bg-black/5 border border-black/15 rounded">
-              Nimbus Digital Marketplace
+            <span className="text-xs font-mono uppercase tracking-wider text-ink px-2 py-0.5 bg-black/5 border border-black/15 rounded font-semibold">
+              Nimbus Marketplace
             </span>
-            <span className="text-xs font-mono text-emerald-600">● Razorpay Enabled</span>
+            <span className="text-xs font-mono text-emerald-600 font-semibold">● Razorpay Enabled</span>
+            <span className="text-xs font-mono text-orange-600 font-semibold">● Kinguin Store Partner</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-display font-bold text-ink mt-1">
             Cloud Game Store
           </h1>
           <p className="text-muted text-sm font-mono mt-1">
-            Click any title to view game specs & buy via Razorpay for instant cloud sync.
+            Buy digital keys via Razorpay or redirect to Kinguin Marketplace with Client Partner ID.
           </p>
-        </div>
-
-        <div className="flex items-center gap-4 bg-white border border-black/10 p-3.5 rounded-2xl font-mono text-xs shrink-0 shadow-sm">
-          <div className="px-3 border-r border-black/10">
-            <span className="text-muted block text-[10px]">NIMBUS CREDITS</span>
-            <span className="text-emerald-600 font-bold text-sm">
-              ${cloudCredits.toFixed(2)}
-            </span>
-          </div>
-          <button
-            onClick={() => setShowOnlyWishlist(!showOnlyWishlist)}
-            className={`px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
-              showOnlyWishlist
-                ? "bg-ink text-white font-bold border-ink shadow-sm"
-                : "bg-deep text-muted hover:text-ink border-black/10"
-            }`}
-          >
-            ★ Wishlist ({wishlistCount})
-          </button>
         </div>
       </div>
 
       {/* Featured Banner */}
-      <section className="relative rounded-2xl bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border border-black/20 p-8 overflow-hidden shadow-glow">
-        <div className="absolute right-0 top-0 bottom-0 w-full lg:w-1/2 opacity-25 lg:opacity-50 pointer-events-none">
-          <img
-            src={featuredGame.banner}
-            alt={featuredGame.title}
-            className="w-full h-full object-cover mask-gradient"
-          />
-        </div>
-
-        <div className="relative z-10 space-y-4 max-w-xl">
-          <div className="flex items-center gap-3">
-            <span className="bg-red-500 text-white text-[11px] font-mono font-bold px-2.5 py-1 rounded-md uppercase tracking-wider animate-pulse">
-              FLASH SALE -{featuredGame.discount}% OFF
-            </span>
-            <span className="text-xs font-mono text-white/70 flex items-center gap-1">
-              <span>⏱️</span> Razorpay Instant Checkout
-            </span>
+      {featuredGame && (
+        <section className="relative rounded-2xl bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border border-black/20 p-8 overflow-hidden shadow-md">
+          <div className="absolute right-0 top-0 bottom-0 w-full lg:w-1/2 opacity-30 lg:opacity-60 pointer-events-none">
+            <img
+              src={featuredGame.background_image}
+              alt={featuredGame.name}
+              className="w-full h-full object-cover"
+            />
           </div>
 
-          <Link href={`/dashboard/games/${featuredGame.id}`} className="block group">
-            <h2 className="text-2xl sm:text-3xl font-display font-bold text-white leading-tight group-hover:text-white/80 transition-colors">
-              {featuredGame.title}
+          <div className="relative z-10 space-y-4 max-w-xl">
+            <div className="flex items-center gap-3">
+              <span className="bg-emerald-500 text-white text-[11px] font-mono font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">
+                SPOTLIGHT TITLE
+              </span>
+              <span className="text-xs font-mono text-white/80 flex items-center gap-1">
+                <span>⚡</span> Razorpay & Kinguin Integrated
+              </span>
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl font-display font-bold text-white leading-tight">
+              {featuredGame.name}
             </h2>
-          </Link>
 
-          <p className="text-white/60 text-xs font-mono line-clamp-2">
-            {featuredGame.description}
-          </p>
+            <p className="text-white/70 text-xs font-mono line-clamp-2">
+              Explore immersive worlds with RTX ray-tracing pre-configured on Nimbus high-speed GPU nodes.
+            </p>
 
-          <div className="flex items-center gap-4 pt-2">
-            <div className="font-mono">
-              <span className="text-xs text-white/50 line-through mr-2">
-                ${featuredGame.originalPrice?.toFixed(2)}
-              </span>
-              <span className="text-2xl font-bold text-white">
-                ${featuredGame.price.toFixed(2)}
-              </span>
-            </div>
+            <div className="flex items-center gap-4 pt-2">
+              <div className="font-mono">
+                <span className="text-2xl font-bold text-white">
+                  ${(19.99 + (featuredGame.id % 35)).toFixed(2)}
+                </span>
+                <span className="text-xs text-white/60 block">
+                  (₹{Math.round((19.99 + (featuredGame.id % 35)) * 83).toLocaleString()} INR)
+                </span>
+              </div>
 
-            <div className="flex gap-2">
-              <Link
-                href={`/dashboard/games/${featuredGame.id}`}
-                className="px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-mono font-bold text-xs hover:bg-white/20 transition-all"
-              >
-                Inspect Game Page →
-              </Link>
-              <button
-                onClick={() => setCheckoutGame(featuredGame)}
-                className="px-6 py-3 rounded-xl bg-white text-gray-900 font-mono font-bold text-xs shadow-glow hover:opacity-90 transition-all cursor-pointer flex items-center gap-2"
-              >
-                <span>💳</span>
-                <span>BUY NOW</span>
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setPaymentMethod("razorpay");
+                    setCheckoutGame(featuredGame);
+                  }}
+                  className="px-5 py-3.5 rounded-xl bg-white text-gray-900 font-mono font-bold text-xs hover:bg-white/90 transition-all cursor-pointer flex items-center gap-2 shadow-md"
+                >
+                  <span>💳</span>
+                  <span>BUY WITH RAZORPAY</span>
+                </button>
+                <a
+                  href={getKinguinBuyUrl(featuredGame.name)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-3.5 rounded-xl bg-orange-600 text-white font-mono font-bold text-xs hover:bg-orange-700 transition-all cursor-pointer flex items-center gap-2 shadow-md"
+                >
+                  <span>🏷️</span>
+                  <span>BUY ON KINGUIN ↗</span>
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Controls */}
-      <div className="space-y-4">
+      <div className="space-y-4 bg-white p-5 rounded-2xl border border-black/10 shadow-sm">
         <div className="grid md:grid-cols-12 gap-4">
-          <div className="md:col-span-5 relative">
+          <div className="md:col-span-6 relative">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search store by game title, genre, publisher..."
-              className="w-full bg-white border border-black/10 rounded-xl pl-10 pr-4 py-2.5 text-xs font-mono text-ink placeholder:text-muted focus:border-black/40 focus:outline-none transition-colors"
+              placeholder="Search store by game title, genre..."
+              className="w-full bg-deep border border-black/10 rounded-xl pl-10 pr-4 py-2.5 text-xs font-mono text-ink placeholder:text-muted focus:border-black/40 focus:outline-none transition-colors"
             />
             <svg
               className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
@@ -285,200 +374,77 @@ export default function StorePage() {
             <select
               value={selectedGenre}
               onChange={(e) => setSelectedGenre(e.target.value)}
-              className="w-full bg-white border border-black/10 rounded-xl px-4 py-2.5 text-xs font-mono text-ink focus:border-black/40 focus:outline-none cursor-pointer"
+              className="w-full bg-deep border border-black/10 rounded-xl px-4 py-2.5 text-xs font-mono text-ink focus:border-black/40 focus:outline-none cursor-pointer"
             >
               <option value="All">All Genres</option>
-              <option value="Action RPG">Action RPG</option>
-              <option value="Soulslike">Soulslike</option>
-              <option value="Racing">Racing</option>
-              <option value="Sci-Fi">Sci-Fi</option>
-              <option value="Horror">Horror</option>
-              <option value="FPS">FPS / Shooter</option>
+              <option value="Action">Action</option>
+              <option value="RPG">RPG</option>
+              <option value="Adventure">Adventure</option>
               <option value="Strategy">Strategy</option>
+              <option value="Shooter">Shooter</option>
+              <option value="Indie">Indie</option>
             </select>
           </div>
 
-          <div className="md:col-span-4">
+          <div className="md:col-span-3">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="w-full bg-white border border-black/10 rounded-xl px-4 py-2.5 text-xs font-mono text-ink focus:border-black/40 focus:outline-none cursor-pointer"
+              className="w-full bg-deep border border-black/10 rounded-xl px-4 py-2.5 text-xs font-mono text-ink focus:border-black/40 focus:outline-none cursor-pointer"
             >
-              <option value="featured">Sort by: Featured & Popular</option>
-              <option value="discount">Sort by: Highest Discount</option>
-              <option value="price-low">Sort by: Price (Low to High)</option>
-              <option value="price-high">Sort by: Price (High to Low)</option>
-              <option value="rating">Sort by: Top Rating</option>
+              <option value="featured">Featured & Popular</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="rating">Top Rating</option>
             </select>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-black/10">
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-            <span className="text-[11px] font-mono text-muted uppercase mr-1">Platform:</span>
-            {["All", "Steam", "Epic", "Xbox", "GOG"].map((st) => (
-              <button
-                key={st}
-                onClick={() => setSelectedStore(st)}
-                className={`px-3 py-1 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
-                  selectedStore === st
-                    ? "bg-ink text-white border border-ink font-bold"
-                    : "bg-white border border-black/10 text-muted hover:text-ink"
-                }`}
-              >
-                {st}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-4 text-xs font-mono">
-            <label className="flex items-center gap-2 text-muted cursor-pointer hover:text-ink">
-              <input
-                type="checkbox"
-                checked={showOnlyOnSale}
-                onChange={(e) => setShowOnlyOnSale(e.target.checked)}
-                className="rounded border-black/20 bg-white text-ink focus:ring-0"
-              />
-              <span>On Sale Only</span>
-            </label>
           </div>
         </div>
       </div>
 
       {/* Catalog Grid */}
-      {filteredGames.length === 0 ? (
-        <div className="p-12 text-center rounded-2xl bg-surface border border-line space-y-3 font-mono text-xs">
+      {loading ? (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-72 rounded-xl bg-black/5 animate-pulse" />
+          ))}
+        </div>
+      ) : filteredGames.length === 0 ? (
+        <div className="p-12 text-center rounded-2xl bg-white border border-black/10 space-y-3 font-mono text-xs shadow-sm">
           <p className="text-muted">No games found matching your current filter criteria.</p>
           <button
             onClick={() => {
               setSearchQuery("");
               setSelectedGenre("All");
-              setSelectedStore("All");
-              setShowOnlyOnSale(false);
-              setShowOnlyWishlist(false);
             }}
-            className="text-cyan underline cursor-pointer"
+            className="text-ink underline cursor-pointer font-bold"
           >
             Reset Filters
           </button>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredGames.map((game) => {
-            const isOwned = purchasedIds.includes(game.id);
-
-            return (
-              <div
-                key={game.id}
-                className="rounded-2xl bg-white border border-black/10 p-4 flex flex-col justify-between hover:border-black/30 hover:shadow-md transition-all duration-300 group space-y-4"
-              >
-                {/* Game Cover Image -> Links to Individual Page */}
-                <Link href={`/dashboard/games/${game.id}`} className="w-full h-48 rounded-xl overflow-hidden relative bg-void block">
-                  <img
-                    src={game.banner}
-                    alt={game.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-
-                  <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/60 text-white border border-white/10 backdrop-blur-md">
-                      {game.store}
-                    </span>
-                    {game.discount && game.discount > 0 ? (
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-red-500 text-white">
-                        -{game.discount}%
-                      </span>
-                    ) : null}
-                  </div>
-
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleWishlist(game.id);
-                    }}
-                    className={`absolute top-2.5 right-2.5 p-2 rounded-full backdrop-blur-md transition-all cursor-pointer ${
-                      game.inWishlist
-                        ? "bg-ink text-white shadow-sm"
-                        : "bg-black/60 text-white/70 hover:text-white border border-white/10"
-                    }`}
-                  >
-                    ★
-                  </button>
-                </Link>
-
-                {/* Metadata */}
-                <div className="space-y-2 flex-1">
-                  <div className="flex justify-between items-start">
-                    <span className="text-[11px] font-mono text-muted">{game.genre}</span>
-                    <span className="text-[11px] font-mono text-amber-400">★ {game.rating}</span>
-                  </div>
-
-                  <Link href={`/dashboard/games/${game.id}`}>
-                    <h3 className="font-display font-bold text-ink text-base line-clamp-1 group-hover:text-cyan transition-colors">
-                      {game.title}
-                    </h3>
-                  </Link>
-
-                  <p className="text-xs text-muted font-mono line-clamp-2">
-                    {game.description}
-                  </p>
-
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-deep border border-black/10 text-muted">
-                      {game.resolution}
-                    </span>
-                    {game.rtx && (
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/5 border border-black/20 text-ink">
-                        RTX READY
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Price & Actions */}
-                <div className="pt-3 border-t border-line/60 flex items-center justify-between gap-3 font-mono">
-                  <div>
-                    {game.originalPrice && game.discount ? (
-                      <div className="text-[10px] text-muted line-through">
-                        ${game.originalPrice.toFixed(2)}
-                      </div>
-                    ) : null}
-                    <div className="text-lg font-bold text-ink">
-                      ${game.price.toFixed(2)}
-                    </div>
-                  </div>
-
-                  {isOwned ? (
-                    <Link
-                      href={`/dashboard/games/${game.id}`}
-                      className="px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center gap-1.5"
-                    >
-                      <span>✓ IN LIBRARY</span>
-                    </Link>
-                  ) : (
-                    <button
-                      onClick={() => setCheckoutGame(game)}
-                      className="px-4 py-2 rounded-xl bg-ink text-white hover:bg-black/80 text-xs font-bold transition-all cursor-pointer"
-                    >
-                      BUY NOW
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+          {filteredGames.map((game) => (
+            <StoreGameCard
+              key={game.id}
+              game={game}
+              isOwned={purchasedIds.includes(String(game.id))}
+              onCheckout={(g) => {
+                setPaymentMethod("razorpay");
+                setCheckoutGame(g);
+              }}
+            />
+          ))}
         </div>
       )}
 
       {/* Checkout Modal */}
       {checkoutGame && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-black/10 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-xl relative">
+          <div className="bg-white border border-black/10 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-xl relative font-mono">
             <div className="flex items-center justify-between border-b border-black/10 pb-4">
               <div>
-                <span className="text-[10px] font-mono text-muted uppercase tracking-wider">Razorpay Checkout</span>
-                <h3 className="text-xl font-display font-bold text-ink">{checkoutGame.title}</h3>
+                <span className="text-[10px] text-muted uppercase tracking-wider">Purchase Options</span>
+                <h3 className="text-xl font-display font-bold text-ink">{checkoutGame.name}</h3>
               </div>
               <button
                 onClick={() => setCheckoutGame(null)}
@@ -489,72 +455,47 @@ export default function StorePage() {
             </div>
 
             <div className="p-3 rounded-xl bg-deep border border-black/10 flex items-center gap-4">
-              <img src={checkoutGame.banner} alt={checkoutGame.title} className="w-16 h-16 rounded-lg object-cover" />
-              <div className="min-w-0 flex-1 font-mono text-xs space-y-1">
-                <div className="text-ink font-bold truncate">{checkoutGame.title}</div>
-                <div className="text-muted text-[11px]">{checkoutGame.store} Digital Key • Cloud Ready</div>
+              <img src={checkoutGame.background_image} alt={checkoutGame.name} className="w-16 h-16 rounded-lg object-cover" />
+              <div className="min-w-0 flex-1 text-xs space-y-1">
+                <div className="text-ink font-bold truncate">{checkoutGame.name}</div>
+                <div className="text-muted text-[11px]">Digital License • Instant Cloud Sync</div>
               </div>
             </div>
 
+            {/* Select Checkout Method */}
             <div className="space-y-2">
-              <label className="text-xs font-mono text-muted uppercase block">Select Payment Method</label>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { id: "razorpay", label: "💳 Razorpay Gateway" },
-                  { id: "credits", label: `Nimbus Credits ($${cloudCredits.toFixed(2)})` },
-                  { id: "card", label: "Credit / Debit Card" },
-                  { id: "paypal", label: "PayPal Express" },
-                ].map((pm) => (
-                  <button
-                    key={pm.id}
-                    type="button"
-                    onClick={() => setPaymentMethod(pm.id as any)}
-                    className={`p-2.5 rounded-xl border text-xs font-mono text-left transition-all cursor-pointer ${
-                      paymentMethod === pm.id
-                        ? "bg-ink text-white border-ink font-bold"
-                        : "bg-deep border-black/10 text-muted hover:text-ink hover:border-black/30"
-                    }`}
-                  >
-                    {pm.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2 font-mono text-xs">
-              <label className="text-muted uppercase block text-[10px]">Promo Code</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value)}
-                  placeholder="Try 'NIMBUS20'"
-                  className="flex-1 bg-deep border border-black/10 rounded-lg px-3 py-2 text-ink placeholder:text-muted focus:border-black/40 focus:outline-none"
-                />
+              <label className="text-xs uppercase text-muted block">Select Payment Gateway</label>
+              <div className="grid grid-cols-2 gap-3">
                 <button
-                  onClick={handleApplyPromo}
-                  className="px-4 py-2 bg-white border border-black/20 text-ink hover:bg-deep rounded-lg text-xs font-bold cursor-pointer"
+                  type="button"
+                  onClick={() => setPaymentMethod("razorpay")}
+                  className={`p-3 rounded-xl border text-xs text-left transition-all cursor-pointer ${
+                    paymentMethod === "razorpay"
+                      ? "bg-ink text-white border-ink font-bold"
+                      : "bg-deep border-black/10 text-muted hover:text-ink"
+                  }`}
                 >
-                  Apply
+                  💳 Razorpay Gateway
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("kinguin")}
+                  className={`p-3 rounded-xl border text-xs text-left transition-all cursor-pointer ${
+                    paymentMethod === "kinguin"
+                      ? "bg-orange-600 text-white border-orange-600 font-bold"
+                      : "bg-deep border-black/10 text-muted hover:text-ink"
+                  }`}
+                >
+                  🏷️ Kinguin Marketplace ↗
                 </button>
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-deep border border-black/10 space-y-2 font-mono text-xs">
-              <div className="flex justify-between text-muted">
-                <span>Game Price:</span>
-                <span>${checkoutGame.price.toFixed(2)}</span>
-              </div>
-              {appliedDiscount > 0 && (
-                <div className="flex justify-between text-emerald-600">
-                  <span>Discount (20%):</span>
-                  <span>-${(checkoutGame.price * appliedDiscount).toFixed(2)}</span>
-                </div>
-              )}
-              <div className="flex justify-between text-ink font-bold text-sm pt-2 border-t border-black/10">
-                <span>Total Amount:</span>
+            <div className="p-4 rounded-xl bg-deep border border-black/10 space-y-2 text-xs">
+              <div className="flex justify-between text-ink font-bold text-sm">
+                <span>Total Price:</span>
                 <span>
-                  ${(checkoutGame.price * (1 - appliedDiscount)).toFixed(2)} (₹{Math.round(checkoutGame.price * (1 - appliedDiscount) * 83).toLocaleString()} INR)
+                  ${(19.99 + (checkoutGame.id % 35)).toFixed(2)} (₹{Math.round((19.99 + (checkoutGame.id % 35)) * 83).toLocaleString()} INR)
                 </span>
               </div>
             </div>
@@ -562,15 +503,21 @@ export default function StorePage() {
             <button
               disabled={isProcessing}
               onClick={handleCompletePurchase}
-              className="w-full py-3.5 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+              className={`w-full py-3.5 rounded-xl text-white font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm ${
+                paymentMethod === "kinguin"
+                  ? "bg-orange-600 hover:bg-orange-700"
+                  : "bg-ink hover:bg-black/80"
+              }`}
             >
               {isProcessing ? (
                 <>
                   <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>LAUNCHING PAYMENT GATEWAY...</span>
+                  <span>PROCESSING...</span>
                 </>
+              ) : paymentMethod === "kinguin" ? (
+                <span>REDIRECT TO KINGUIN.NET ↗</span>
               ) : (
-                <span>PAY WITH {paymentMethod.toUpperCase()}</span>
+                <span>PAY WITH RAZORPAY</span>
               )}
             </button>
           </div>
@@ -580,39 +527,39 @@ export default function StorePage() {
       {/* Success Modal */}
       {purchasedSuccess && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-emerald-200 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-xl text-center">
+          <div className="bg-white border border-emerald-200 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-xl text-center font-mono">
             <div className="w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-400 flex items-center justify-center mx-auto text-2xl text-emerald-500">
               ✓
             </div>
 
             <div className="space-y-2">
-              <span className="text-xs font-mono uppercase text-emerald-600">Razorpay Payment Verified</span>
+              <span className="text-xs uppercase text-emerald-600">Payment Verified</span>
               <h3 className="text-2xl font-display font-bold text-ink">
-                {purchasedSuccess.game.title}
+                {purchasedSuccess.game.name}
               </h3>
-              <p className="text-xs font-mono text-muted">
-                Game added to your Cloud Library. Pre-installed and synced to your Cloud PC.
+              <p className="text-xs text-muted">
+                Game added to your Cloud Library. Pre-installed and ready to stream.
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-deep border border-black/10 space-y-2">
-              <span className="text-[10px] font-mono text-muted uppercase block">Digital Key Code</span>
-              <div className="font-mono font-bold text-ink text-lg tracking-widest">
+              <span className="text-[10px] text-muted uppercase block">Digital License Key</span>
+              <div className="font-bold text-ink text-lg tracking-widest">
                 {purchasedSuccess.key}
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Link
-                href={`/dashboard/games/${purchasedSuccess.game.id}`}
+                href="/dashboard/library"
                 onClick={() => setPurchasedSuccess(null)}
-                className="flex-1 py-3 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all text-center"
+                className="flex-1 py-3 rounded-xl bg-ink text-white font-bold text-xs hover:bg-black/80 transition-all text-center"
               >
-                🖥️ VIEW GAME PAGE & LAUNCH
+                🖥️ GO TO LIBRARY & STREAM
               </Link>
               <button
                 onClick={() => setPurchasedSuccess(null)}
-                className="px-6 py-3 rounded-xl bg-white border border-black/15 text-muted hover:text-ink font-mono text-xs cursor-pointer"
+                className="px-6 py-3 rounded-xl bg-white border border-black/15 text-muted hover:text-ink text-xs cursor-pointer"
               >
                 Continue Browsing
               </button>
