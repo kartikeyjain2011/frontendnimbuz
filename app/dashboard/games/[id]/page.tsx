@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import Script from "next/script";
 import { useState, useEffect } from "react";
 import { getGameById, isGamePurchased, markGameAsPurchased, generateActivationKey } from "@/lib/gamesData";
-import { fetchGameDetails, fetchGameScreenshots, type RawgGameScreenshot } from "@/lib/rawg";
+import { fetchGameDetails, fetchGameScreenshots, type RawgScreenshot } from "@/lib/rawg";
 import { getKinguinBuyUrl } from "@/lib/kinguin";
 
 declare global {

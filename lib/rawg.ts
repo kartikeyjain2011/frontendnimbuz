@@ -9,6 +9,8 @@ export interface RawgScreenshot {
   image: string;
 }
 
+export type RawgGameScreenshot = RawgScreenshot;
+
 export interface RawgGameDetail {
   id: number;
   slug: string;
