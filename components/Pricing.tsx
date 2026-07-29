@@ -3,6 +3,8 @@
 
 import Script from "next/script";
 import { useState } from "react";
+import { syncSubscriptionToAdmin, syncBillingToAdmin } from "@/lib/adminSync";
+
 
 declare global {
   interface Window {
@@ -213,11 +215,43 @@ export default function Pricing() {
       image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=200&q=80",
       handler: function (response: any) {
         setLoading(null);
+        const pid = response.razorpay_payment_id;
+        const planTitle = `${plan.name} (${plan.subtitle})`;
+
+        syncSubscriptionToAdmin({
+          userId: "landing_user",
+          userEmail: "gamer@nimbus.cloud",
+          userName: "NIMBUS Gamer",
+          planId: plan.id,
+          planName: planTitle,
+          billingCycle: cycle,
+          price: totalINR,
+          currency: "INR",
+          paymentId: pid,
+          status: "active",
+          startDate: new Date().toISOString(),
+        });
+
+        syncBillingToAdmin({
+          paymentId: pid,
+          userId: "landing_user",
+          userEmail: "gamer@nimbus.cloud",
+          userName: "NIMBUS Gamer",
+          amount: totalINR,
+          currency: "INR",
+          itemType: "subscription",
+          itemTitle: planTitle,
+          paymentMethod: "Razorpay",
+          status: "success",
+          timestamp: new Date().toISOString(),
+        });
+
         alert(
-          `✅ Payment Successful!\nPayment ID: ${response.razorpay_payment_id}\n\nWelcome to ${plan.name}! Redirecting to your dashboard…`
+          `✅ Payment Successful!\nPayment ID: ${pid}\n\nWelcome to ${plan.name}! Redirecting to your dashboard…`
         );
         window.location.href = "/dashboard";
       },
+
       prefill: { name: "NIMBUS Gamer", email: "gamer@nimbus.cloud", contact: "9876543210" },
       notes: { plan_id: plan.id, billing_cycle: cycle, months: activeCycle.months },
       theme: { color: "#111111" },

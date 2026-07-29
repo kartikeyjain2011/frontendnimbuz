@@ -11,6 +11,8 @@ import {
   getPurchasedGameIds,
   markGameAsPurchased,
 } from "@/lib/gamesData";
+import { syncGamePurchaseToAdmin, syncBillingToAdmin } from "@/lib/adminSync";
+
 
 declare global {
   interface Window {
@@ -222,6 +224,38 @@ export default function StorePage() {
         setPurchasedSuccess({ game: checkoutGame, key: generatedKey });
         setCheckoutGame(null);
         setIsProcessing(false);
+
+        // Sync game purchase & transaction to Admin Console
+        const userEmail = user?.primaryEmailAddress?.emailAddress || "gamer@nimbus.cloud";
+        const userId = user?.id || "guest_user";
+        const pid = response.razorpay_payment_id || `pay_game_${Date.now()}`;
+
+        syncGamePurchaseToAdmin({
+          userId,
+          userEmail,
+          gameId: String(checkoutGame.id),
+          gameTitle: checkoutGame.name,
+          store: checkoutGame.parent_platforms?.[0]?.platform?.name || "PC",
+          priceUSD,
+          priceINR: priceInINR,
+          activationKey: generatedKey,
+          purchaseDate: new Date().toISOString(),
+          paymentId: pid,
+        });
+
+        syncBillingToAdmin({
+          paymentId: pid,
+          userId,
+          userEmail,
+          userName: user?.fullName || "NIMBUS Gamer",
+          amount: priceInINR,
+          currency: "INR",
+          itemType: "game_purchase",
+          itemTitle: checkoutGame.name,
+          paymentMethod: "Razorpay",
+          status: "success",
+          timestamp: new Date().toISOString(),
+        });
       },
       prefill: {
         name: user?.fullName || user?.firstName || "NIMBUS Gamer",
@@ -255,8 +289,40 @@ export default function StorePage() {
       setPurchasedSuccess({ game: checkoutGame, key: generatedKey });
       setCheckoutGame(null);
       setIsProcessing(false);
+
+      const userEmail = user?.primaryEmailAddress?.emailAddress || "gamer@nimbus.cloud";
+      const userId = user?.id || "guest_user";
+      const pid = `pay_game_fallback_${Date.now()}`;
+
+      syncGamePurchaseToAdmin({
+        userId,
+        userEmail,
+        gameId: String(checkoutGame.id),
+        gameTitle: checkoutGame.name,
+        store: checkoutGame.parent_platforms?.[0]?.platform?.name || "PC",
+        priceUSD,
+        priceINR: priceInINR,
+        activationKey: generatedKey,
+        purchaseDate: new Date().toISOString(),
+        paymentId: pid,
+      });
+
+      syncBillingToAdmin({
+        paymentId: pid,
+        userId,
+        userEmail,
+        userName: user?.fullName || "NIMBUS Gamer",
+        amount: priceInINR,
+        currency: "INR",
+        itemType: "game_purchase",
+        itemTitle: checkoutGame.name,
+        paymentMethod: "Razorpay",
+        status: "success",
+        timestamp: new Date().toISOString(),
+      });
     }, 1200);
   };
+
 
   return (
     <div className="space-y-10 pb-12">

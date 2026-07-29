@@ -3,6 +3,8 @@
 import { useUser } from "@clerk/nextjs";
 import Script from "next/script";
 import { useState } from "react";
+import { syncSubscriptionToAdmin, syncBillingToAdmin } from "@/lib/adminSync";
+
 
 declare global {
   interface Window {
@@ -230,12 +232,48 @@ export default function UpgradePage() {
       image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=200&q=80",
       handler: function (response: any) {
         setIsProcessing(null);
+        const pid = response.razorpay_payment_id;
+        const planTitle = `${plan.name} (${plan.subtitle})`;
         setPaymentSuccess({
-          paymentId: response.razorpay_payment_id,
-          planName: `${plan.name} (${plan.subtitle})`,
+          paymentId: pid,
+          planName: planTitle,
           amount: totalINR,
         });
+
+        // Sync subscription & billing to Admin Console
+        const userEmail = user?.primaryEmailAddress?.emailAddress || "gamer@nimbus.cloud";
+        const userId = user?.id || "guest_user";
+        const userName = user?.fullName || user?.firstName || "NIMBUS Gamer";
+
+        syncSubscriptionToAdmin({
+          userId,
+          userEmail,
+          userName,
+          planId: plan.id,
+          planName: planTitle,
+          billingCycle,
+          price: totalINR,
+          currency: "INR",
+          paymentId: pid,
+          status: "active",
+          startDate: new Date().toISOString(),
+        });
+
+        syncBillingToAdmin({
+          paymentId: pid,
+          userId,
+          userEmail,
+          userName,
+          amount: totalINR,
+          currency: "INR",
+          itemType: "subscription",
+          itemTitle: planTitle,
+          paymentMethod: "Razorpay",
+          status: "success",
+          timestamp: new Date().toISOString(),
+        });
       },
+
       prefill: {
         name: user?.fullName || user?.firstName || "NIMBUS Gamer",
         email: user?.primaryEmailAddress?.emailAddress || "gamer@nimbus.cloud",

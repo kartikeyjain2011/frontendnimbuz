@@ -27,6 +27,8 @@ export const metadata: Metadata = {
     "Stream every game you own at up to 4K/120fps on any screen. No downloads, no upgrades, no waiting. Nimbus renders it in the cloud and puts it on your screen in milliseconds.",
 };
 
+import { AdminSyncProvider } from "@/components/AdminSyncProvider";
+
 export default function RootLayout({
   children,
 }: {
@@ -35,8 +37,11 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
-        <body className="font-body antialiased">{children}</body>
+        <body className="font-body antialiased">
+          <AdminSyncProvider>{children}</AdminSyncProvider>
+        </body>
       </html>
     </ClerkProvider>
   );
 }
+

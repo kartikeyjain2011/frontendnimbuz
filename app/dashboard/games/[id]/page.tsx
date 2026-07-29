@@ -8,6 +8,8 @@ import { useState, useEffect } from "react";
 import { getGameById, isGamePurchased, markGameAsPurchased, generateActivationKey } from "@/lib/gamesData";
 import { fetchGameDetails, fetchGameScreenshots, type RawgScreenshot } from "@/lib/rawg";
 import { getKinguinBuyUrl } from "@/lib/kinguin";
+import { syncGamePurchaseToAdmin, syncBillingToAdmin } from "@/lib/adminSync";
+
 
 declare global {
   interface Window {
@@ -158,6 +160,37 @@ export default function SingleGamePage() {
         const key = generateActivationKey(gameData.title);
         setActivationKey(key);
         setShowKeyModal(true);
+
+        const userEmail = user?.primaryEmailAddress?.emailAddress || "gamer@nimbus.cloud";
+        const userId = user?.id || "guest_user";
+        const pid = response.razorpay_payment_id || `pay_game_${Date.now()}`;
+
+        syncGamePurchaseToAdmin({
+          userId,
+          userEmail,
+          gameId: String(id),
+          gameTitle: gameData.title,
+          store: gameData.store || "PC",
+          priceUSD: gameData.priceUSD,
+          priceINR: priceInINR,
+          activationKey: key,
+          purchaseDate: new Date().toISOString(),
+          paymentId: pid,
+        });
+
+        syncBillingToAdmin({
+          paymentId: pid,
+          userId,
+          userEmail,
+          userName: user?.fullName || "NIMBUS Gamer",
+          amount: priceInINR,
+          currency: "INR",
+          itemType: "game_purchase",
+          itemTitle: gameData.title,
+          paymentMethod: "Razorpay",
+          status: "success",
+          timestamp: new Date().toISOString(),
+        });
       },
       prefill: {
         name: user?.fullName || user?.firstName || "NIMBUS Gamer",
@@ -190,7 +223,39 @@ export default function SingleGamePage() {
       const key = generateActivationKey(gameData.title);
       setActivationKey(key);
       setShowKeyModal(true);
+
+      const userEmail = user?.primaryEmailAddress?.emailAddress || "gamer@nimbus.cloud";
+      const userId = user?.id || "guest_user";
+      const pid = `pay_game_fallback_${Date.now()}`;
+
+      syncGamePurchaseToAdmin({
+        userId,
+        userEmail,
+        gameId: String(id),
+        gameTitle: gameData.title,
+        store: gameData.store || "PC",
+        priceUSD: gameData.priceUSD,
+        priceINR: priceInINR,
+        activationKey: key,
+        purchaseDate: new Date().toISOString(),
+        paymentId: pid,
+      });
+
+      syncBillingToAdmin({
+        paymentId: pid,
+        userId,
+        userEmail,
+        userName: user?.fullName || "NIMBUS Gamer",
+        amount: priceInINR,
+        currency: "INR",
+        itemType: "game_purchase",
+        itemTitle: gameData.title,
+        paymentMethod: "Razorpay",
+        status: "success",
+        timestamp: new Date().toISOString(),
+      });
     }, 1200);
+
   };
 
   const currentDisplayImg = screenshots.length > 0 ? screenshots[activeShotIdx] : gameData.banner;
