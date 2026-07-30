@@ -2,16 +2,20 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { fetchTrendingGames, type RawgGame } from "@/lib/rawg";
+import { type RawgGame } from "@/lib/rawg";
+import GameStreamPlayer from "@/components/GameStreamPlayer";
+import { fetchAvailableBackendGames } from "@/lib/backendApi";
 
 function MyGameCard({
   game,
   isFavorite,
   onToggleFavorite,
+  onLaunchStream,
 }: {
   game: RawgGame;
   isFavorite: boolean;
   onToggleFavorite: (id: number) => void;
+  onLaunchStream: (game: RawgGame) => void;
 }) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const screenshots = game.short_screenshots?.map((s) => s.image) || [];
@@ -30,7 +34,7 @@ function MyGameCard({
   return (
     <div className="rounded-2xl bg-white border border-black/10 p-5 flex flex-col sm:flex-row gap-5 hover:border-black/30 hover:shadow-md transition-all duration-300">
       {/* Thumbnail with Autoplay Preview & Link to Individual Page */}
-      <Link href={`/dashboard/games/${game.id}`} className="w-full sm:w-44 h-40 rounded-xl overflow-hidden relative bg-black shrink-0 group block">
+      <Link href={`/dashboard/games/${game.slug || game.id}`} className="w-full sm:w-44 h-40 rounded-xl overflow-hidden relative bg-black shrink-0 group block">
         <img
           src={screenshots[currentIdx] || game.background_image}
           alt={game.name}
@@ -55,7 +59,7 @@ function MyGameCard({
 
         <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-white text-[10px] font-mono font-semibold">STREAM PREVIEW</span>
+          <span className="text-white text-[10px] font-mono font-semibold">CLOUD HOSTED</span>
         </div>
       </Link>
 
@@ -65,10 +69,10 @@ function MyGameCard({
           <div className="flex justify-between items-start gap-2">
             <span className="text-[11px] font-mono text-muted">{genreName}</span>
             <span className="text-[11px] font-mono text-emerald-600 font-semibold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Cloud Synced
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Backend Synced
             </span>
           </div>
-          <Link href={`/dashboard/games/${game.id}`}>
+          <Link href={`/dashboard/games/${game.slug || game.id}`}>
             <h3 className="font-display font-bold text-ink text-lg line-clamp-1 hover:text-emerald-600 transition-colors">
               {game.name}
             </h3>
@@ -94,17 +98,17 @@ function MyGameCard({
         {/* Actions */}
         <div className="flex gap-2">
           <Link
-            href={`/dashboard/games/${game.id}`}
+            href={`/dashboard/games/${game.slug || game.id}`}
             className="flex-1 py-2 rounded-xl text-xs font-mono font-bold text-center bg-deep border border-black/10 text-ink hover:bg-black/5 transition-all block"
           >
             Game Details
           </Link>
-          <Link
-            href="/dashboard/cloud-pc"
-            className="flex-1 py-2 rounded-xl text-xs font-mono font-bold text-center bg-ink text-white hover:bg-black/80 shadow-sm transition-all block"
+          <button
+            onClick={() => onLaunchStream(game)}
+            className="flex-1 py-2 rounded-xl text-xs font-mono font-bold text-center bg-ink text-white hover:bg-black/80 shadow-sm transition-all cursor-pointer"
           >
-            🖥️ LAUNCH PC
-          </Link>
+            ⚡ LAUNCH STREAM
+          </button>
         </div>
       </div>
     </div>
@@ -116,10 +120,11 @@ export default function MyGamesPage() {
   const [games, setGames] = useState<RawgGame[]>([]);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<number[]>([]);
+  const [activeGameStream, setActiveGameStream] = useState<RawgGame | null>(null);
 
   useEffect(() => {
-    fetchTrendingGames(12)
-      .then((res) => {
+    fetchAvailableBackendGames()
+      .then((res: any) => {
         setGames(res);
         if (res.length > 1) {
           setFavorites([res[0].id, res[1].id]);
@@ -214,9 +219,21 @@ export default function MyGamesPage() {
               game={game}
               isFavorite={favorites.includes(game.id)}
               onToggleFavorite={toggleFavorite}
+              onLaunchStream={(g) => setActiveGameStream(g)}
             />
           ))}
         </div>
+      )}
+
+      {/* Live WebRTC Cloud Stream Player Modal */}
+      {activeGameStream && (
+        <GameStreamPlayer
+          gameId={String(activeGameStream.id)}
+          gameTitle={activeGameStream.name}
+          bannerUrl={activeGameStream.background_image}
+          resolution="1440p"
+          onClose={() => setActiveGameStream(null)}
+        />
       )}
     </div>
   );

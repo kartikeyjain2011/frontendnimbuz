@@ -9,7 +9,7 @@ import { getGameById, isGamePurchased, markGameAsPurchased, generateActivationKe
 import { fetchGameDetails, fetchGameScreenshots, type RawgScreenshot } from "@/lib/rawg";
 import { getKinguinBuyUrl } from "@/lib/kinguin";
 import { syncGamePurchaseToAdmin, syncBillingToAdmin } from "@/lib/adminSync";
-
+import GameStreamPlayer from "@/components/GameStreamPlayer";
 
 declare global {
   interface Window {
@@ -24,6 +24,7 @@ export default function SingleGamePage() {
   const [isOwned, setIsOwned] = useState(false);
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [activationKey, setActivationKey] = useState("");
+  const [activeStream, setActiveStream] = useState(false);
   
   // Game details state
   const [gameData, setGameData] = useState<{
@@ -364,12 +365,12 @@ export default function SingleGamePage() {
           <div className="space-y-3 pt-4 border-t border-black/10 font-mono">
             {isOwned ? (
               <div className="space-y-2">
-                <Link
-                  href="/dashboard/cloud-pc"
-                  className="w-full py-4 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all flex items-center justify-center gap-2 shadow-sm"
+                <button
+                  onClick={() => setActiveStream(true)}
+                  className="w-full py-4 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
                 >
-                  <span>🖥️ LAUNCH ON CLOUD PC NOW</span>
-                </Link>
+                  <span>⚡ STREAM {gameData.title.toUpperCase()} NOW</span>
+                </button>
                 <Link
                   href="/dashboard/my-games"
                   className="w-full py-2.5 rounded-xl text-xs font-mono text-center block bg-deep border border-black/10 text-muted hover:text-ink transition-colors font-semibold"
@@ -496,12 +497,15 @@ export default function SingleGamePage() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2 font-mono">
-              <Link
-                href="/dashboard/cloud-pc"
-                className="flex-1 py-3 rounded-xl bg-ink text-white font-bold text-xs hover:bg-black/80 transition-all text-center"
+              <button
+                onClick={() => {
+                  setShowKeyModal(false);
+                  setActiveStream(true);
+                }}
+                className="flex-1 py-3 rounded-xl bg-ink text-white font-bold text-xs hover:bg-black/80 transition-all text-center cursor-pointer"
               >
-                🖥️ LAUNCH ON CLOUD PC
-              </Link>
+                ⚡ STREAM ON CLOUD NOW
+              </button>
               <button
                 onClick={() => setShowKeyModal(false)}
                 className="px-6 py-3 rounded-xl bg-white border border-black/15 text-muted hover:text-ink text-xs cursor-pointer font-semibold"
@@ -511,6 +515,17 @@ export default function SingleGamePage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Live WebRTC Cloud Stream Player Modal */}
+      {activeStream && gameData && (
+        <GameStreamPlayer
+          gameId={String(id)}
+          gameTitle={gameData.title}
+          bannerUrl={gameData.banner}
+          resolution="1440p"
+          onClose={() => setActiveStream(false)}
+        />
       )}
     </div>
   );

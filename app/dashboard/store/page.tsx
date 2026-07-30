@@ -12,7 +12,7 @@ import {
   markGameAsPurchased,
 } from "@/lib/gamesData";
 import { syncGamePurchaseToAdmin, syncBillingToAdmin } from "@/lib/adminSync";
-
+import GameStreamPlayer from "@/components/GameStreamPlayer";
 
 declare global {
   interface Window {
@@ -24,10 +24,12 @@ function StoreGameCard({
   game,
   isOwned,
   onCheckout,
+  onLaunchStream,
 }: {
   game: RawgGame;
   isOwned: boolean;
   onCheckout: (game: RawgGame) => void;
+  onLaunchStream?: (game: RawgGame) => void;
 }) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const screenshots = game.short_screenshots?.map((s) => s.image) || [];
@@ -114,9 +116,12 @@ function StoreGameCard({
         </div>
 
         {isOwned ? (
-          <span className="w-full py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center justify-center gap-1">
-            ✓ IN LIBRARY
-          </span>
+          <button
+            onClick={() => onLaunchStream && onLaunchStream(game)}
+            className="w-full py-2.5 rounded-xl bg-ink text-white hover:bg-black/80 text-xs font-bold transition-all cursor-pointer shadow-sm flex items-center justify-center gap-1.5"
+          >
+            <span>⚡</span> STREAM NOW
+          </button>
         ) : (
           <div className="grid grid-cols-2 gap-2 font-mono">
             <button
@@ -159,6 +164,7 @@ export default function StorePage() {
     game: RawgGame;
     key: string;
   } | null>(null);
+  const [activeGameStream, setActiveGameStream] = useState<RawgGame | null>(null);
 
   useEffect(() => {
     setPurchasedIds(getPurchasedGameIds());
@@ -498,6 +504,7 @@ export default function StorePage() {
                 setPaymentMethod("razorpay");
                 setCheckoutGame(g);
               }}
+              onLaunchStream={(g) => setActiveGameStream(g)}
             />
           ))}
         </div>
@@ -616,13 +623,16 @@ export default function StorePage() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <Link
-                href="/dashboard/library"
-                onClick={() => setPurchasedSuccess(null)}
-                className="flex-1 py-3 rounded-xl bg-ink text-white font-bold text-xs hover:bg-black/80 transition-all text-center"
+              <button
+                onClick={() => {
+                  const g = purchasedSuccess.game;
+                  setPurchasedSuccess(null);
+                  setActiveGameStream(g);
+                }}
+                className="flex-1 py-3 rounded-xl bg-ink text-white font-bold text-xs hover:bg-black/80 transition-all text-center cursor-pointer"
               >
-                🖥️ GO TO LIBRARY & STREAM
-              </Link>
+                ⚡ STREAM ON CLOUD NOW
+              </button>
               <button
                 onClick={() => setPurchasedSuccess(null)}
                 className="px-6 py-3 rounded-xl bg-white border border-black/15 text-muted hover:text-ink text-xs cursor-pointer"
@@ -632,6 +642,17 @@ export default function StorePage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Live WebRTC Cloud Stream Player Modal */}
+      {activeGameStream && (
+        <GameStreamPlayer
+          gameId={String(activeGameStream.id)}
+          gameTitle={activeGameStream.name}
+          bannerUrl={activeGameStream.background_image}
+          resolution="1440p"
+          onClose={() => setActiveGameStream(null)}
+        />
       )}
     </div>
   );

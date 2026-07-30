@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser, useClerk } from "@clerk/nextjs";
-import { fetchTrendingGames, type RawgGame } from "@/lib/rawg";
+import { type RawgGame } from "@/lib/rawg";
+import { fetchAvailableBackendGames } from "@/lib/backendApi";
 
 // ── Auto-cycling preview image hook ───────────────────────────
 function useAutoImageCycle(images: string[], intervalMs = 2000) {
@@ -32,14 +33,14 @@ function GameCard({ game }: { game: RawgGame }) {
 
   const handleCardClick = () => {
     if (isSignedIn) {
-      router.push(`/dashboard/games/${game.id}`);
+      router.push(`/dashboard/games/${game.slug || game.id}`);
     } else {
       if (openSignIn) {
         openSignIn({
-          forceRedirectUrl: `/dashboard/games/${game.id}`,
+          forceRedirectUrl: `/dashboard/games/${game.slug || game.id}`,
         });
       } else {
-        router.push(`/sign-in?redirectUrl=/dashboard/games/${game.id}`);
+        router.push(`/sign-in?redirectUrl=/dashboard/games/${game.slug || game.id}`);
       }
     }
   };
@@ -74,7 +75,7 @@ function GameCard({ game }: { game: RawgGame }) {
         {/* Autoplay Live Indicator */}
         <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded-md">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-white text-[10px] font-mono font-semibold">STREAM PREVIEW</span>
+          <span className="text-white text-[10px] font-mono font-semibold">CLOUD HOSTED</span>
         </div>
       </div>
 
@@ -108,8 +109,8 @@ export default function GameLibrary() {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    fetchTrendingGames(12)
-      .then((data) => {
+    fetchAvailableBackendGames()
+      .then((data: any) => {
         setGames(data);
         setLoading(false);
       })

@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
-import { fetchTrendingGames, type RawgGame } from "@/lib/rawg";
+import { type RawgGame } from "@/lib/rawg";
+import GameStreamPlayer from "@/components/GameStreamPlayer";
+import { fetchAvailableBackendGames } from "@/lib/backendApi";
 
 const nodes = [
   { region: "US-East (N. Virginia)", ping: "4ms", load: "14%", status: "Optimal" },
@@ -11,7 +13,13 @@ const nodes = [
   { region: "AP-East (Tokyo)", ping: "18ms", load: "35%", status: "Good" },
 ];
 
-function OverviewGameCard({ game }: { game: RawgGame }) {
+function OverviewGameCard({
+  game,
+  onLaunchStream,
+}: {
+  game: RawgGame;
+  onLaunchStream: (game: RawgGame) => void;
+}) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const screenshots = game.short_screenshots?.map((s) => s.image) || [];
 
@@ -53,12 +61,12 @@ function OverviewGameCard({ game }: { game: RawgGame }) {
 
         <div className="pt-2 border-t border-black/10 flex items-center justify-between font-mono text-xs">
           <span className="text-muted">Metacritic: {game.metacritic || "N/A"}</span>
-          <Link
-            href="/dashboard/upgrade"
-            className="px-3 py-1.5 rounded-lg bg-ink text-white font-bold text-[11px] hover:bg-black/80 transition-colors"
+          <button
+            onClick={() => onLaunchStream(game)}
+            className="px-3.5 py-1.5 rounded-lg bg-ink text-white font-bold text-[11px] hover:bg-black/80 transition-colors cursor-pointer"
           >
             ⚡ PLAY NOW
-          </Link>
+          </button>
         </div>
       </div>
     </div>
@@ -69,11 +77,12 @@ export default function OverviewPage() {
   const { user, isLoaded } = useUser();
   const [games, setGames] = useState<RawgGame[]>([]);
   const [loadingGames, setLoadingGames] = useState(true);
+  const [activeGameStream, setActiveGameStream] = useState<RawgGame | null>(null);
 
   useEffect(() => {
-    fetchTrendingGames(6)
-      .then((data) => {
-        setGames(data);
+    fetchAvailableBackendGames()
+      .then((data: any) => {
+        setGames(data.slice(0, 6));
         setLoadingGames(false);
       })
       .catch(() => setLoadingGames(false));
@@ -176,7 +185,13 @@ export default function OverviewPage() {
             ? Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="h-56 rounded-xl bg-black/5 animate-pulse" />
               ))
-            : games.map((game) => <OverviewGameCard key={game.id} game={game} />)}
+            : games.map((game) => (
+                <OverviewGameCard
+                  key={game.id}
+                  game={game}
+                  onLaunchStream={(g) => setActiveGameStream(g)}
+                />
+              ))}
         </div>
       </section>
 
@@ -203,6 +218,17 @@ export default function OverviewPage() {
           ))}
         </div>
       </section>
+
+      {/* Live WebRTC Cloud Stream Player Modal */}
+      {activeGameStream && (
+        <GameStreamPlayer
+          gameId={String(activeGameStream.id)}
+          gameTitle={activeGameStream.name}
+          bannerUrl={activeGameStream.background_image}
+          resolution="1440p"
+          onClose={() => setActiveGameStream(null)}
+        />
+      )}
     </div>
   );
 }

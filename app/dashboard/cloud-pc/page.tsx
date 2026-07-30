@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import GameStreamPlayer from "@/components/GameStreamPlayer";
+import { fetchBackendHealth, type BackendHealthStatus } from "@/lib/backendApi";
 
 // ── Session Plans (no hardware specs) ──────────────────────────
 const SESSION_PLANS = [
@@ -46,9 +48,15 @@ export default function CloudPCPage() {
   const [bitrate, setBitrate] = useState(75);
   const [lowLatency, setLowLatency] = useState(true);
   const [isBenchmarking, setIsBenchmarking] = useState(false);
+  const [activeStreamApp, setActiveStreamApp] = useState<string | null>(null);
+  const [backendHealth, setBackendHealth] = useState<BackendHealthStatus | null>(null);
   const [benchmarkResult, setBenchmarkResult] = useState<{
     ping: string; jitter: string; bandwidth: string; score: string;
   } | null>(null);
+
+  useEffect(() => {
+    fetchBackendHealth().then((h) => setBackendHealth(h)).catch(() => {});
+  }, []);
 
   // Simulated live uptime counter
   const [uptime, setUptime] = useState(0);
@@ -149,10 +157,16 @@ export default function CloudPCPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 relative shrink-0">
-          <button className="px-6 py-3.5 rounded-xl bg-white text-ink font-mono font-bold text-xs hover:bg-white/90 transition-all cursor-pointer flex items-center gap-2">
+          <button
+            onClick={() => setActiveStreamApp("Nimbus Cloud Desktop")}
+            className="px-6 py-3.5 rounded-xl bg-white text-ink font-mono font-bold text-xs hover:bg-white/90 transition-all cursor-pointer flex items-center gap-2"
+          >
             <span>⚡</span> Launch Desktop
           </button>
-          <button className="px-5 py-3.5 rounded-xl border border-white/20 text-white/80 hover:border-white/40 hover:text-white font-mono text-xs transition-colors cursor-pointer">
+          <button
+            onClick={() => setActiveStreamApp("Nimbus RDP / Parsec Desktop")}
+            className="px-5 py-3.5 rounded-xl border border-white/20 text-white/80 hover:border-white/40 hover:text-white font-mono text-xs transition-colors cursor-pointer"
+          >
             🖥️ Open via RDP / Parsec
           </button>
         </div>
@@ -367,6 +381,7 @@ export default function CloudPCPage() {
           {QUICK_APPS.map((app) => (
             <button
               key={app.name}
+              onClick={() => setActiveStreamApp(`Cloud App: ${app.name}`)}
               className="rounded-xl bg-white border border-black/10 hover:border-black/25 hover:shadow-sm p-4 flex flex-col items-center gap-2 transition-all cursor-pointer group"
             >
               <span className="text-2xl group-hover:scale-110 transition-transform">{app.icon}</span>
@@ -422,6 +437,15 @@ export default function CloudPCPage() {
         ))}
       </section>
 
+      {/* Live WebRTC Cloud PC Stream Player Modal */}
+      {activeStreamApp && (
+        <GameStreamPlayer
+          gameId="cloud_pc_desktop"
+          gameTitle={activeStreamApp}
+          resolution={selectedPlan === "premium" ? "4K" : selectedPlan === "extra" ? "1440p" : "1080p"}
+          onClose={() => setActiveStreamApp(null)}
+        />
+      )}
     </div>
   );
 }
