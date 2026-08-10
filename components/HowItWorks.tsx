@@ -18,21 +18,21 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="relative py-24 md:py-32 border-t border-line">
+    <section id="how-it-works" className="relative py-24 md:py-28 border-t border-line">
       <div className="container-px">
         <div className="flex items-center gap-2 mb-6">
           <span className="section-label">The loop</span>
           <span className="signal-line flex-1 max-w-16" />
         </div>
-        <h2 className="font-display font-semibold text-3xl md:text-5xl tracking-tight max-w-2xl text-balance">
+        <h2 className="font-display font-semibold text-[clamp(1.9rem,4vw,3.1rem)] tracking-tight max-w-2xl text-balance text-ink">
           Three steps, repeated sixty times a second
         </h2>
 
         <div className="mt-16 grid md:grid-cols-3 gap-px bg-line rounded-2xl overflow-hidden">
           {steps.map((s) => (
             <div key={s.n} className="bg-void p-8 md:p-10">
-              <span className="font-mono text-cyan text-sm">{s.n}</span>
-              <h3 className="font-display font-medium text-2xl mt-4 mb-3">
+              <span className="font-mono text-aqua text-sm">{s.n}</span>
+              <h3 className="font-display font-medium text-2xl mt-4 mb-3 text-ink">
                 {s.title}
               </h3>
               <p className="text-muted leading-relaxed">{s.copy}</p>

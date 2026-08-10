@@ -1,7 +1,7 @@
 const columns = [
   {
     title: "Product",
-    links: ["Library", "Devices", "Performance", "Pricing"],
+    links: ["Library", "Devices", "How it works", "Pricing"],
   },
   {
     title: "Company",
@@ -20,18 +20,21 @@ const columns = [
 export default function Footer() {
   return (
     <>
+      {/* CTA band */}
       <section className="relative py-24 md:py-32 border-t border-line overflow-hidden">
-        <div className="absolute inset-0 bg-aurora-1 opacity-70" />
+        <div className="absolute inset-0 bg-aurora-3 opacity-70" />
+        <div className="noise-overlay" />
         <div className="container-px relative text-center">
-          <h2 className="font-display font-semibold text-3xl md:text-6xl tracking-tight text-balance max-w-3xl mx-auto">
-            Your next session is <span className="gradient-text">11ms</span> away
+          <h2 className="font-display font-semibold text-[clamp(2rem,5vw,3.8rem)] tracking-tight text-balance max-w-3xl mx-auto text-ink">
+            Your next session is{" "}
+            <span className="gradient-text">11ms</span> away
           </h2>
           <p className="mt-6 text-muted max-w-md mx-auto">
             No install, no queue on paid plans, no hardware to outgrow.
           </p>
           <a
             href="#pricing"
-            className="mt-10 inline-flex items-center rounded-full bg-cyan text-void font-medium px-8 py-4 hover:shadow-glow transition-shadow"
+            className="mt-10 inline-flex items-center rounded-full bg-plasma-sweep text-white font-medium px-8 py-4 hover:shadow-glow transition-shadow"
           >
             Start streaming free
           </a>
@@ -42,7 +45,7 @@ export default function Footer() {
         <div className="container-px py-16 grid sm:grid-cols-2 lg:grid-cols-[1.3fr_repeat(4,1fr)] gap-10">
           <div>
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan" />
+              <span className="w-2.5 h-2.5 rounded-full bg-aqua shadow-glow-aqua" />
               <span className="font-display font-semibold text-lg text-ink">
                 NIMBUS
               </span>

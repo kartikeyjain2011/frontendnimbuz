@@ -1,10 +1,9 @@
 "use client";
 
-
-import Script from "next/script";
 import { useState } from "react";
+import Script from "next/script";
+import { coverUrl } from "@/lib/steamMedia";
 import { syncSubscriptionToAdmin, syncBillingToAdmin } from "@/lib/adminSync";
-
 
 declare global {
   interface Window {
@@ -12,220 +11,148 @@ declare global {
   }
 }
 
-// ─── Billing cycles ────────────────────────────────────────────
-type CycleKey = "1mo" | "3mo" | "6mo" | "12mo";
-
-const CYCLES: {
-  key: CycleKey;
-  label: string;
-  months: number;
-  discount: number;
-  savingsBadge?: string;
-}[] = [
-  { key: "1mo",  label: "Monthly",   months: 1,  discount: 0 },
-  { key: "3mo",  label: "3 Months",  months: 3,  discount: 0.05, savingsBadge: "−5%" },
-  { key: "6mo",  label: "6 Months",  months: 6,  discount: 0.10, savingsBadge: "−10%" },
-  { key: "12mo", label: "Annual",    months: 12, discount: 0.15, savingsBadge: "−15%" },
+/** Key art tiled behind the pricing block. */
+const PRICING_ART = [
+  1091500, 1245620, 1086940, 2358720, 1174180, 990080, 1551360, 1593500,
 ];
 
-/** Paise-precise total: round(monthly × months × (1 − discount)) */
-function recurringPrice(monthly: number, months: number, discount: number): number {
-  return Math.round(monthly * months * (1 - discount) * 100) / 100;
-}
+type TierId = "free" | "performance" | "ultimate";
 
-function fmt(n: number): string {
-  return "₹" + n.toLocaleString("en-IN", {
-    minimumFractionDigits: n % 1 === 0 ? 0 : 2,
-    maximumFractionDigits: 2,
-  });
-}
-
-// ─── Plans ─────────────────────────────────────────────────────
-interface Plan {
-  id: string;
+interface Tier {
+  id: TierId;
   name: string;
-  subtitle: string;
-  monthlyBase: number;
-  badge?: string;
-  blurb: string;
-  gpuSpec: string;
-  features: string[];
-  isPopular?: boolean;
-  cta: string;
+  monthly: number;
+  sixMonth: number;
+  featured?: boolean;
+  rig: string;
+  specs: {
+    resolution: string;
+    fps: string;
+    session: string;
+    rayTracing: string;
+    queue: string;
+    vram: string;
+  };
+  perks: string[];
 }
 
-const GAMING: Plan[] = [
+const TIERS: Tier[] = [
   {
-    id: "basic",
-    name: "BASIC",
-    subtitle: "Essential",
-    monthlyBase: 799,
-    blurb: "Jump into cloud gaming with no hardware.",
-    gpuSpec: "RTX 3060 / 8 GB VRAM",
-    features: [
-      "3-Hour Max Session",
-      "1080p @ 60 FPS",
-      "Standard Queue Priority",
-      "10 GB Cloud Save",
-      "Basic Game Library",
+    id: "free",
+    name: "Free",
+    monthly: 0,
+    sixMonth: 0,
+    rig: "Basic Rig",
+    specs: {
+      resolution: "Up to 1080p",
+      fps: "Up to 60 FPS",
+      session: "1-hour sessions",
+      rayTracing: "—",
+      queue: "No priority · >2 min wait",
+      vram: "Shared",
+    },
+    perks: [
+      "Access 2,000+ games",
+      "Ready-to-Play games",
+      "1-hour gaming sessions",
+      "Up to 1080p at 60 FPS",
     ],
-    cta: "Get BASIC",
   },
   {
-    id: "pro",
-    name: "PRO",
-    subtitle: "Extra",
-    monthlyBase: 1499,
-    blurb: "High frame-rates, zero queue wait.",
-    gpuSpec: "RTX 4070 Ti / 16 GB VRAM",
-    features: [
-      "Unlimited Sessions",
-      "1440p QHD @ 120 FPS",
-      "Ray Tracing",
-      "Skip-the-Queue Access",
-      "50 GB Cloud NVMe",
-      "5.1 Surround Sound",
+    id: "performance",
+    name: "Performance",
+    monthly: 999,
+    sixMonth: 5094,
+    featured: true,
+    rig: "Nimbus RTX",
+    specs: {
+      resolution: "Up to 1440p",
+      fps: "Up to 60 FPS",
+      session: "6-hour sessions",
+      rayTracing: "RTX ON",
+      queue: "Priority · <1 min wait",
+      vram: "16 GB",
+    },
+    perks: [
+      "Access 4,500+ games",
+      "Ready-to-Play + Install-to-Play",
+      "6-hour gaming sessions",
+      "Up to 1440p at 60 FPS",
+      "Priority access to queue",
     ],
-    cta: "Get PRO",
-  },
-  {
-    id: "premium",
-    name: "PREMIUM",
-    subtitle: "Premium",
-    monthlyBase: 2499,
-    badge: "BEST VALUE",
-    isPopular: true,
-    blurb: "4K / 120 FPS with full path-tracing.",
-    gpuSpec: "RTX 4090 / 24 GB VRAM",
-    features: [
-      "Unlimited Sessions",
-      "4K Ultra HD @ 120 FPS",
-      "Path Tracing + DLSS 3.5",
-      "VIP Fast-Track Server",
-      "250 GB Personal NVMe",
-      "7.1 PCM Audio",
-      "WebRTC Ultra-Low Latency",
-    ],
-    cta: "Get PREMIUM",
   },
   {
     id: "ultimate",
-    name: "ULTIMATE",
-    subtitle: "Ultimate",
-    monthlyBase: 2999,
-    blurb: "Dedicated bare-metal node at 240 FPS.",
-    gpuSpec: "RTX 4090 Ti / 24 GB VRAM",
-    features: [
-      "Unlimited Sessions",
-      "4K @ 240 FPS / 8K Preview",
-      "Path Tracing + DLSS 3.5 + FG",
-      "Dedicated Bare-Metal Node",
-      "500 GB Personal NVMe",
-      "Dolby Atmos Audio",
-      "5 ms WebRTC Mode",
+    name: "Ultimate",
+    monthly: 1999,
+    sixMonth: 10194,
+    rig: "Nimbus RTX 5090",
+    specs: {
+      resolution: "Up to 5K",
+      fps: "Up to 360 FPS",
+      session: "8-hour sessions",
+      rayTracing: "Full path tracing",
+      queue: "First priority · no wait",
+      vram: "32 GB",
+    },
+    perks: [
+      "Access 4,500+ games",
+      "Ready-to-Play + Install-to-Play",
+      "8-hour gaming sessions",
+      "Up to 5K at 360 FPS",
+      "First priority access to queue",
     ],
-    cta: "Get ULTIMATE",
   },
 ];
 
-const CLOUD_PC: Plan[] = [
-  {
-    id: "essential-pc",
-    name: "ESSENTIAL",
-    subtitle: "Essential PC",
-    monthlyBase: 1999,
-    blurb: "Dedicated Windows 11 cloud desktop.",
-    gpuSpec: "RTX 4070 / 16 GB / 32 GB RAM",
-    features: [
-      "Full Windows 11 Admin",
-      "500 GB Gen4 NVMe",
-      "1440p @ 120 FPS",
-      "Always-On (No Timeout)",
-      "Steam, Epic & Discord",
-    ],
-    cta: "Deploy ESSENTIAL",
-  },
-  {
-    id: "extra-pc",
-    name: "EXTRA",
-    subtitle: "Professional PC",
-    monthlyBase: 3499,
-    badge: "POPULAR",
-    isPopular: true,
-    blurb: "4K gaming + 3D render & video editing.",
-    gpuSpec: "RTX 4090 / 24 GB / 64 GB DDR5",
-    features: [
-      "Dedicated RTX 4090 Node",
-      "2 TB High-Speed NVMe",
-      "4K @ 120 FPS / 8K Support",
-      "Parsec Pro & RDP Access",
-      "10 Gbps Network",
-      "Custom Drivers & CUDA 12",
-    ],
-    cta: "Deploy EXTRA",
-  },
-  {
-    id: "premium-pc",
-    name: "PREMIUM",
-    subtitle: "Creator PC",
-    monthlyBase: 4999,
-    blurb: "AI workloads, 8K editing & extreme gaming.",
-    gpuSpec: "RTX 4090 ×2 / 96 GB / 128 GB RAM",
-    features: [
-      "Dual RTX 4090 SLI Node",
-      "4 TB Enterprise NVMe",
-      "8K @ 60 FPS / 4K @ 240 FPS",
-      "PyTorch & TensorFlow ready",
-      "Dedicated Static IP",
-      "25 Gbps Uplink",
-    ],
-    cta: "Deploy PREMIUM",
-  },
+const MATRIX_ROWS: { key: keyof Tier["specs"]; label: string }[] = [
+  { key: "resolution", label: "Max resolution" },
+  { key: "fps", label: "Frame rate" },
+  { key: "rayTracing", label: "Ray tracing" },
+  { key: "session", label: "Session length" },
+  { key: "queue", label: "Queue priority" },
+  { key: "vram", label: "GPU memory" },
 ];
 
-// ─── Component ─────────────────────────────────────────────────
+function fmt(n: number) {
+  return n.toLocaleString("en-IN");
+}
+
 export default function Pricing() {
-  const [category, setCategory] = useState<"gaming" | "cloud-pc">("gaming");
-  const [cycle, setCycle] = useState<CycleKey>("1mo");
+  const [annual, setAnnual] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
 
-  const plans = category === "gaming" ? GAMING : CLOUD_PC;
-  const activeCycle = CYCLES.find((c) => c.key === cycle)!;
+  const handlePay = (tier: Tier) => {
+    if (tier.id === "free") {
+      window.location.href = "/sign-up";
+      return;
+    }
 
-  const getTotal = (plan: Plan) =>
-    recurringPrice(plan.monthlyBase, activeCycle.months, activeCycle.discount);
+    const price = annual ? tier.sixMonth : tier.monthly;
+    const paise = Math.round(price * 100);
+    const cycleLabel = annual ? "6 months" : "Monthly";
 
-  const handlePay = (plan: Plan) => {
-    const totalINR = getTotal(plan);
-    const paise = Math.round(totalINR * 100);
-
-    setLoading(plan.id);
-
-    const cycleLabel =
-      activeCycle.months === 1
-        ? "Monthly"
-        : `${activeCycle.months}-Month (${Math.round(activeCycle.discount * 100)}% off)`;
+    setLoading(tier.id);
 
     const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_TIQY8CAZ52qCin",
+      key:
+        process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_TIQY8CAZ52qCin",
       amount: paise,
       currency: "INR",
       name: "NIMBUS Cloud Gaming",
-      description: `${plan.name} — ${plan.subtitle} · ${cycleLabel}`,
-      image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=200&q=80",
+      description: `${tier.name} — ${tier.rig} · ${cycleLabel}`,
       handler: function (response: any) {
         setLoading(null);
         const pid = response.razorpay_payment_id;
-        const planTitle = `${plan.name} (${plan.subtitle})`;
 
         syncSubscriptionToAdmin({
           userId: "landing_user",
           userEmail: "gamer@nimbus.cloud",
           userName: "NIMBUS Gamer",
-          planId: plan.id,
-          planName: planTitle,
-          billingCycle: cycle,
-          price: totalINR,
+          planId: tier.id,
+          planName: `${tier.name} (${tier.rig})`,
+          billingCycle: annual ? "6mo" : "1mo",
+          price,
           currency: "INR",
           paymentId: pid,
           status: "active",
@@ -237,24 +164,27 @@ export default function Pricing() {
           userId: "landing_user",
           userEmail: "gamer@nimbus.cloud",
           userName: "NIMBUS Gamer",
-          amount: totalINR,
+          amount: price,
           currency: "INR",
           itemType: "subscription",
-          itemTitle: planTitle,
+          itemTitle: `${tier.name} (${tier.rig})`,
           paymentMethod: "Razorpay",
           status: "success",
           timestamp: new Date().toISOString(),
         });
 
         alert(
-          `✅ Payment Successful!\nPayment ID: ${pid}\n\nWelcome to ${plan.name}! Redirecting to your dashboard…`
+          `✅ Payment Successful!\nPayment ID: ${pid}\n\nWelcome to ${tier.name}! Redirecting to your dashboard…`,
         );
         window.location.href = "/dashboard";
       },
-
-      prefill: { name: "NIMBUS Gamer", email: "gamer@nimbus.cloud", contact: "9876543210" },
-      notes: { plan_id: plan.id, billing_cycle: cycle, months: activeCycle.months },
-      theme: { color: "#111111" },
+      prefill: {
+        name: "NIMBUS Gamer",
+        email: "gamer@nimbus.cloud",
+        contact: "9876543210",
+      },
+      notes: { tier_id: tier.id, billing_cycle: annual ? "6mo" : "1mo" },
+      theme: { color: "#7C3AED" },
       modal: { ondismiss: () => setLoading(null) },
     };
 
@@ -267,201 +197,239 @@ export default function Pricing() {
   };
 
   return (
-    <section id="pricing" className="relative py-24 md:py-32 border-t border-line">
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+    <section id="pricing" className="relative py-24 md:py-28 overflow-hidden">
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="lazyOnload"
+      />
 
-      <div className="container-px space-y-14">
+      {/* Key-art backdrop */}
+      <div aria-hidden="true" className="absolute inset-0">
+        <div className="grid h-full grid-cols-4 gap-2 opacity-[0.14] md:grid-cols-8">
+          {PRICING_ART.map((appId, i) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={`${appId}-${i}`}
+              src={coverUrl(appId)}
+              alt=""
+              loading="lazy"
+              className="h-full w-full object-cover grayscale"
+            />
+          ))}
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-void via-void/95 to-void" />
+      </div>
+      <div className="absolute inset-0 bg-aurora-3" />
+      <div className="noise-overlay" />
 
-        {/* ── Section header ── */}
-        <div>
-          <div className="flex items-center gap-2 mb-6">
-            <span className="section-label">Pricing</span>
-            <span className="signal-line flex-1 max-w-16" />
+      <div className="container-px relative">
+        {/* Heading */}
+        <div className="max-w-2xl">
+          <div className="flex items-center gap-3 mb-6">
+            <span className="section-label">Select your membership</span>
+            <span className="signal-line flex-1 max-w-20" />
           </div>
-          <h2 className="font-display font-semibold text-3xl md:text-5xl tracking-tight max-w-2xl text-balance">
-            Rent the GPU, keep the games
+          <h2 className="font-display font-semibold text-[clamp(2rem,4.4vw,3.4rem)] leading-[1.06] tracking-tight text-ink text-balance">
+            Pick your GPU.
+            <span className="gradient-text"> Cancel whenever.</span>
           </h2>
-          <p className="mt-4 text-muted text-base max-w-xl leading-relaxed">
-            Pay per billing cycle via Razorpay — UPI, Cards, NetBanking & Wallets accepted. Cancel anytime.
+          <p className="mt-6 text-muted text-lg leading-relaxed">
+            Every tier streams the same library you already own. Paying more
+            buys you a faster card, a longer session and a shorter queue —
+            never a bigger catalogue paywall.
           </p>
         </div>
 
-        {/* ── Controls ── */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 flex-wrap">
-          {/* Category tabs */}
-          <div className="flex items-center gap-1 bg-deep border border-line p-1.5 rounded-2xl">
+        {/* Billing toggle */}
+        <div className="mt-10 flex flex-wrap items-center gap-4">
+          <div className="inline-flex items-center gap-1 rounded-full border border-line bg-panel/70 p-1 backdrop-blur">
             <button
-              onClick={() => setCategory("gaming")}
-              className={`px-5 py-2 rounded-xl text-xs font-mono font-semibold transition-all cursor-pointer ${
-                category === "gaming"
-                  ? "bg-ink text-void shadow-sm"
-                  : "text-muted hover:text-ink"
+              onClick={() => setAnnual(false)}
+              aria-pressed={!annual}
+              className={`rounded-full px-6 py-2.5 text-sm font-medium transition-all cursor-pointer ${
+                !annual ? "bg-white text-black" : "text-muted hover:text-ink"
               }`}
             >
-              🎮 Cloud Gaming
+              Monthly
             </button>
             <button
-              onClick={() => setCategory("cloud-pc")}
-              className={`px-5 py-2 rounded-xl text-xs font-mono font-semibold transition-all cursor-pointer ${
-                category === "cloud-pc"
-                  ? "bg-ink text-void shadow-sm"
-                  : "text-muted hover:text-ink"
+              onClick={() => setAnnual(true)}
+              aria-pressed={annual}
+              className={`rounded-full px-6 py-2.5 text-sm font-medium transition-all cursor-pointer ${
+                annual ? "bg-white text-black" : "text-muted hover:text-ink"
               }`}
             >
-              🖥️ Cloud PC Rigs
+              6 months
             </button>
           </div>
 
-          {/* Billing cycle tabs */}
-          <div className="flex items-center gap-2 flex-wrap">
-            {CYCLES.map((c) => (
-              <button
-                key={c.key}
-                onClick={() => setCycle(c.key)}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border text-xs font-mono font-semibold transition-all cursor-pointer ${
-                  cycle === c.key
-                    ? "bg-ink text-void border-ink shadow-sm"
-                    : "bg-void border-line text-muted hover:text-ink hover:border-ink/30"
-                }`}
-              >
-                <span>{c.label}</span>
-                {c.savingsBadge && (
-                  <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
-                      cycle === c.key
-                        ? "bg-white/20 text-void"
-                        : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    }`}
-                  >
-                    {c.savingsBadge}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-ember/40 bg-ember/10 px-3 py-1.5 font-mono text-[0.65rem] uppercase tracking-wider text-ember">
+            Save 15% on 6 months
+          </span>
         </div>
 
-        {activeCycle.discount > 0 && (
-          <p className="text-xs font-mono text-muted -mt-8">
-            Committing to {activeCycle.months} months saves you{" "}
-            <span className="text-emerald-600 font-bold">{Math.round(activeCycle.discount * 100)}%</span>{" "}
-            — charged as a single payment.
-          </p>
-        )}
-
-        {/* ── Plan cards ── */}
-        <div
-          className={`grid gap-5 items-stretch ${
-            plans.length === 4
-              ? "sm:grid-cols-2 xl:grid-cols-4"
-              : "sm:grid-cols-2 lg:grid-cols-3"
-          }`}
-        >
-          {plans.map((plan) => {
-            const total = getTotal(plan);
-            const isLoading = loading === plan.id;
+        {/* Tier cards */}
+        <div className="mt-12 grid gap-6 lg:grid-cols-3">
+          {TIERS.map((tier) => {
+            const price = annual ? tier.sixMonth : tier.monthly;
+            const unit = annual ? "/6 mo" : "/mo";
+            const isLoading = loading === tier.id;
 
             return (
               <div
-                key={plan.id}
-                className={`relative flex flex-col rounded-2xl border overflow-hidden transition-all duration-300 ${
-                  plan.isPopular
-                    ? "bg-ink text-void border-ink shadow-glow lg:-translate-y-2"
-                    : "card-panel border-line hover:border-ink/20 hover:shadow-glow"
+                key={tier.id}
+                className={`relative rounded-3xl p-6 transition-transform duration-300 hover:-translate-y-1 sm:p-8 ${
+                  tier.featured
+                    ? "ring-gradient bg-surface shadow-glow lg:scale-[1.02]"
+                    : "border border-line bg-panel/60 backdrop-blur hover:border-plasma/40"
                 }`}
               >
-                {/* Badge */}
-                {plan.badge && (
-                  <div
-                    className={`absolute top-0 right-0 text-[10px] font-mono font-bold px-3 py-1 rounded-bl-xl ${
-                      plan.isPopular ? "bg-white text-ink" : "bg-ink text-void"
-                    }`}
-                  >
-                    {plan.badge}
-                  </div>
+                {tier.featured && (
+                  <span className="absolute -top-3 left-8 rounded-full bg-plasma-sweep px-3 py-1 font-mono text-[0.65rem] uppercase tracking-wider text-white">
+                    Most popular
+                  </span>
                 )}
 
-                <div className="p-7 flex flex-col flex-1 space-y-5">
-                  {/* Name */}
-                  <div>
-                    <span className={`text-[10px] font-mono uppercase tracking-widest ${plan.isPopular ? "text-void/50" : "text-muted"}`}>
-                      {plan.subtitle}
+                <h3 className="font-display text-2xl font-semibold text-ink">
+                  {tier.name}
+                </h3>
+                <p className="mt-1.5 font-mono text-[0.68rem] uppercase tracking-wider text-muted">
+                  {tier.rig}
+                  {tier.id === "free" ? " · ad-supported" : " · no ads"}
+                </p>
+
+                <div className="mt-6 flex items-end gap-1">
+                  {price === 0 ? (
+                    <span className="font-display text-4xl font-semibold text-ink">
+                      Free
                     </span>
-                    <h3 className={`font-display font-bold text-2xl mt-0.5 ${plan.isPopular ? "text-void" : "text-ink"}`}>
-                      {plan.name}
-                    </h3>
-                    <p className={`text-xs font-mono mt-1 leading-snug ${plan.isPopular ? "text-void/60" : "text-muted"}`}>
-                      {plan.blurb}
-                    </p>
-                  </div>
-
-                  {/* Price */}
-                  <div className={`py-4 border-y space-y-1 ${plan.isPopular ? "border-white/15" : "border-line"}`}>
-                    <div className={`font-mono font-bold text-3xl ${plan.isPopular ? "text-void" : "text-ink"}`}>
-                      {fmt(total)}
-                    </div>
-                    <div className={`text-[11px] font-mono ${plan.isPopular ? "text-void/50" : "text-muted"}`}>
-                      {activeCycle.months === 1
-                        ? "/ month"
-                        : `for ${activeCycle.months} months · ${fmt(plan.monthlyBase)}/mo base`}
-                    </div>
-                    {activeCycle.discount > 0 && (
-                      <div className={`text-[11px] font-mono ${plan.isPopular ? "text-emerald-300" : "text-emerald-600"}`}>
-                        Save {fmt(plan.monthlyBase * activeCycle.months * activeCycle.discount)} vs monthly
-                      </div>
-                    )}
-                  </div>
-
-                  {/* GPU spec */}
-                  <div className={`p-2.5 rounded-lg border text-xs font-mono ${plan.isPopular ? "bg-white/10 border-white/15" : "bg-deep border-line"}`}>
-                    <span className={`block text-[10px] uppercase tracking-wider mb-0.5 ${plan.isPopular ? "text-void/40" : "text-muted"}`}>
-                      Hardware Node
-                    </span>
-                    <span className={`font-semibold ${plan.isPopular ? "text-void" : "text-ink"}`}>{plan.gpuSpec}</span>
-                  </div>
-
-                  {/* Features */}
-                  <ul className="flex-1 space-y-2">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2 text-xs font-mono">
-                        <span className={`shrink-0 mt-px font-bold ${plan.isPopular ? "text-void" : "text-ink"}`}>✓</span>
-                        <span className={plan.isPopular ? "text-void/80" : "text-ink"}>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* CTA */}
-                  <button
-                    onClick={() => handlePay(plan)}
-                    disabled={isLoading}
-                    className={`w-full py-3 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60 ${
-                      plan.isPopular
-                        ? "bg-void text-ink hover:bg-void/90"
-                        : "bg-ink text-void hover:bg-ink/80"
-                    }`}
-                  >
-                    {isLoading ? (
-                      <>
-                        <span className={`w-3.5 h-3.5 border-2 border-t-transparent rounded-full animate-spin ${plan.isPopular ? "border-ink" : "border-void"}`} />
-                        <span>Opening Razorpay…</span>
-                      </>
-                    ) : (
-                      <span>⚡ {plan.cta}</span>
-                    )}
-                  </button>
+                  ) : (
+                    <>
+                      <span className="mb-1 text-lg text-muted">₹</span>
+                      <span className="font-display text-4xl font-semibold tabular-nums text-ink">
+                        {fmt(price)}
+                      </span>
+                      <span className="mb-1.5 text-sm text-muted">{unit}</span>
+                    </>
+                  )}
                 </div>
+
+                <p className="mt-1.5 h-4 font-mono text-[0.62rem] text-faint">
+                  {price > 0 &&
+                    (annual
+                      ? `₹${Math.round(price / 6).toLocaleString("en-IN")}/mo equivalent`
+                      : `₹${fmt(tier.sixMonth)} for 6 months`)}
+                </p>
+
+                <button
+                  onClick={() => handlePay(tier)}
+                  disabled={isLoading}
+                  className={`mt-7 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold transition-all disabled:opacity-60 ${
+                    tier.featured
+                      ? "bg-plasma-sweep text-white hover:shadow-glow"
+                      : "border border-line-strong text-ink hover:border-plasma hover:bg-plasma/15 hover:text-plasma-bright"
+                  }`}
+                >
+                  {isLoading ? (
+                    <>
+                      <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-t-transparent border-white" />
+                      Opening Razorpay…
+                    </>
+                  ) : tier.id === "free" ? (
+                    "Join Free"
+                  ) : tier.id === "performance" ? (
+                    "Get Performance"
+                  ) : (
+                    "Go Ultimate"
+                  )}
+                </button>
+
+                <ul className="mt-8 space-y-3">
+                  {tier.perks.map((perk) => (
+                    <li
+                      key={perk}
+                      className={`flex items-start gap-3 text-sm ${
+                        tier.featured ? "text-ink/85" : "text-muted"
+                      }`}
+                    >
+                      <svg
+                        className={`mt-0.5 h-4 w-4 shrink-0 ${
+                          tier.featured ? "text-plasma-bright" : "text-faint"
+                        }`}
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M3 8.5l3.2 3.2L13 5"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      {perk}
+                    </li>
+                  ))}
+                </ul>
               </div>
             );
           })}
         </div>
 
+        {/* Spec comparison matrix */}
+        <div className="mt-16 rounded-2xl border border-line bg-panel/40 backdrop-blur">
+          <div className="overflow-x-auto rounded-2xl">
+            <table className="w-full min-w-[640px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-line">
+                  <th className="px-6 py-5 font-normal text-faint">
+                    <span className="section-label">Compare</span>
+                  </th>
+                  {TIERS.map((t) => (
+                    <th
+                      key={t.id}
+                      className="px-6 py-5 font-display text-base font-semibold text-ink"
+                    >
+                      {t.name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {MATRIX_ROWS.map((row, i) => (
+                  <tr key={row.key} className={i % 2 ? "bg-white/[0.015]" : undefined}>
+                    <td className="px-6 py-4 text-muted">{row.label}</td>
+                    {TIERS.map((t) => (
+                      <td
+                        key={t.id}
+                        className={`px-6 py-4 font-mono text-[0.82rem] ${
+                          t.specs[row.key] === "—"
+                            ? "text-faint"
+                            : t.featured
+                              ? "text-ink"
+                              : "text-muted"
+                        }`}
+                      >
+                        {t.specs[row.key]}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-
-        {/* ── Footer note ── */}
-        <p className="text-xs text-muted font-mono">
-          Payments processed securely via Razorpay (UPI · Cards · NetBanking · Wallets). Cancel any cycle before renewal.
+        <p className="mt-3 text-center font-mono text-[0.6rem] uppercase tracking-widest text-faint lg:hidden">
+          Swipe the table to compare →
         </p>
 
+        <p className="mt-6 text-center text-xs text-faint">
+          Prices in INR. Payments processed via Razorpay (UPI · Cards ·
+          NetBanking · Wallets). Cancel any time — no lock-in, no hardware to
+          return.
+        </p>
       </div>
     </section>
   );

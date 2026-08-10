@@ -33,7 +33,7 @@ export default function Testimonials() {
 
         <div className="mt-16 grid md:grid-cols-3 gap-5">
           {quotes.map((q) => (
-            <figure key={q.name} className="card-panel rounded-2xl p-8 flex flex-col">
+            <figure key={q.name} className="rounded-2xl border border-line bg-panel/60 p-8 flex flex-col">
               <blockquote className="text-ink leading-relaxed flex-1">
                 &ldquo;{q.quote}&rdquo;
               </blockquote>

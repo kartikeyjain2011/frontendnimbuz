@@ -46,14 +46,14 @@ export default function Performance() {
               key={t.name}
               className={`rounded-2xl p-8 border ${
                 t.featured
-                  ? "border-cyan/40 bg-gradient-to-b from-cyan/10 to-transparent shadow-glow"
-                  : "border-line card-panel"
+                  ? "border-aqua/40 bg-gradient-to-b from-aqua/10 to-transparent shadow-glow-aqua"
+                  : "border-line bg-panel/60"
               }`}
             >
               <div className="flex items-center justify-between">
                 <h3 className="font-display font-medium text-2xl">{t.name}</h3>
                 {t.featured && (
-                  <span className="text-xs font-mono text-cyan border border-cyan/40 rounded-full px-2.5 py-1">
+                  <span className="text-xs font-mono text-aqua border border-aqua/40 rounded-full px-2.5 py-1">
                     most popular
                   </span>
                 )}

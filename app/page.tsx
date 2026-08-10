@@ -9,21 +9,26 @@ import Pricing from "@/components/Pricing";
 import Testimonials from "@/components/Testimonials";
 import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
+import { FeaturedTitleProvider } from "@/components/FeaturedTitleContext";
 
 export default function Home() {
   return (
-    <main className="bg-void text-ink">
-      <Navbar />
-      <Hero />
-      <HowItWorks />
-      <GameLibrary />
-      <GameTrailers />
-      <DeviceCompat />
-      <Performance />
-      <Pricing />
-      <Testimonials />
-      <FAQ />
-      <Footer />
-    </main>
+    <FeaturedTitleProvider>
+      <main className="bg-void text-ink">
+        <Navbar />
+        {/* Hero and TrailerShowcase share FeaturedTitleContext — selecting a
+            trailer here swaps the backdrop video in the hero and vice-versa. */}
+        <Hero />
+        <GameTrailers />
+        <HowItWorks />
+        <GameLibrary />
+        <DeviceCompat />
+        <Performance />
+        <Pricing />
+        <Testimonials />
+        <FAQ />
+        <Footer />
+      </main>
+    </FeaturedTitleProvider>
   );
 }

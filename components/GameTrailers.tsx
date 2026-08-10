@@ -1,145 +1,320 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useUser, useClerk } from "@clerk/nextjs";
-import { fetchNewReleases, type RawgGame } from "@/lib/rawg";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import {
+  Play,
+  Volume2,
+  VolumeX,
+  ChevronLeft,
+  ChevronRight,
+  Pause,
+} from "lucide-react";
+import { FEATURED, headerUrl, trailerMp4 } from "@/lib/steamMedia";
+import { STOREFRONTS } from "./StoreIcons";
+import { brandFor } from "@/lib/storeBrand";
+import { useFeaturedTitle } from "./FeaturedTitleContext";
 
-function TrailerCard({ game }: { game: RawgGame }) {
-  const { isSignedIn } = useUser();
-  const { openSignIn } = useClerk();
-  const router = useRouter();
+/**
+ * Trailer carousel.
+ *
+ * Monochrome chrome, colour supplied by the artwork and video.
+ * Advances on a timer, pauses on hover/focus, honours prefers-reduced-motion.
+ * Shares the selected index with HeroBanner via FeaturedTitleContext.
+ */
 
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const screenshots = game.short_screenshots?.map((s) => s.image) || [];
-
-  // Autoplay video preview reel continuously
-  useEffect(() => {
-    if (!screenshots || screenshots.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentIdx((prev) => (prev + 1) % screenshots.length);
-    }, 1800);
-    return () => clearInterval(interval);
-  }, [screenshots]);
-
-  const handleCardClick = () => {
-    if (isSignedIn) {
-      router.push(`/dashboard/games/${game.id}`);
-    } else {
-      if (openSignIn) {
-        openSignIn({
-          forceRedirectUrl: `/dashboard/games/${game.id}`,
-        });
-      } else {
-        router.push(`/sign-in?redirectUrl=/dashboard/games/${game.id}`);
-      }
-    }
-  };
-
-  return (
-    <div
-      onClick={handleCardClick}
-      className="group relative rounded-2xl bg-white border border-black/10 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col cursor-pointer"
-    >
-      {/* Visual Showcase / Autoplay Video Reel */}
-      <div className="relative aspect-video bg-black overflow-hidden">
-        <img
-          src={screenshots[currentIdx] || game.background_image}
-          alt={game.name}
-          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
-        />
-
-        {/* Top Badges */}
-        <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-          <span className="bg-black/70 backdrop-blur-md text-white font-mono text-[10px] px-2.5 py-0.5 rounded-full border border-white/10 flex items-center gap-1.5 font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            LIVE REEL
-          </span>
-          {game.rating > 0 && (
-            <span className="bg-amber-400 text-black font-mono font-bold text-[10px] px-2 py-0.5 rounded-full">
-              ★ {game.rating.toFixed(1)}
-            </span>
-          )}
-        </div>
-
-        {/* Progress indicator */}
-        {screenshots.length > 1 && (
-          <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between bg-black/60 backdrop-blur-md px-3 py-1 rounded-md text-[10px] font-mono text-white">
-            <span>PREVIEW REEL ({currentIdx + 1}/{screenshots.length})</span>
-            <div className="flex gap-1">
-              {screenshots.map((_, i) => (
-                <span
-                  key={i}
-                  className={`h-1 rounded-full transition-all ${
-                    i === currentIdx ? "bg-white w-4" : "bg-white/30 w-1"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Details Area */}
-      <div className="p-5 flex flex-col justify-between flex-1 space-y-4">
-        <div>
-          <div className="flex items-center justify-between text-xs font-mono text-muted mb-1">
-            <span>{game.genres[0]?.name || "Featured Title"}</span>
-            <span>Released: {game.released || "N/A"}</span>
-          </div>
-          <h3 className="font-display font-bold text-ink text-lg line-clamp-1 group-hover:text-emerald-600 transition-colors">
-            {game.name}
-          </h3>
-        </div>
-
-        <div className="pt-2 border-t border-black/10 flex items-center justify-between text-xs font-mono">
-          <span className="text-muted">Metacritic Score: <strong className="text-ink">{game.metacritic || "N/A"}</strong></span>
-          <span className="text-ink font-semibold group-hover:translate-x-1 transition-transform">
-            Watch Reel & Launch →
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
+const ADVANCE_MS = 9000;
 
 export default function GameTrailers() {
-  const [games, setGames] = useState<RawgGame[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [muted, setMuted] = useState(true);
+  const [playing, setPlaying] = useState(false);
+  const [auto, setAuto] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const railRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
 
+  const { index, title: game, setIndex } = useFeaturedTitle();
+  const store = STOREFRONTS.find((s) => s.name === game.store);
+
+  const go = useCallback(
+    (next: number) => {
+      setIndex(next);
+    },
+    [setIndex],
+  );
+
+  // Pause carousel when section is off-screen
+  const [inView, setInView] = useState(false);
   useEffect(() => {
-    fetchNewReleases(6)
-      .then((res) => {
-        setGames(res);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    const el = sectionRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0.25 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
+  // Autoswipe
+  useEffect(() => {
+    if (!auto || !inView) return;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduced) return;
+    const id = setInterval(() => go(index + 1), ADVANCE_MS);
+    return () => clearInterval(id);
+  }, [auto, inView, index, go]);
+
+  // Load selected trailer
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+
+    if (!inView) {
+      v.pause();
+      return;
+    }
+
+    setPlaying(false);
+    v.src = trailerMp4(game.trailerId);
+    v.load();
+    void v.play().catch(() => setPlaying(false));
+  }, [game.trailerId, inView]);
+
+  // Keep active thumbnail centred in the filmstrip
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const el = rail.children[index] as HTMLElement | undefined;
+    if (!el) return;
+    const target =
+      el.offsetLeft - rail.clientWidth / 2 + el.offsetWidth / 2;
+    rail.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+  }, [index]);
+
   return (
-    <section className="relative py-20 border-t border-line bg-deep/30">
-      <div className="container-px space-y-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="section-label">AUTOPLAY REELS</span>
-              <span className="signal-line flex-1 max-w-16" />
+    <section
+      ref={sectionRef}
+      id="trailers"
+      className="relative overflow-hidden border-t border-line bg-void py-24 md:py-28"
+      onMouseEnter={() => setAuto(false)}
+      onMouseLeave={() => setAuto(true)}
+    >
+      <div className="noise-overlay" />
+
+      <div className="container-px relative">
+        {/* Section header */}
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <div className="max-w-xl">
+            <div className="mb-4 flex items-center gap-3">
+              <span className="section-label">In the spotlight</span>
+              <span className="signal-line w-16" />
             </div>
-            <h2 className="font-display font-bold text-3xl md:text-4xl text-ink">
-              Trending Gameplay Video Previews
+            <h2 className="font-display text-[clamp(1.7rem,3.4vw,2.6rem)] font-semibold leading-[1.08] tracking-tight text-ink text-balance">
+              Gameplay trailers,
+              <span className="gradient-text"> streaming now.</span>
             </h2>
           </div>
-          <p className="text-muted text-xs font-mono max-w-md">
-            Continuous video reels streaming in real-time. Click any title to launch or sign in to your account.
-          </p>
+
+          {/* Controls */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setAuto((a) => !a)}
+              aria-pressed={auto}
+              aria-label={auto ? "Pause auto-advance" : "Resume auto-advance"}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-line text-muted transition-colors hover:border-plasma/60 hover:text-plasma-bright cursor-pointer"
+            >
+              {auto ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </button>
+            <button
+              onClick={() => go(index - 1)}
+              aria-label="Previous trailer"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-line text-muted transition-colors hover:border-plasma/60 hover:text-plasma-bright cursor-pointer"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => go(index + 1)}
+              aria-label="Next trailer"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-line text-muted transition-colors hover:border-plasma/60 hover:text-plasma-bright cursor-pointer"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setMuted((m) => !m)}
+              aria-pressed={!muted}
+              className="ml-1 inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-sm text-muted transition-colors hover:border-plasma/60 hover:text-plasma-bright cursor-pointer"
+            >
+              {muted ? (
+                <VolumeX className="h-4 w-4" />
+              ) : (
+                <Volume2 className="h-4 w-4" />
+              )}
+              {muted ? "Sound off" : "Sound on"}
+            </button>
+          </div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loading
-            ? Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="aspect-video rounded-2xl bg-black/5 animate-pulse" />
-              ))
-            : games.map((game) => <TrailerCard key={game.id} game={game} />)}
+        {/* Main video + detail panel */}
+        <div className="mt-8 grid gap-6 lg:grid-cols-[1.55fr_1fr]">
+          {/* Video player */}
+          <div className="group relative overflow-hidden rounded-2xl border border-line transition-all duration-300 hover:border-plasma/60 hover:shadow-glow">
+            <div className="relative aspect-video bg-black">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={headerUrl(game.appId)}
+                alt=""
+                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
+                  playing ? "opacity-0" : "opacity-100"
+                }`}
+              />
+              <video
+                ref={videoRef}
+                muted={muted}
+                loop
+                playsInline
+                preload="metadata"
+                aria-label={`${game.title} gameplay trailer`}
+                onPlaying={() => setPlaying(true)}
+                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
+                  playing ? "opacity-100" : "opacity-0"
+                }`}
+              />
+
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-void via-void/25 to-transparent" />
+
+              {/* Badges */}
+              <div className="absolute left-4 top-4 flex flex-wrap items-center gap-2">
+                {game.rtx && (
+                  <span className="rounded-md bg-plasma px-2.5 py-1 font-mono text-[0.6rem] font-bold uppercase tracking-wider text-white">
+                    RTX ON
+                  </span>
+                )}
+                <span className="rounded-md border border-line bg-black/70 px-2.5 py-1 font-mono text-[0.6rem] uppercase tracking-wider text-ink backdrop-blur">
+                  {game.maxSpec}
+                </span>
+              </div>
+
+              {/* Auto-advance progress bar */}
+              {auto && (
+                <motion.div
+                  key={`bar-${index}`}
+                  className="absolute inset-x-0 bottom-0 h-0.5 origin-left bg-plasma"
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: ADVANCE_MS / 1000, ease: "linear" }}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Detail panel */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={game.id}
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -12 }}
+              transition={{ duration: 0.35 }}
+              className="flex flex-col justify-center rounded-2xl border border-line bg-panel/60 p-6 backdrop-blur md:p-7"
+            >
+              <div className="flex items-center gap-2">
+                {store && (
+                  <span
+                    className="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1"
+                    style={{
+                      color: brandFor(store.name)?.hex,
+                      backgroundColor: brandFor(store.name)?.tint,
+                      borderColor: brandFor(store.name)?.border,
+                    }}
+                  >
+                    <store.Mark className="h-3 w-3" />
+                    <span className="font-mono text-[0.6rem] uppercase tracking-wider">
+                      {store.name}
+                    </span>
+                  </span>
+                )}
+                <span className="font-mono text-[0.6rem] uppercase tracking-wider text-faint">
+                  {game.genre}
+                </span>
+              </div>
+
+              <h3 className="mt-4 font-display text-2xl font-semibold leading-snug text-ink">
+                {game.title}
+              </h3>
+
+              <p className="mt-3 text-sm leading-relaxed text-muted">
+                Available to stream instantly on all your devices. Connect your
+                library and start playing at up to {game.maxSpec} with no
+                downloads required.
+              </p>
+
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <div className="rounded-xl border border-line bg-void/60 p-3">
+                  <p className="font-mono text-[0.6rem] uppercase tracking-wider text-faint">
+                    Max spec
+                  </p>
+                  <p className="mt-1 font-display text-sm font-semibold text-ink">
+                    {game.maxSpec}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-line bg-void/60 p-3">
+                  <p className="font-mono text-[0.6rem] uppercase tracking-wider text-faint">
+                    Ray tracing
+                  </p>
+                  <p
+                    className={`mt-1 font-display text-sm font-semibold ${
+                      game.rtx ? "text-plasma-bright" : "text-muted"
+                    }`}
+                  >
+                    {game.rtx ? "RTX ON" : "—"}
+                  </p>
+                </div>
+              </div>
+
+              <a
+                href="/sign-up"
+                className="mt-6 flex items-center justify-center gap-2 rounded-full bg-plasma-sweep py-3 text-sm font-semibold text-white transition-shadow hover:shadow-glow"
+              >
+                <Play className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+                Stream {game.title}
+              </a>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Filmstrip */}
+        <div
+          ref={railRef}
+          className="no-scrollbar mt-6 flex gap-3 overflow-x-auto pb-1"
+        >
+          {FEATURED.map((t, i) => (
+            <button
+              key={t.id}
+              onClick={() => go(i)}
+              aria-label={`Select ${t.title}`}
+              aria-pressed={i === index}
+              className={`relative shrink-0 overflow-hidden rounded-xl border transition-all duration-200 cursor-pointer ${
+                i === index
+                  ? "border-plasma shadow-glow"
+                  : "border-line opacity-50 hover:opacity-80"
+              }`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={headerUrl(t.appId)}
+                alt={t.title}
+                className="h-16 w-28 object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+              <span className="absolute inset-x-0 bottom-1.5 px-2 font-mono text-[0.55rem] uppercase tracking-wide text-white/80 line-clamp-1 text-center">
+                {t.title}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
     </section>

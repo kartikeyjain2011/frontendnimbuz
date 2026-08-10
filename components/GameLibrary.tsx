@@ -1,170 +1,185 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useUser, useClerk } from "@clerk/nextjs";
-import { type RawgGame } from "@/lib/rawg";
-import { fetchAvailableBackendGames } from "@/lib/backendApi";
+import { useRef, useState } from "react";
+import { gamesList } from "@/lib/gamesData";
+import GameSearch from "./GameSearch";
+import { STOREFRONTS } from "./StoreIcons";
+import { brandFor } from "@/lib/storeBrand";
 
-// ── Auto-cycling preview image hook ───────────────────────────
-function useAutoImageCycle(images: string[], intervalMs = 2000) {
-  const [idx, setIdx] = useState(0);
+const FILTERS = ["All", "Action RPG", "Shooter", "Racing", "Strategy"] as const;
 
-  useEffect(() => {
-    if (!images || images.length <= 1) return;
-    const timer = setInterval(() => {
-      setIdx((prev) => (prev + 1) % images.length);
-    }, intervalMs);
-    return () => clearInterval(timer);
-  }, [images, intervalMs]);
+export default function GameLibrary() {
+  const [active, setActive] = useState<string>("All");
+  const railRef = useRef<HTMLDivElement>(null);
 
-  return images[idx] ?? "";
-}
+  const games =
+    active === "All"
+      ? gamesList
+      : gamesList.filter((g) => g.genre === active);
 
-// ── Game card with click auth check ────────────────────────────
-function GameCard({ game }: { game: RawgGame }) {
-  const { isSignedIn } = useUser();
-  const { openSignIn } = useClerk();
-  const router = useRouter();
-
-  const screenshots = game.short_screenshots?.map((s) => s.image) || [];
-  const currentImg = useAutoImageCycle(screenshots.length > 0 ? screenshots : [game.background_image], 2200);
-  const genre = game.genres?.[0]?.name ?? "Action";
-
-  const handleCardClick = () => {
-    if (isSignedIn) {
-      router.push(`/dashboard/games/${game.slug || game.id}`);
-    } else {
-      if (openSignIn) {
-        openSignIn({
-          forceRedirectUrl: `/dashboard/games/${game.slug || game.id}`,
-        });
-      } else {
-        router.push(`/sign-in?redirectUrl=/dashboard/games/${game.slug || game.id}`);
-      }
-    }
+  const scroll = (dir: 1 | -1) => {
+    railRef.current?.scrollBy({ left: dir * 620, behavior: "smooth" });
   };
 
   return (
-    <div
-      onClick={handleCardClick}
-      className="group cursor-pointer text-left"
+    <section
+      id="library"
+      className="relative overflow-hidden border-t border-line py-24 md:py-28"
     >
-      <div className="aspect-[3/4] rounded-xl relative overflow-hidden border border-black/10 bg-deep transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-md group-hover:border-black/20">
-        {/* Main image preview */}
-        {currentImg ? (
-          <img
-            src={currentImg}
-            alt={game.name}
-            className="w-full h-full object-cover transition-all duration-500"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-deep to-line" />
-        )}
-
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity" />
-
-        {/* Rating badge */}
-        {game.rating > 0 && (
-          <div className="absolute top-2 right-2 bg-black/70 backdrop-blur-sm text-white text-[10px] font-mono px-2 py-0.5 rounded-md font-bold">
-            ★ {game.rating.toFixed(1)}
-          </div>
-        )}
-
-        {/* Autoplay Live Indicator */}
-        <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded-md">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-white text-[10px] font-mono font-semibold">CLOUD HOSTED</span>
-        </div>
-      </div>
-
-      <div className="mt-3">
-        <div className="text-sm font-medium text-ink line-clamp-1 group-hover:text-emerald-600 transition-colors">
-          {game.name}
-        </div>
-        <div className="text-xs text-muted mt-0.5">{genre}</div>
-      </div>
-    </div>
-  );
-}
-
-// ── Skeleton card ────────────────────────────────────────────
-function SkeletonCard() {
-  return (
-    <div className="animate-pulse">
-      <div className="aspect-[3/4] rounded-xl bg-deep border border-black/5" />
-      <div className="mt-3 space-y-1.5">
-        <div className="h-3.5 bg-deep rounded w-3/4" />
-        <div className="h-3 bg-deep rounded w-1/2" />
-      </div>
-    </div>
-  );
-}
-
-// ── Section ──────────────────────────────────────────────────
-export default function GameLibrary() {
-  const [games, setGames] = useState<RawgGame[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    fetchAvailableBackendGames()
-      .then((data: any) => {
-        setGames(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError(true);
-        setLoading(false);
-      });
-  }, []);
-
-  return (
-    <section id="library" className="relative py-24 md:py-32 border-t border-line">
       <div className="container-px">
-        <div className="flex flex-wrap items-end justify-between gap-6 mb-14">
-          <div>
-            <div className="flex items-center gap-2 mb-6">
-              <span className="section-label">Library</span>
-              <span className="signal-line flex-1 max-w-16" />
-              {!loading && !error && (
-                <span className="section-label text-emerald-600 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Live Sync Active
-                </span>
-              )}
+        {/* Header row */}
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <div className="max-w-xl">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="section-label">The catalogue</span>
+              <span className="signal-line w-16" />
             </div>
-            <h2 className="font-display font-semibold text-3xl md:text-5xl tracking-tight max-w-xl text-balance">
-              Top-rated games, already installed
+            <h2 className="font-display text-[clamp(1.9rem,4vw,3.1rem)] font-semibold leading-[1.08] tracking-tight text-balance text-ink">
+              Play Your PC Games.
+              <span className="gradient-text"> Discover More.</span>
             </h2>
+            <p className="mt-5 leading-relaxed text-muted">
+              Connect your supported game stores and subscriptions — like Steam,
+              Epic, GOG, PC Game Pass and Ubisoft Connect — and stream the titles
+              you already own with RTX performance. Thousands of games are ready
+              to play instantly.
+            </p>
           </div>
-          <p className="text-muted max-w-sm">
-            Continuous live video previews. Click any game to launch directly or sign in to your Nimbus account.
-          </p>
+
+          <div className="flex items-center gap-2">
+            <RailButton dir={-1} onClick={() => scroll(-1)} />
+            <RailButton dir={1} onClick={() => scroll(1)} />
+          </div>
         </div>
 
-        {error ? (
-          <div className="text-center py-12 text-muted font-mono text-sm">
-            Unable to load games right now. Please try again later.
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {loading
-              ? Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)
-              : games.map((game) => <GameCard key={game.id} game={game} />)}
-          </div>
-        )}
+        {/* Search */}
+        <div className="mt-9">
+          <GameSearch />
+        </div>
 
-        <div className="mt-10">
-          <a
-            href="#pricing"
-            className="text-sm text-ink hover:text-muted transition-colors inline-flex items-center gap-1.5 underline underline-offset-2"
-          >
-            Start streaming the full catalog →
-          </a>
+        {/* Genre filters */}
+        <div className="mt-6 flex flex-wrap gap-2">
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              onClick={() => setActive(f)}
+              aria-pressed={active === f}
+              className={`rounded-full border px-4 py-2 text-sm transition-all cursor-pointer ${
+                active === f
+                  ? "border-plasma bg-plasma/15 text-plasma-bright shadow-glow"
+                  : "border-line text-muted hover:border-plasma/50 hover:text-ink"
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+
+        {/* Poster rail */}
+        <div
+          ref={railRef}
+          className="no-scrollbar edge-fade-r mt-8 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4"
+        >
+          {games.map((game) => (
+            <article
+              key={game.id}
+              className="group relative w-[262px] shrink-0 snap-start"
+            >
+              <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-line bg-panel transition-all duration-300 group-hover:-translate-y-1 group-hover:border-white/30 group-hover:shadow-glow-aqua">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={game.banner}
+                  alt={`${game.title} key art`}
+                  loading="lazy"
+                  className="h-full w-full object-cover grayscale transition-all duration-500 group-hover:scale-[1.06] group-hover:grayscale-0"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-void via-void/25 to-transparent" />
+
+                {game.rtx && (
+                  <span className="absolute left-3 top-3 rounded-md bg-plasma/85 px-2 py-1 font-mono text-[0.6rem] uppercase tracking-wider text-white backdrop-blur">
+                    RTX ON
+                  </span>
+                )}
+
+                <span className="absolute right-3 top-3 rounded-md border border-white/15 bg-black/50 px-2 py-1 font-mono text-[0.6rem] text-ink backdrop-blur">
+                  {game.store}
+                </span>
+
+                <div className="absolute inset-x-0 bottom-0 p-4">
+                  <h3 className="font-display text-[0.98rem] font-semibold leading-snug text-ink">
+                    {game.title}
+                  </h3>
+                  <p className="mt-1 font-mono text-[0.68rem] text-muted">
+                    {game.genre} · {game.resolution}
+                  </p>
+
+                  <a
+                    href={`/dashboard/games/${game.id}`}
+                    className="mt-3 flex translate-y-2 items-center justify-center gap-1.5 rounded-full bg-plasma-sweep py-2.5 text-xs font-medium text-white opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 focus:translate-y-0 focus:opacity-100"
+                  >
+                    <svg
+                      className="h-3 w-3"
+                      viewBox="0 0 12 12"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M3 1.5v9l7-4.5-7-4.5z" />
+                    </svg>
+                    Play now
+                  </a>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        {/* Store strip */}
+        <div className="mt-12 flex flex-wrap items-center gap-x-3 gap-y-3 rounded-2xl border border-line bg-panel/40 px-6 py-5 backdrop-blur">
+          <span className="section-label mr-3">Connect your library</span>
+          {STOREFRONTS.map(({ name, Mark }) => {
+            const brand = brandFor(name);
+            return (
+              <span
+                key={name}
+                className="group/store flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-2 text-muted transition-all duration-300 hover:-translate-y-0.5 cursor-default"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = brand?.hex ?? "";
+                  e.currentTarget.style.backgroundColor = brand?.tint ?? "";
+                  e.currentTarget.style.borderColor = brand?.border ?? "";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "";
+                  e.currentTarget.style.backgroundColor = "";
+                  e.currentTarget.style.borderColor = "transparent";
+                }}
+              >
+                <Mark className="h-5 w-5 shrink-0 transition-transform duration-200 group-hover/store:scale-110" />
+                <span className="font-display text-sm">{name}</span>
+              </span>
+            );
+          })}
         </div>
       </div>
     </section>
+  );
+}
+
+function RailButton({ dir, onClick }: { dir: 1 | -1; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label={dir === 1 ? "Scroll right" : "Scroll left"}
+      className="flex h-11 w-11 items-center justify-center rounded-full border border-line text-muted transition-colors hover:border-plasma/60 hover:text-plasma-bright cursor-pointer"
+    >
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path
+          d={dir === 1 ? "M6 3l5 5-5 5" : "M10 3L5 8l5 5"}
+          stroke="currentColor"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
   );
 }
