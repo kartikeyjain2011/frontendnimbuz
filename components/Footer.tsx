@@ -1,4 +1,4 @@
-import { Lock, Mail, MapPin, Phone, ShieldCheck } from "lucide-react";
+import { Building2, Lock, Mail, MapPin, Phone, ShieldCheck } from "lucide-react";
 import { PAYMENT_BADGES } from "./PaymentBadges";
 
 function InstagramMark({ className }: { className?: string }) {
@@ -77,32 +77,32 @@ export default function Footer() {
               you want to play, not the moment your hardware is ready.
             </p>
 
-            <address className="mt-6 not-italic space-y-3 max-w-xs">
-              <p className="text-sm font-medium text-ink">
+            <address className="mt-6 max-w-xs not-italic grid grid-cols-[1rem_1fr] items-start gap-x-3 gap-y-2.5 text-sm leading-6">
+              <Building2 className="w-4 h-4 mt-1 text-aqua" />
+              <span className="font-medium text-ink">
                 Lemonade Digital Media Technology Private Limited
-              </p>
-              <p className="flex items-start gap-2.5 text-sm text-muted leading-relaxed">
-                <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-aqua" />
-                <span>91 Spring Board, Jhandewalan, Delhi&#8209;110055</span>
-              </p>
-              <p className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 shrink-0 text-aqua" />
-                <a
-                  href="tel:+918588000993"
-                  className="text-sm text-muted hover:text-ink transition-colors"
-                >
-                  +91 85880 00993
-                </a>
-              </p>
-              <p className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 shrink-0 text-aqua" />
-                <a
-                  href="mailto:hi@playnimbuz.com"
-                  className="text-sm text-muted hover:text-ink transition-colors"
-                >
-                  hi@playnimbuz.com
-                </a>
-              </p>
+              </span>
+
+              <MapPin className="w-4 h-4 mt-1 text-aqua" />
+              <span className="text-muted">
+                91 Spring Board, Jhandewalan, Delhi&#8209;110055
+              </span>
+
+              <Phone className="w-4 h-4 mt-1 text-aqua" />
+              <a
+                href="tel:+918588000993"
+                className="text-muted hover:text-ink transition-colors justify-self-start"
+              >
+                +91 85880 00993
+              </a>
+
+              <Mail className="w-4 h-4 mt-1 text-aqua" />
+              <a
+                href="mailto:hi@playnimbuz.com"
+                className="text-muted hover:text-ink transition-colors justify-self-start"
+              >
+                hi@playnimbuz.com
+              </a>
             </address>
 
             <a
