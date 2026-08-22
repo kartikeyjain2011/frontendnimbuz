@@ -93,8 +93,8 @@ export default function CloudPCPage() {
       {/* ── Page header ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold text-ink">Cloud PC</h1>
-          <p className="text-muted text-sm font-mono mt-1">
+          <h1 className="text-3xl font-display font-bold text-dash-ink">Cloud PC</h1>
+          <p className="text-dash-muted text-sm font-mono mt-1">
             Stream your personal cloud desktop from anywhere, on any device.
           </p>
         </div>
@@ -111,9 +111,9 @@ export default function CloudPCPage() {
                   : "bg-red-500"
               }`}
             />
-            <span className="text-ink font-semibold">{vmStatus}</span>
+            <span className="text-dash-ink font-semibold">{vmStatus}</span>
             {vmStatus === "Running" && (
-              <span className="text-muted tabular-nums">{formatUptime(uptime)}</span>
+              <span className="text-dash-muted tabular-nums">{formatUptime(uptime)}</span>
             )}
           </div>
           <button
@@ -138,7 +138,7 @@ export default function CloudPCPage() {
       </div>
 
       {/* ── Hero launch banner ── */}
-      <div className="rounded-2xl bg-ink text-white p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 overflow-hidden relative">
+      <div className="rounded-2xl bg-dash-ink text-white p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 overflow-hidden relative">
         {/* Decorative rings */}
         <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full border border-white/5" />
         <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full border border-white/8" />
@@ -159,7 +159,7 @@ export default function CloudPCPage() {
         <div className="flex flex-col sm:flex-row gap-3 relative shrink-0">
           <button
             onClick={() => setActiveStreamApp("Nimbus Cloud Desktop")}
-            className="px-6 py-3.5 rounded-xl bg-white text-ink font-mono font-bold text-xs hover:bg-white/90 transition-all cursor-pointer flex items-center gap-2"
+            className="px-6 py-3.5 rounded-xl bg-white text-dash-ink font-mono font-bold text-xs hover:bg-white/90 transition-all cursor-pointer flex items-center gap-2"
           >
             <span>⚡</span> Launch Desktop
           </button>
@@ -175,8 +175,8 @@ export default function CloudPCPage() {
       {/* ── Session plan selector ── */}
       <section className="space-y-4">
         <div>
-          <h2 className="text-xl font-display font-bold text-ink">Active Session Plan</h2>
-          <p className="text-muted text-xs font-mono mt-1">
+          <h2 className="text-xl font-display font-bold text-dash-ink">Active Session Plan</h2>
+          <p className="text-dash-muted text-xs font-mono mt-1">
             Switch your streaming quality on the fly — no restart needed.
           </p>
         </div>
@@ -190,27 +190,27 @@ export default function CloudPCPage() {
                 onClick={() => setSelectedPlan(plan.id)}
                 className={`rounded-xl p-5 border text-left transition-all cursor-pointer space-y-3 ${
                   isActive
-                    ? "bg-ink text-white border-ink shadow-md"
-                    : "bg-white border-black/10 hover:border-black/25 hover:shadow-sm text-ink"
+                    ? "bg-dash-ink text-white border-dash-ink shadow-md"
+                    : "bg-white border-black/10 hover:border-black/25 hover:shadow-sm text-dash-ink"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xl">{plan.emoji}</span>
                   {isActive && (
-                    <span className="text-[10px] font-mono font-bold bg-white text-ink px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-mono font-bold bg-white text-dash-ink px-2 py-0.5 rounded-full">
                       ACTIVE
                     </span>
                   )}
                 </div>
                 <div>
-                  <div className={`font-display font-bold text-lg ${isActive ? "text-white" : "text-ink"}`}>
+                  <div className={`font-display font-bold text-lg ${isActive ? "text-white" : "text-dash-ink"}`}>
                     {plan.label}
                   </div>
-                  <div className={`text-[11px] font-mono font-semibold mt-0.5 ${isActive ? "text-white/60" : "text-muted"}`}>
+                  <div className={`text-[11px] font-mono font-semibold mt-0.5 ${isActive ? "text-white/60" : "text-dash-muted"}`}>
                     {plan.tag}
                   </div>
                 </div>
-                <p className={`text-xs font-mono leading-snug ${isActive ? "text-white/70" : "text-muted"}`}>
+                <p className={`text-xs font-mono leading-snug ${isActive ? "text-white/70" : "text-dash-muted"}`}>
                   {plan.description}
                 </p>
               </button>
@@ -218,9 +218,9 @@ export default function CloudPCPage() {
           })}
         </div>
 
-        <p className="text-xs font-mono text-muted">
+        <p className="text-xs font-mono text-dash-muted">
           Want a higher tier?{" "}
-          <Link href="/dashboard/upgrade" className="text-ink underline underline-offset-2 hover:opacity-70 transition-opacity">
+          <Link href="/dashboard/upgrade" className="text-dash-ink underline underline-offset-2 hover:opacity-70 transition-opacity">
             Upgrade your plan →
           </Link>
         </p>
@@ -231,12 +231,12 @@ export default function CloudPCPage() {
 
         {/* Stream settings */}
         <div className="rounded-2xl bg-white border border-black/10 p-6 space-y-6 shadow-sm">
-          <h2 className="text-lg font-display font-bold text-ink">Stream Settings</h2>
+          <h2 className="text-lg font-display font-bold text-dash-ink">Stream Settings</h2>
 
           <div className="space-y-5 font-mono text-xs">
             {/* Resolution */}
             <div className="space-y-2">
-              <label className="text-muted block">Output Resolution</label>
+              <label className="text-dash-muted block">Output Resolution</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {["1080p (FHD)", "1440p (QHD)", "4K (3840×2160)", "8K Ultra"].map((res) => (
                   <button
@@ -244,8 +244,8 @@ export default function CloudPCPage() {
                     onClick={() => setResolution(res)}
                     className={`py-2 px-1 rounded-lg border text-center transition-all cursor-pointer text-[11px] ${
                       resolution === res
-                        ? "bg-ink text-white border-ink font-bold"
-                        : "bg-deep text-muted border-black/10 hover:text-ink hover:border-black/25"
+                        ? "bg-dash-ink text-white border-dash-ink font-bold"
+                        : "bg-dash-subtle text-dash-muted border-black/10 hover:text-dash-ink hover:border-black/25"
                     }`}
                   >
                     {res}
@@ -256,7 +256,7 @@ export default function CloudPCPage() {
 
             {/* FPS */}
             <div className="space-y-2">
-              <label className="text-muted block">Frame Rate Cap</label>
+              <label className="text-dash-muted block">Frame Rate Cap</label>
               <div className="grid grid-cols-3 gap-2">
                 {["60 FPS", "120 FPS", "240 FPS"].map((rate) => (
                   <button
@@ -264,8 +264,8 @@ export default function CloudPCPage() {
                     onClick={() => setFps(rate)}
                     className={`py-2.5 rounded-lg border text-center transition-all cursor-pointer ${
                       fps === rate
-                        ? "bg-ink text-white border-ink font-bold"
-                        : "bg-deep text-muted border-black/10 hover:text-ink hover:border-black/25"
+                        ? "bg-dash-ink text-white border-dash-ink font-bold"
+                        : "bg-dash-subtle text-dash-muted border-black/10 hover:text-dash-ink hover:border-black/25"
                     }`}
                   >
                     {rate}
@@ -277,8 +277,8 @@ export default function CloudPCPage() {
             {/* Bitrate slider */}
             <div className="space-y-2">
               <div className="flex justify-between">
-                <label className="text-muted">Target Bitrate</label>
-                <span className="text-ink font-bold">{bitrate} Mbps</span>
+                <label className="text-dash-muted">Target Bitrate</label>
+                <span className="text-dash-ink font-bold">{bitrate} Mbps</span>
               </div>
               <input
                 type="range" min="10" max="150" step="5"
@@ -286,7 +286,7 @@ export default function CloudPCPage() {
                 onChange={(e) => setBitrate(Number(e.target.value))}
                 className="w-full accent-black cursor-pointer"
               />
-              <div className="flex justify-between text-[10px] text-muted">
+              <div className="flex justify-between text-[10px] text-dash-muted">
                 <span>10 Mbps</span>
                 <span>75 Mbps (Rec.)</span>
                 <span>150 Mbps</span>
@@ -296,13 +296,13 @@ export default function CloudPCPage() {
             {/* Low-latency toggle */}
             <div className="flex items-center justify-between pt-2 border-t border-black/10">
               <div>
-                <span className="text-ink font-semibold block">Low-Latency WebRTC Mode</span>
-                <span className="text-[11px] text-muted">Sub-5 ms ultra-responsive input</span>
+                <span className="text-dash-ink font-semibold block">Low-Latency WebRTC Mode</span>
+                <span className="text-[11px] text-dash-muted">Sub-5 ms ultra-responsive input</span>
               </div>
               <button
                 onClick={() => setLowLatency(!lowLatency)}
                 className={`w-12 h-6 rounded-full transition-colors p-1 cursor-pointer ${
-                  lowLatency ? "bg-ink" : "bg-black/10"
+                  lowLatency ? "bg-dash-ink" : "bg-black/10"
                 }`}
               >
                 <div
@@ -318,38 +318,38 @@ export default function CloudPCPage() {
         {/* Network diagnostics */}
         <div className="rounded-2xl bg-white border border-black/10 p-6 space-y-5 shadow-sm flex flex-col justify-between">
           <div className="space-y-2">
-            <h2 className="text-lg font-display font-bold text-ink">Network Diagnostics</h2>
-            <p className="text-xs text-muted font-mono">
+            <h2 className="text-lg font-display font-bold text-dash-ink">Network Diagnostics</h2>
+            <p className="text-xs text-dash-muted font-mono">
               Test connection quality to the nearest NIMBUS datacenter node.
             </p>
           </div>
 
-          <div className="p-4 rounded-xl bg-deep border border-black/10 space-y-3 font-mono text-xs flex-1">
+          <div className="p-4 rounded-xl bg-dash-subtle border border-black/10 space-y-3 font-mono text-xs flex-1">
             {isBenchmarking ? (
               <div className="py-6 text-center space-y-3">
-                <div className="w-6 h-6 border-2 border-ink border-t-transparent rounded-full animate-spin mx-auto" />
-                <p className="text-muted animate-pulse">Pinging Mumbai Datacenter Node…</p>
+                <div className="w-6 h-6 border-2 border-dash-ink border-t-transparent rounded-full animate-spin mx-auto" />
+                <p className="text-dash-muted animate-pulse">Pinging Mumbai Datacenter Node…</p>
               </div>
             ) : benchmarkResult ? (
               <div className="space-y-2.5">
                 <div className="flex justify-between py-1.5 border-b border-black/8">
-                  <span className="text-muted">Round-Trip Latency</span>
-                  <span className="text-ink font-bold">{benchmarkResult.ping}</span>
+                  <span className="text-dash-muted">Round-Trip Latency</span>
+                  <span className="text-dash-ink font-bold">{benchmarkResult.ping}</span>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-black/8">
-                  <span className="text-muted">Network Jitter</span>
+                  <span className="text-dash-muted">Network Jitter</span>
                   <span className="text-emerald-600 font-bold">{benchmarkResult.jitter}</span>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-black/8">
-                  <span className="text-muted">Available Bandwidth</span>
-                  <span className="text-ink font-bold">{benchmarkResult.bandwidth}</span>
+                  <span className="text-dash-muted">Available Bandwidth</span>
+                  <span className="text-dash-ink font-bold">{benchmarkResult.bandwidth}</span>
                 </div>
                 <div className="pt-1 text-emerald-600 text-[11px] flex items-center gap-1.5">
                   <span className="font-bold">✓</span> {benchmarkResult.score}
                 </div>
               </div>
             ) : (
-              <div className="py-8 text-center text-muted text-xs space-y-2">
+              <div className="py-8 text-center text-dash-muted text-xs space-y-2">
                 <div className="text-3xl opacity-30">📡</div>
                 <p>Run a test to check stream readiness.</p>
               </div>
@@ -359,7 +359,7 @@ export default function CloudPCPage() {
           <button
             onClick={runBenchmark}
             disabled={isBenchmarking}
-            className="w-full py-3 rounded-xl bg-ink text-white hover:bg-black/80 font-mono font-bold text-xs transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-xl bg-dash-ink text-white hover:bg-black/80 font-mono font-bold text-xs transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isBenchmarking ? (
               <>
@@ -375,7 +375,7 @@ export default function CloudPCPage() {
 
       {/* ── Quick-launch apps ── */}
       <section className="space-y-4">
-        <h2 className="text-xl font-display font-bold text-ink">Installed Apps</h2>
+        <h2 className="text-xl font-display font-bold text-dash-ink">Installed Apps</h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {QUICK_APPS.map((app) => (
@@ -385,13 +385,13 @@ export default function CloudPCPage() {
               className="rounded-xl bg-white border border-black/10 hover:border-black/25 hover:shadow-sm p-4 flex flex-col items-center gap-2 transition-all cursor-pointer group"
             >
               <span className="text-2xl group-hover:scale-110 transition-transform">{app.icon}</span>
-              <span className="text-xs font-mono font-semibold text-ink">{app.name}</span>
+              <span className="text-xs font-mono font-semibold text-dash-ink">{app.name}</span>
               <span
                 className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
                   app.status === "Running"
                     ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                     : app.status === "Installed"
-                    ? "bg-deep text-muted border border-black/10"
+                    ? "bg-dash-subtle text-dash-muted border border-black/10"
                     : "bg-red-50 text-red-500 border border-red-200"
                 }`}
               >
@@ -403,7 +403,7 @@ export default function CloudPCPage() {
       </section>
 
       {/* ── Access methods ── */}
-      <section className="rounded-2xl bg-deep border border-black/10 p-6 grid sm:grid-cols-3 gap-6">
+      <section className="rounded-2xl bg-dash-subtle border border-black/10 p-6 grid sm:grid-cols-3 gap-6">
         {[
           {
             icon: "🌐",
@@ -427,10 +427,10 @@ export default function CloudPCPage() {
           <div key={method.title} className="space-y-3">
             <div className="text-2xl">{method.icon}</div>
             <div>
-              <h3 className="font-display font-bold text-ink text-sm">{method.title}</h3>
-              <p className="text-xs font-mono text-muted mt-1 leading-relaxed">{method.desc}</p>
+              <h3 className="font-display font-bold text-dash-ink text-sm">{method.title}</h3>
+              <p className="text-xs font-mono text-dash-muted mt-1 leading-relaxed">{method.desc}</p>
             </div>
-            <button className="text-xs font-mono text-ink underline underline-offset-2 hover:opacity-60 transition-opacity cursor-pointer">
+            <button className="text-xs font-mono text-dash-ink underline underline-offset-2 hover:opacity-60 transition-opacity cursor-pointer">
               {method.action} →
             </button>
           </div>

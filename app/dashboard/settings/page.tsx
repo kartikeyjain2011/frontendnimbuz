@@ -102,31 +102,31 @@ export default function SettingsPage() {
     <div className="space-y-8 pb-12">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-cyan text-void font-mono text-xs font-bold px-5 py-3 rounded-xl shadow-glow flex items-center gap-2 animate-bounce">
+        <div className="fixed bottom-6 right-6 z-50 bg-dash-ink text-white font-mono text-xs font-bold px-5 py-3 rounded-xl shadow-sm flex items-center gap-2 animate-bounce">
           <span>✓</span>
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-black/10 pb-6">
         <div>
-          <h1 className="text-3xl font-display font-bold text-ink">
+          <h1 className="text-3xl font-display font-bold text-dash-ink">
             Account & Rig Settings
           </h1>
-          <p className="text-muted text-sm font-mono mt-1">
+          <p className="text-dash-muted text-sm font-mono mt-1">
             Customize your gamer profile, WebRTC streaming quality, linked stores, and cloud hardware preferences.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 font-mono text-xs text-muted bg-surface p-2 rounded-xl border border-line">
+        <div className="flex items-center gap-2 font-mono text-xs text-dash-muted bg-white p-2 rounded-xl border border-black/10">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>Profile Status: <strong className="text-ink">Synced & Verified</strong></span>
+          <span>Profile Status: <strong className="text-dash-ink">Synced & Verified</strong></span>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-line/60 pb-3">
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-black/10 pb-3">
         {[
           { id: "profile", label: "🎮 Profile & Identity", badge: null },
           { id: "stream", label: "⚡ Streaming & Performance", badge: "4K 120FPS" },
@@ -139,13 +139,13 @@ export default function SettingsPage() {
             onClick={() => setActiveTab(tab.id as any)}
             className={`px-4 py-2.5 rounded-xl text-xs font-mono transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer ${
               activeTab === tab.id
-                ? "bg-cyan text-void font-bold shadow-glow"
-                : "bg-surface/50 text-muted hover:text-ink hover:bg-surface border border-line/40"
+                ? "bg-dash-ink text-white font-bold shadow-sm"
+                : "bg-dash-subtle text-dash-muted hover:text-dash-ink hover:bg-dash-subtle border border-black/10"
             }`}
           >
             <span>{tab.label}</span>
             {tab.badge && (
-              <span className={`text-[10px] px-1.5 py-0.5 rounded ${activeTab === tab.id ? "bg-void/20 text-void" : "bg-void text-cyan"}`}>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded ${activeTab === tab.id ? "bg-white/20 text-white" : "bg-dash-subtle text-dash-ink"}`}>
                 {tab.badge}
               </span>
             )}
@@ -159,8 +159,8 @@ export default function SettingsPage() {
       {activeTab === "profile" && (
         <form onSubmit={handleSaveProfile} className="space-y-8">
           {/* Avatar Section */}
-          <div className="rounded-2xl bg-surface border border-line p-6 space-y-6">
-            <h2 className="text-lg font-display font-bold text-ink flex items-center gap-2">
+          <div className="rounded-2xl bg-white border border-black/10 p-6 space-y-6">
+            <h2 className="text-lg font-display font-bold text-dash-ink flex items-center gap-2">
               <span>Avatar & Gamer Avatar</span>
             </h2>
             <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -168,14 +168,14 @@ export default function SettingsPage() {
                 <img
                   src={avatarUrl}
                   alt="User Avatar"
-                  className="w-24 h-24 rounded-2xl object-cover border-2 border-cyan/60 shadow-glow"
+                  className="w-24 h-24 rounded-2xl object-cover border-2 border-dash-ink/30 shadow-sm"
                 />
-                <span className="absolute -bottom-1 -right-1 bg-cyan text-void text-[10px] font-mono font-bold px-2 py-0.5 rounded-full">
+                <span className="absolute -bottom-1 -right-1 bg-dash-ink text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded-full">
                   PRO
                 </span>
               </div>
               <div className="space-y-3 text-center sm:text-left flex-1">
-                <span className="text-xs font-mono text-muted block">
+                <span className="text-xs font-mono text-dash-muted block">
                   Select a pre-made gaming avatar or enter a custom image URL below:
                 </span>
                 <div className="flex flex-wrap justify-center sm:justify-start gap-3">
@@ -185,7 +185,7 @@ export default function SettingsPage() {
                       key={idx}
                       onClick={() => setAvatarUrl(img)}
                       className={`w-10 h-10 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
-                        avatarUrl === img ? "border-cyan scale-110 shadow-glow" : "border-line opacity-60 hover:opacity-100"
+                        avatarUrl === img ? "border-dash-ink scale-110 shadow-sm" : "border-black/10 opacity-60 hover:opacity-100"
                       }`}
                     >
                       <img src={img} alt={`Avatar option ${idx + 1}`} className="w-full h-full object-cover" />
@@ -197,52 +197,52 @@ export default function SettingsPage() {
                   value={avatarUrl}
                   onChange={(e) => setAvatarUrl(e.target.value)}
                   placeholder="Custom image URL (https://...)"
-                  className="w-full bg-void/80 border border-line rounded-lg px-3 py-2 text-xs font-mono text-ink placeholder:text-muted focus:border-cyan focus:outline-none"
+                  className="w-full bg-dash-subtle border border-black/10 rounded-lg px-3 py-2 text-xs font-mono text-dash-ink placeholder:text-dash-muted focus:border-dash-ink focus:outline-none"
                 />
               </div>
             </div>
           </div>
 
           {/* User Info Fields */}
-          <div className="rounded-2xl bg-surface border border-line p-6 space-y-6">
-            <h2 className="text-lg font-display font-bold text-ink">Personal Details</h2>
+          <div className="rounded-2xl bg-white border border-black/10 p-6 space-y-6">
+            <h2 className="text-lg font-display font-bold text-dash-ink">Personal Details</h2>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-xs font-mono text-muted uppercase">GamerTag / Username</label>
+                <label className="text-xs font-mono text-dash-muted uppercase">GamerTag / Username</label>
                 <input
                   type="text"
                   value={gamerTag}
                   onChange={(e) => setGamerTag(e.target.value)}
-                  className="w-full bg-void/80 border border-line rounded-lg px-4 py-2.5 text-xs font-mono text-ink focus:border-cyan focus:outline-none"
+                  className="w-full bg-dash-subtle border border-black/10 rounded-lg px-4 py-2.5 text-xs font-mono text-dash-ink focus:border-dash-ink focus:outline-none"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-mono text-muted uppercase">Full Name</label>
+                <label className="text-xs font-mono text-dash-muted uppercase">Full Name</label>
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full bg-void/80 border border-line rounded-lg px-4 py-2.5 text-xs font-mono text-ink focus:border-cyan focus:outline-none"
+                  className="w-full bg-dash-subtle border border-black/10 rounded-lg px-4 py-2.5 text-xs font-mono text-dash-ink focus:border-dash-ink focus:outline-none"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-mono text-muted uppercase">Email Address</label>
+                <label className="text-xs font-mono text-dash-muted uppercase">Email Address</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-void/80 border border-line rounded-lg px-4 py-2.5 text-xs font-mono text-ink focus:border-cyan focus:outline-none"
+                  className="w-full bg-dash-subtle border border-black/10 rounded-lg px-4 py-2.5 text-xs font-mono text-dash-ink focus:border-dash-ink focus:outline-none"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-mono text-muted uppercase">Primary Datacenter Region</label>
+                <label className="text-xs font-mono text-dash-muted uppercase">Primary Datacenter Region</label>
                 <select
                   value={selectedRegion}
                   onChange={(e) => setSelectedRegion(e.target.value)}
-                  className="w-full bg-void/80 border border-line rounded-lg px-4 py-2.5 text-xs font-mono text-ink focus:border-cyan focus:outline-none cursor-pointer"
+                  className="w-full bg-dash-subtle border border-black/10 rounded-lg px-4 py-2.5 text-xs font-mono text-dash-ink focus:border-dash-ink focus:outline-none cursor-pointer"
                 >
                   {datacenterRegions.map((region) => (
-                    <option key={region.id} value={region.id} className="bg-deep text-ink">
+                    <option key={region.id} value={region.id} className="bg-white text-dash-ink">
                       {region.name} ({region.ping}) - {region.status}
                     </option>
                   ))}
@@ -251,12 +251,12 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-mono text-muted uppercase">Gamer Bio / Quote</label>
+              <label className="text-xs font-mono text-dash-muted uppercase">Gamer Bio / Quote</label>
               <textarea
                 rows={3}
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                className="w-full bg-void/80 border border-line rounded-lg p-4 text-xs font-mono text-ink focus:border-cyan focus:outline-none"
+                className="w-full bg-dash-subtle border border-black/10 rounded-lg p-4 text-xs font-mono text-dash-ink focus:border-dash-ink focus:outline-none"
               />
             </div>
           </div>
@@ -264,7 +264,7 @@ export default function SettingsPage() {
           <div className="flex justify-end gap-3">
             <button
               type="submit"
-              className="px-8 py-3 rounded-xl bg-cyan text-void font-mono font-bold text-xs shadow-glow hover:opacity-90 transition-all cursor-pointer"
+              className="px-8 py-3 rounded-xl bg-dash-ink text-white font-mono font-bold text-xs shadow-sm hover:opacity-90 transition-all cursor-pointer"
             >
               SAVE PROFILE CHANGES
             </button>
@@ -277,20 +277,20 @@ export default function SettingsPage() {
       {/* ───────────────────────────────────────────────────────────── */}
       {activeTab === "stream" && (
         <div className="space-y-8">
-          <div className="rounded-2xl bg-surface border border-line p-6 space-y-6">
+          <div className="rounded-2xl bg-white border border-black/10 p-6 space-y-6">
             <div>
-              <h2 className="text-lg font-display font-bold text-ink">
+              <h2 className="text-lg font-display font-bold text-dash-ink">
                 WebRTC Stream Quality & GPU Hardware
               </h2>
-              <p className="text-xs font-mono text-muted mt-1">
+              <p className="text-xs font-mono text-dash-muted mt-1">
                 Configure your cloud rig rendering targets and streaming protocol parameters.
               </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-6">
               {/* Resolution */}
-              <div className="p-4 rounded-xl bg-void/60 border border-line space-y-3">
-                <label className="text-xs font-mono text-muted uppercase block">Target Resolution</label>
+              <div className="p-4 rounded-xl bg-dash-subtle border border-black/10 space-y-3">
+                <label className="text-xs font-mono text-dash-muted uppercase block">Target Resolution</label>
                 {["4K (2160p)", "1440p Quad HD", "1080p Full HD"].map((res) => (
                   <button
                     key={res}
@@ -301,8 +301,8 @@ export default function SettingsPage() {
                     }}
                     className={`w-full py-2 px-3 rounded-lg text-xs font-mono text-left transition-all cursor-pointer ${
                       resolution === res
-                        ? "bg-cyan/20 border border-cyan text-cyan font-bold"
-                        : "bg-surface/50 border border-line text-muted hover:text-ink"
+                        ? "bg-dash-ink border border-dash-ink text-white font-bold"
+                        : "bg-dash-subtle border border-black/10 text-dash-muted hover:text-dash-ink"
                     }`}
                   >
                     {res}
@@ -311,8 +311,8 @@ export default function SettingsPage() {
               </div>
 
               {/* Target FPS */}
-              <div className="p-4 rounded-xl bg-void/60 border border-line space-y-3">
-                <label className="text-xs font-mono text-muted uppercase block">Target Frame Rate</label>
+              <div className="p-4 rounded-xl bg-dash-subtle border border-black/10 space-y-3">
+                <label className="text-xs font-mono text-dash-muted uppercase block">Target Frame Rate</label>
                 {["240 FPS (Esports)", "120 FPS (Ultra)", "60 FPS (Balanced)"].map((fps) => (
                   <button
                     key={fps}
@@ -323,8 +323,8 @@ export default function SettingsPage() {
                     }}
                     className={`w-full py-2 px-3 rounded-lg text-xs font-mono text-left transition-all cursor-pointer ${
                       targetFps === fps
-                        ? "bg-cyan/20 border border-cyan text-cyan font-bold"
-                        : "bg-surface/50 border border-line text-muted hover:text-ink"
+                        ? "bg-dash-ink border border-dash-ink text-white font-bold"
+                        : "bg-dash-subtle border border-black/10 text-dash-muted hover:text-dash-ink"
                     }`}
                   >
                     {fps}
@@ -333,8 +333,8 @@ export default function SettingsPage() {
               </div>
 
               {/* Bitrate */}
-              <div className="p-4 rounded-xl bg-void/60 border border-line space-y-3">
-                <label className="text-xs font-mono text-muted uppercase block">Max Stream Bitrate</label>
+              <div className="p-4 rounded-xl bg-dash-subtle border border-black/10 space-y-3">
+                <label className="text-xs font-mono text-dash-muted uppercase block">Max Stream Bitrate</label>
                 {["100 Mbps (Ludicrous)", "75 Mbps (High)", "50 Mbps (Standard)"].map((b) => (
                   <button
                     key={b}
@@ -345,8 +345,8 @@ export default function SettingsPage() {
                     }}
                     className={`w-full py-2 px-3 rounded-lg text-xs font-mono text-left transition-all cursor-pointer ${
                       bitrate === b
-                        ? "bg-cyan/20 border border-cyan text-cyan font-bold"
-                        : "bg-surface/50 border border-line text-muted hover:text-ink"
+                        ? "bg-dash-ink border border-dash-ink text-white font-bold"
+                        : "bg-dash-subtle border border-black/10 text-dash-muted hover:text-dash-ink"
                     }`}
                   >
                     {b}
@@ -356,13 +356,13 @@ export default function SettingsPage() {
             </div>
 
             {/* Hardware Toggles */}
-            <div className="space-y-4 pt-4 border-t border-line/60">
-              <div className="flex items-center justify-between p-4 rounded-xl bg-void/60 border border-line">
+            <div className="space-y-4 pt-4 border-t border-black/10">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-dash-subtle border border-black/10">
                 <div>
-                  <h3 className="font-display font-semibold text-ink text-sm">
+                  <h3 className="font-display font-semibold text-dash-ink text-sm">
                     Ray Tracing Hardware Acceleration
                   </h3>
-                  <p className="text-xs font-mono text-muted">
+                  <p className="text-xs font-mono text-dash-muted">
                     Enable RTX Path Tracing and DLSS 3.5 Frame Generation on RTX 4090 Cloud Nodes.
                   </p>
                 </div>
@@ -373,19 +373,19 @@ export default function SettingsPage() {
                     showToast(`Ray Tracing ${!rayTracing ? "enabled" : "disabled"}`);
                   }}
                   className={`w-12 h-6 rounded-full p-1 transition-colors cursor-pointer ${
-                    rayTracing ? "bg-cyan" : "bg-line"
+                    rayTracing ? "bg-dash-ink" : "bg-black/15"
                   }`}
                 >
-                  <div className={`w-4 h-4 rounded-full bg-void transition-transform ${rayTracing ? "translate-x-6" : "translate-x-0"}`} />
+                  <div className={`w-4 h-4 rounded-full bg-white transition-transform ${rayTracing ? "translate-x-6" : "translate-x-0"}`} />
                 </button>
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-xl bg-void/60 border border-line">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-dash-subtle border border-black/10">
                 <div>
-                  <h3 className="font-display font-semibold text-ink text-sm">
+                  <h3 className="font-display font-semibold text-dash-ink text-sm">
                     HDR 10-Bit Color Depth
                   </h3>
-                  <p className="text-xs font-mono text-muted">
+                  <p className="text-xs font-mono text-dash-muted">
                     Stream High Dynamic Range video color directly to compatible displays.
                   </p>
                 </div>
@@ -396,10 +396,10 @@ export default function SettingsPage() {
                     showToast(`HDR 10-Bit ${!hdr ? "enabled" : "disabled"}`);
                   }}
                   className={`w-12 h-6 rounded-full p-1 transition-colors cursor-pointer ${
-                    hdr ? "bg-cyan" : "bg-line"
+                    hdr ? "bg-dash-ink" : "bg-black/15"
                   }`}
                 >
-                  <div className={`w-4 h-4 rounded-full bg-void transition-transform ${hdr ? "translate-x-6" : "translate-x-0"}`} />
+                  <div className={`w-4 h-4 rounded-full bg-white transition-transform ${hdr ? "translate-x-6" : "translate-x-0"}`} />
                 </button>
               </div>
             </div>
@@ -411,12 +411,12 @@ export default function SettingsPage() {
       {/* TAB 3: LINKED STORES */}
       {/* ───────────────────────────────────────────────────────────── */}
       {activeTab === "accounts" && (
-        <div className="rounded-2xl bg-surface border border-line p-6 space-y-6">
+        <div className="rounded-2xl bg-white border border-black/10 p-6 space-y-6">
           <div>
-            <h2 className="text-lg font-display font-bold text-ink">
+            <h2 className="text-lg font-display font-bold text-dash-ink">
               Linked Gaming Accounts & Libraries
             </h2>
-            <p className="text-xs font-mono text-muted mt-1">
+            <p className="text-xs font-mono text-dash-muted mt-1">
               Connect your external digital store accounts to auto-sync games to your Nimbus Cloud PC.
             </p>
           </div>
@@ -425,15 +425,15 @@ export default function SettingsPage() {
             {Object.entries(linkedAccounts).map(([key, data]) => {
               const platformName = key.toUpperCase();
               return (
-                <div key={key} className="p-4 rounded-xl bg-void/80 border border-line flex items-center justify-between gap-4">
+                <div key={key} className="p-4 rounded-xl bg-dash-subtle border border-black/10 flex items-center justify-between gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-display font-bold text-ink text-sm">{platformName}</span>
-                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${data.connected ? "bg-emerald-400/20 text-emerald-400 border border-emerald-400/40" : "bg-surface text-muted"}`}>
+                      <span className="font-display font-bold text-dash-ink text-sm">{platformName}</span>
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${data.connected ? "bg-emerald-400/20 text-emerald-600 border border-emerald-400/40" : "bg-white text-dash-muted"}`}>
                         {data.connected ? "CONNECTED" : "NOT LINKED"}
                       </span>
                     </div>
-                    <p className="text-xs font-mono text-muted">
+                    <p className="text-xs font-mono text-dash-muted">
                       {data.connected ? `Linked as: ${data.username}` : "Sync cloud games & saves"}
                     </p>
                   </div>
@@ -443,8 +443,8 @@ export default function SettingsPage() {
                     onClick={() => toggleAccount(key as any)}
                     className={`px-4 py-2 rounded-lg font-mono text-xs font-bold transition-all cursor-pointer ${
                       data.connected
-                        ? "bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500 hover:text-ink"
-                        : "bg-cyan/10 text-cyan border border-cyan/40 hover:bg-cyan hover:text-void"
+                        ? "bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500 hover:text-dash-ink"
+                        : "bg-dash-ink/5 text-dash-ink border border-dash-ink/25 hover:bg-dash-ink hover:text-white"
                     }`}
                   >
                     {data.connected ? "Disconnect" : "Connect"}
@@ -461,11 +461,11 @@ export default function SettingsPage() {
       {/* ───────────────────────────────────────────────────────────── */}
       {activeTab === "security" && (
         <div className="space-y-6">
-          <div className="rounded-2xl bg-surface border border-line p-6 space-y-6">
+          <div className="rounded-2xl bg-white border border-black/10 p-6 space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-display font-bold text-ink">Two-Factor Authentication (2FA)</h2>
-                <p className="text-xs font-mono text-muted mt-1">
+                <h2 className="text-lg font-display font-bold text-dash-ink">Two-Factor Authentication (2FA)</h2>
+                <p className="text-xs font-mono text-dash-muted mt-1">
                   Protect your cloud rig and purchases with authenticator apps.
                 </p>
               </div>
@@ -476,27 +476,27 @@ export default function SettingsPage() {
                   showToast(`2FA Security ${!twoFactor ? "Enabled" : "Disabled"}`);
                 }}
                 className={`w-12 h-6 rounded-full p-1 transition-colors cursor-pointer ${
-                  twoFactor ? "bg-cyan" : "bg-line"
+                  twoFactor ? "bg-dash-ink" : "bg-black/15"
                 }`}
               >
-                <div className={`w-4 h-4 rounded-full bg-void transition-transform ${twoFactor ? "translate-x-6" : "translate-x-0"}`} />
+                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${twoFactor ? "translate-x-6" : "translate-x-0"}`} />
               </button>
             </div>
 
-            <div className="pt-6 border-t border-line/60 space-y-4">
-              <h3 className="font-display font-semibold text-ink text-sm">Active Cloud Sessions</h3>
+            <div className="pt-6 border-t border-black/10 space-y-4">
+              <h3 className="font-display font-semibold text-dash-ink text-sm">Active Cloud Sessions</h3>
               <div className="space-y-3">
-                <div className="p-3.5 rounded-xl bg-void/80 border border-line flex justify-between items-center text-xs font-mono">
+                <div className="p-3.5 rounded-xl bg-dash-subtle border border-black/10 flex justify-between items-center text-xs font-mono">
                   <div>
-                    <span className="text-ink font-bold block">Windows 11 Cloud PC - RTX 4090 Rig</span>
-                    <span className="text-muted">US-East Node • Active Stream</span>
+                    <span className="text-dash-ink font-bold block">Windows 11 Cloud PC - RTX 4090 Rig</span>
+                    <span className="text-dash-muted">US-East Node • Active Stream</span>
                   </div>
-                  <span className="text-emerald-400 font-bold">CURRENT SESSION</span>
+                  <span className="text-emerald-600 font-bold">CURRENT SESSION</span>
                 </div>
-                <div className="p-3.5 rounded-xl bg-void/80 border border-line flex justify-between items-center text-xs font-mono">
+                <div className="p-3.5 rounded-xl bg-dash-subtle border border-black/10 flex justify-between items-center text-xs font-mono">
                   <div>
-                    <span className="text-ink font-bold block">Chrome Browser - Dashboard</span>
-                    <span className="text-muted">IP 192.168.1.100 • 5 mins ago</span>
+                    <span className="text-dash-ink font-bold block">Chrome Browser - Dashboard</span>
+                    <span className="text-dash-muted">IP 192.168.1.100 • 5 mins ago</span>
                   </div>
                   <button
                     onClick={() => showToast("Session revoked.")}
@@ -515,10 +515,10 @@ export default function SettingsPage() {
       {/* TAB 5: NOTIFICATIONS */}
       {/* ───────────────────────────────────────────────────────────── */}
       {activeTab === "notifications" && (
-        <div className="rounded-2xl bg-surface border border-line p-6 space-y-6">
+        <div className="rounded-2xl bg-white border border-black/10 p-6 space-y-6">
           <div>
-            <h2 className="text-lg font-display font-bold text-ink">Gamer Notification Preferences</h2>
-            <p className="text-xs font-mono text-muted mt-1">
+            <h2 className="text-lg font-display font-bold text-dash-ink">Gamer Notification Preferences</h2>
+            <p className="text-xs font-mono text-dash-muted mt-1">
               Choose which game events and system alerts trigger notifications.
             </p>
           </div>
@@ -532,10 +532,10 @@ export default function SettingsPage() {
             ].map((item) => {
               const enabled = (notifs as any)[item.id];
               return (
-                <div key={item.id} className="p-4 rounded-xl bg-void/80 border border-line flex items-center justify-between gap-4">
+                <div key={item.id} className="p-4 rounded-xl bg-dash-subtle border border-black/10 flex items-center justify-between gap-4">
                   <div>
-                    <h3 className="font-display font-semibold text-ink text-sm">{item.title}</h3>
-                    <p className="text-xs font-mono text-muted">{item.desc}</p>
+                    <h3 className="font-display font-semibold text-dash-ink text-sm">{item.title}</h3>
+                    <p className="text-xs font-mono text-dash-muted">{item.desc}</p>
                   </div>
                   <button
                     type="button"
@@ -544,10 +544,10 @@ export default function SettingsPage() {
                       showToast(`Preference updated.`);
                     }}
                     className={`w-12 h-6 rounded-full p-1 transition-colors cursor-pointer shrink-0 ${
-                      enabled ? "bg-cyan" : "bg-line"
+                      enabled ? "bg-dash-ink" : "bg-black/15"
                     }`}
                   >
-                    <div className={`w-4 h-4 rounded-full bg-void transition-transform ${enabled ? "translate-x-6" : "translate-x-0"}`} />
+                    <div className={`w-4 h-4 rounded-full bg-white transition-transform ${enabled ? "translate-x-6" : "translate-x-0"}`} />
                   </button>
                 </div>
               );

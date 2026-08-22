@@ -79,21 +79,21 @@ function StoreGameCard({
       {/* Metadata */}
       <div className="space-y-2 flex-1">
         <div className="flex justify-between items-start">
-          <span className="text-[11px] font-mono text-muted">{game.genres?.[0]?.name || "Action"}</span>
+          <span className="text-[11px] font-mono text-dash-muted">{game.genres?.[0]?.name || "Action"}</span>
           <span className="text-[11px] font-mono text-amber-500 font-bold">★ {game.rating?.toFixed(1) || "4.5"}</span>
         </div>
 
         <Link href={`/dashboard/games/${game.id}`}>
-          <h3 className="font-display font-bold text-ink text-base line-clamp-1 group-hover:text-emerald-600 transition-colors">
+          <h3 className="font-display font-bold text-dash-ink text-base line-clamp-1 group-hover:text-emerald-600 transition-colors">
             {game.name}
           </h3>
         </Link>
 
         <div className="flex flex-wrap gap-1.5 pt-1">
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-deep border border-black/10 text-muted">
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-dash-subtle border border-black/10 text-dash-muted">
             4K @ 120 FPS
           </span>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/5 border border-black/20 text-ink">
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/5 border border-black/20 text-dash-ink">
             KINGUIN KEYS READY
           </span>
         </div>
@@ -104,21 +104,21 @@ function StoreGameCard({
         <div className="font-mono flex justify-between items-center">
           <div>
             {discount > 0 && (
-              <span className="text-[10px] text-muted line-through mr-1">
+              <span className="text-[10px] text-dash-muted line-through mr-1">
                 ${priceUSD.toFixed(2)}
               </span>
             )}
-            <span className="text-base font-bold text-ink">
+            <span className="text-base font-bold text-dash-ink">
               ${finalPriceUSD.toFixed(2)}
             </span>
           </div>
-          <span className="text-xs text-muted font-mono">(₹{finalPriceINR.toLocaleString()} INR)</span>
+          <span className="text-xs text-dash-muted font-mono">(₹{finalPriceINR.toLocaleString()} INR)</span>
         </div>
 
         {isOwned ? (
           <button
             onClick={() => onLaunchStream && onLaunchStream(game)}
-            className="w-full py-2.5 rounded-xl bg-ink text-white hover:bg-black/80 text-xs font-bold transition-all cursor-pointer shadow-sm flex items-center justify-center gap-1.5"
+            className="w-full py-2.5 rounded-xl bg-dash-ink text-white hover:bg-black/80 text-xs font-bold transition-all cursor-pointer shadow-sm flex items-center justify-center gap-1.5"
           >
             <span>⚡</span> STREAM NOW
           </button>
@@ -126,7 +126,7 @@ function StoreGameCard({
           <div className="grid grid-cols-2 gap-2 font-mono">
             <button
               onClick={() => onCheckout(game)}
-              className="py-2 rounded-xl bg-ink text-white hover:bg-black/80 text-xs font-bold transition-all cursor-pointer shadow-sm text-center"
+              className="py-2 rounded-xl bg-dash-ink text-white hover:bg-black/80 text-xs font-bold transition-all cursor-pointer shadow-sm text-center"
             >
               RAZORPAY
             </button>
@@ -341,16 +341,16 @@ export default function StorePage() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono uppercase tracking-wider text-ink px-2 py-0.5 bg-black/5 border border-black/15 rounded font-semibold">
+            <span className="text-xs font-mono uppercase tracking-wider text-dash-ink px-2 py-0.5 bg-black/5 border border-black/15 rounded font-semibold">
               Nimbus Marketplace
             </span>
             <span className="text-xs font-mono text-emerald-600 font-semibold">● Razorpay Enabled</span>
             <span className="text-xs font-mono text-orange-600 font-semibold">● Kinguin Store Partner</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-display font-bold text-ink mt-1">
+          <h1 className="text-3xl md:text-4xl font-display font-bold text-dash-ink mt-1">
             Cloud Game Store
           </h1>
-          <p className="text-muted text-sm font-mono mt-1">
+          <p className="text-dash-muted text-sm font-mono mt-1">
             Buy digital keys via Razorpay or redirect to Kinguin Marketplace with Client Partner ID.
           </p>
         </div>
@@ -430,10 +430,10 @@ export default function StorePage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search store by game title, genre..."
-              className="w-full bg-deep border border-black/10 rounded-xl pl-10 pr-4 py-2.5 text-xs font-mono text-ink placeholder:text-muted focus:border-black/40 focus:outline-none transition-colors"
+              className="w-full bg-dash-subtle border border-black/10 rounded-xl pl-10 pr-4 py-2.5 text-xs font-mono text-dash-ink placeholder:text-dash-muted focus:border-black/40 focus:outline-none transition-colors"
             />
             <svg
-              className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
+              className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-dash-muted"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -446,7 +446,7 @@ export default function StorePage() {
             <select
               value={selectedGenre}
               onChange={(e) => setSelectedGenre(e.target.value)}
-              className="w-full bg-deep border border-black/10 rounded-xl px-4 py-2.5 text-xs font-mono text-ink focus:border-black/40 focus:outline-none cursor-pointer"
+              className="w-full bg-dash-subtle border border-black/10 rounded-xl px-4 py-2.5 text-xs font-mono text-dash-ink focus:border-black/40 focus:outline-none cursor-pointer"
             >
               <option value="All">All Genres</option>
               <option value="Action">Action</option>
@@ -462,7 +462,7 @@ export default function StorePage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="w-full bg-deep border border-black/10 rounded-xl px-4 py-2.5 text-xs font-mono text-ink focus:border-black/40 focus:outline-none cursor-pointer"
+              className="w-full bg-dash-subtle border border-black/10 rounded-xl px-4 py-2.5 text-xs font-mono text-dash-ink focus:border-black/40 focus:outline-none cursor-pointer"
             >
               <option value="featured">Featured & Popular</option>
               <option value="price-low">Price: Low to High</option>
@@ -482,13 +482,13 @@ export default function StorePage() {
         </div>
       ) : filteredGames.length === 0 ? (
         <div className="p-12 text-center rounded-2xl bg-white border border-black/10 space-y-3 font-mono text-xs shadow-sm">
-          <p className="text-muted">No games found matching your current filter criteria.</p>
+          <p className="text-dash-muted">No games found matching your current filter criteria.</p>
           <button
             onClick={() => {
               setSearchQuery("");
               setSelectedGenre("All");
             }}
-            className="text-ink underline cursor-pointer font-bold"
+            className="text-dash-ink underline cursor-pointer font-bold"
           >
             Reset Filters
           </button>
@@ -516,36 +516,36 @@ export default function StorePage() {
           <div className="bg-white border border-black/10 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-xl relative font-mono">
             <div className="flex items-center justify-between border-b border-black/10 pb-4">
               <div>
-                <span className="text-[10px] text-muted uppercase tracking-wider">Purchase Options</span>
-                <h3 className="text-xl font-display font-bold text-ink">{checkoutGame.name}</h3>
+                <span className="text-[10px] text-dash-muted uppercase tracking-wider">Purchase Options</span>
+                <h3 className="text-xl font-display font-bold text-dash-ink">{checkoutGame.name}</h3>
               </div>
               <button
                 onClick={() => setCheckoutGame(null)}
-                className="text-muted hover:text-ink cursor-pointer text-xl leading-none"
+                className="text-dash-muted hover:text-dash-ink cursor-pointer text-xl leading-none"
               >
                 ✕
               </button>
             </div>
 
-            <div className="p-3 rounded-xl bg-deep border border-black/10 flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-dash-subtle border border-black/10 flex items-center gap-4">
               <img src={checkoutGame.background_image} alt={checkoutGame.name} className="w-16 h-16 rounded-lg object-cover" />
               <div className="min-w-0 flex-1 text-xs space-y-1">
-                <div className="text-ink font-bold truncate">{checkoutGame.name}</div>
-                <div className="text-muted text-[11px]">Digital License • Instant Cloud Sync</div>
+                <div className="text-dash-ink font-bold truncate">{checkoutGame.name}</div>
+                <div className="text-dash-muted text-[11px]">Digital License • Instant Cloud Sync</div>
               </div>
             </div>
 
             {/* Select Checkout Method */}
             <div className="space-y-2">
-              <label className="text-xs uppercase text-muted block">Select Payment Gateway</label>
+              <label className="text-xs uppercase text-dash-muted block">Select Payment Gateway</label>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setPaymentMethod("razorpay")}
                   className={`p-3 rounded-xl border text-xs text-left transition-all cursor-pointer ${
                     paymentMethod === "razorpay"
-                      ? "bg-ink text-white border-ink font-bold"
-                      : "bg-deep border-black/10 text-muted hover:text-ink"
+                      ? "bg-dash-ink text-white border-dash-ink font-bold"
+                      : "bg-dash-subtle border-black/10 text-dash-muted hover:text-dash-ink"
                   }`}
                 >
                   💳 Razorpay Gateway
@@ -556,7 +556,7 @@ export default function StorePage() {
                   className={`p-3 rounded-xl border text-xs text-left transition-all cursor-pointer ${
                     paymentMethod === "kinguin"
                       ? "bg-orange-600 text-white border-orange-600 font-bold"
-                      : "bg-deep border-black/10 text-muted hover:text-ink"
+                      : "bg-dash-subtle border-black/10 text-dash-muted hover:text-dash-ink"
                   }`}
                 >
                   🏷️ Kinguin Marketplace ↗
@@ -564,8 +564,8 @@ export default function StorePage() {
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-deep border border-black/10 space-y-2 text-xs">
-              <div className="flex justify-between text-ink font-bold text-sm">
+            <div className="p-4 rounded-xl bg-dash-subtle border border-black/10 space-y-2 text-xs">
+              <div className="flex justify-between text-dash-ink font-bold text-sm">
                 <span>Total Price:</span>
                 <span>
                   ${(19.99 + (checkoutGame.id % 35)).toFixed(2)} (₹{Math.round((19.99 + (checkoutGame.id % 35)) * 83).toLocaleString()} INR)
@@ -579,7 +579,7 @@ export default function StorePage() {
               className={`w-full py-3.5 rounded-xl text-white font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm ${
                 paymentMethod === "kinguin"
                   ? "bg-orange-600 hover:bg-orange-700"
-                  : "bg-ink hover:bg-black/80"
+                  : "bg-dash-ink hover:bg-black/80"
               }`}
             >
               {isProcessing ? (
@@ -607,17 +607,17 @@ export default function StorePage() {
 
             <div className="space-y-2">
               <span className="text-xs uppercase text-emerald-600">Payment Verified</span>
-              <h3 className="text-2xl font-display font-bold text-ink">
+              <h3 className="text-2xl font-display font-bold text-dash-ink">
                 {purchasedSuccess.game.name}
               </h3>
-              <p className="text-xs text-muted">
+              <p className="text-xs text-dash-muted">
                 Game added to your Cloud Library. Pre-installed and ready to stream.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-deep border border-black/10 space-y-2">
-              <span className="text-[10px] text-muted uppercase block">Digital License Key</span>
-              <div className="font-bold text-ink text-lg tracking-widest">
+            <div className="p-4 rounded-xl bg-dash-subtle border border-black/10 space-y-2">
+              <span className="text-[10px] text-dash-muted uppercase block">Digital License Key</span>
+              <div className="font-bold text-dash-ink text-lg tracking-widest">
                 {purchasedSuccess.key}
               </div>
             </div>
@@ -629,13 +629,13 @@ export default function StorePage() {
                   setPurchasedSuccess(null);
                   setActiveGameStream(g);
                 }}
-                className="flex-1 py-3 rounded-xl bg-ink text-white font-bold text-xs hover:bg-black/80 transition-all text-center cursor-pointer"
+                className="flex-1 py-3 rounded-xl bg-dash-ink text-white font-bold text-xs hover:bg-black/80 transition-all text-center cursor-pointer"
               >
                 ⚡ STREAM ON CLOUD NOW
               </button>
               <button
                 onClick={() => setPurchasedSuccess(null)}
-                className="px-6 py-3 rounded-xl bg-white border border-black/15 text-muted hover:text-ink text-xs cursor-pointer"
+                className="px-6 py-3 rounded-xl bg-white border border-black/15 text-dash-muted hover:text-dash-ink text-xs cursor-pointer"
               >
                 Continue Browsing
               </button>

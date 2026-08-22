@@ -65,27 +65,27 @@ function LibraryCard({ game, isPurchased }: { game: RawgGame; isPurchased: boole
 
       <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
         <div className="space-y-1">
-          <div className="flex justify-between items-center text-xs font-mono text-muted">
+          <div className="flex justify-between items-center text-xs font-mono text-dash-muted">
             <span>{genreName}</span>
             <span>Released: {game.released?.split("-")[0] || "2024"}</span>
           </div>
-          <h3 className="font-display font-semibold text-ink text-lg line-clamp-1 group-hover:text-emerald-600 transition-colors">
+          <h3 className="font-display font-semibold text-dash-ink text-lg line-clamp-1 group-hover:text-emerald-600 transition-colors">
             {game.name}
           </h3>
         </div>
 
         <div className="space-y-3 pt-2">
-          <div className="flex justify-between text-xs font-mono text-muted">
+          <div className="flex justify-between text-xs font-mono text-dash-muted">
             <span>4K @ 120 FPS</span>
             <span>Metacritic: {game.metacritic || "N/A"}</span>
           </div>
 
           {isPurchased ? (
-            <div className="w-full py-2.5 rounded-lg text-xs font-mono font-bold text-center bg-ink text-white group-hover:bg-black/80 transition-all">
+            <div className="w-full py-2.5 rounded-lg text-xs font-mono font-bold text-center bg-dash-ink text-white group-hover:bg-black/80 transition-all">
               🖥️ LAUNCH ON CLOUD PC
             </div>
           ) : (
-            <div className="w-full py-2.5 rounded-lg text-xs font-mono font-bold text-center bg-black/5 border border-black/15 text-ink group-hover:bg-ink group-hover:text-white transition-all">
+            <div className="w-full py-2.5 rounded-lg text-xs font-mono font-bold text-center bg-black/5 border border-black/15 text-dash-ink group-hover:bg-dash-ink group-hover:text-white transition-all">
               ⚡ BUY & PLAY (₹{priceINR})
             </div>
           )}
@@ -129,25 +129,25 @@ export default function LibraryPage() {
       {/* Header section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold text-ink">
+          <h1 className="text-3xl font-display font-bold text-dash-ink">
             Cloud Game Library
           </h1>
-          <p className="text-muted text-sm font-mono mt-1">
+          <p className="text-dash-muted text-sm font-mono mt-1">
             Browse 2,500+ cloud-ready titles with continuous stream previews.
           </p>
         </div>
 
         {/* Linked Accounts */}
         <div className="flex items-center gap-3">
-          <span className="text-xs font-mono text-muted hidden sm:inline">Linked Accounts:</span>
+          <span className="text-xs font-mono text-dash-muted hidden sm:inline">Linked Accounts:</span>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded bg-white border border-black/10 text-xs font-mono text-ink flex items-center gap-1.5 shadow-sm">
+            <span className="px-2.5 py-1 rounded bg-white border border-black/10 text-xs font-mono text-dash-ink flex items-center gap-1.5 shadow-sm">
               <span className="w-2 h-2 rounded-full bg-emerald-500" /> Steam
             </span>
-            <span className="px-2.5 py-1 rounded bg-white border border-black/10 text-xs font-mono text-ink flex items-center gap-1.5 shadow-sm">
+            <span className="px-2.5 py-1 rounded bg-white border border-black/10 text-xs font-mono text-dash-ink flex items-center gap-1.5 shadow-sm">
               <span className="w-2 h-2 rounded-full bg-emerald-500" /> Epic Games
             </span>
-            <span className="px-2.5 py-1 rounded bg-deep border border-black/10 text-xs font-mono text-muted flex items-center gap-1.5">
+            <span className="px-2.5 py-1 rounded bg-dash-subtle border border-black/10 text-xs font-mono text-dash-muted flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-black/20" /> Xbox
             </span>
           </div>
@@ -159,7 +159,7 @@ export default function LibraryPage() {
         <div className="flex flex-col md:flex-row items-center gap-4">
           <div className="relative flex-1 w-full">
             <svg
-              className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
+              className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-dash-muted"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -171,7 +171,7 @@ export default function LibraryPage() {
               placeholder="Search by game title, genre, or tag..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-deep border border-black/10 rounded-lg pl-10 pr-4 py-2.5 text-xs font-mono text-ink placeholder:text-muted focus:border-black/40 focus:outline-none transition-colors"
+              className="w-full bg-dash-subtle border border-black/10 rounded-lg pl-10 pr-4 py-2.5 text-xs font-mono text-dash-ink placeholder:text-dash-muted focus:border-black/40 focus:outline-none transition-colors"
             />
           </div>
         </div>
@@ -184,8 +184,8 @@ export default function LibraryPage() {
               onClick={() => setSelectedGenre(genre)}
               className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all whitespace-nowrap cursor-pointer ${
                 selectedGenre === genre
-                  ? "bg-ink text-white font-semibold shadow-sm"
-                  : "bg-deep text-muted hover:text-ink border border-black/10"
+                  ? "bg-dash-ink text-white font-semibold shadow-sm"
+                  : "bg-dash-subtle text-dash-muted hover:text-dash-ink border border-black/10"
               }`}
             >
               {genre}
@@ -203,7 +203,7 @@ export default function LibraryPage() {
         </div>
       ) : filteredGames.length === 0 ? (
         <div className="text-center py-16 rounded-xl bg-white border border-black/10 space-y-3 shadow-sm">
-          <p className="text-sm font-mono text-muted">
+          <p className="text-sm font-mono text-dash-muted">
             No games found matching your search parameters.
           </p>
           <button
@@ -211,7 +211,7 @@ export default function LibraryPage() {
               setSearchQuery("");
               setSelectedGenre("All");
             }}
-            className="text-xs text-ink hover:underline font-mono cursor-pointer font-bold"
+            className="text-xs text-dash-ink hover:underline font-mono cursor-pointer font-bold"
           >
             Reset Filters
           </button>

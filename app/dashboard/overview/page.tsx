@@ -53,17 +53,17 @@ function OverviewGameCard({
 
       <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
         <div>
-          <span className="text-[11px] font-mono text-muted">{game.genres[0]?.name || "Action"}</span>
-          <h3 className="font-display font-bold text-ink text-base line-clamp-1 group-hover:text-emerald-600 transition-colors">
+          <span className="text-[11px] font-mono text-dash-muted">{game.genres[0]?.name || "Action"}</span>
+          <h3 className="font-display font-bold text-dash-ink text-base line-clamp-1 group-hover:text-emerald-600 transition-colors">
             {game.name}
           </h3>
         </div>
 
         <div className="pt-2 border-t border-black/10 flex items-center justify-between font-mono text-xs">
-          <span className="text-muted">Metacritic: {game.metacritic || "N/A"}</span>
+          <span className="text-dash-muted">Metacritic: {game.metacritic || "N/A"}</span>
           <button
             onClick={() => onLaunchStream(game)}
-            className="px-3.5 py-1.5 rounded-lg bg-ink text-white font-bold text-[11px] hover:bg-black/80 transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 rounded-lg bg-dash-ink text-white font-bold text-[11px] hover:bg-black/80 transition-colors cursor-pointer"
           >
             ⚡ PLAY NOW
           </button>
@@ -95,17 +95,17 @@ export default function OverviewPage() {
         <div className="relative z-10 space-y-2">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-            <span className="text-xs font-mono uppercase tracking-wider text-ink font-semibold">
+            <span className="text-xs font-mono uppercase tracking-wider text-dash-ink font-semibold">
               Cloud Node Ready
             </span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-display font-bold text-ink">
+          <h1 className="text-3xl md:text-4xl font-display font-bold text-dash-ink">
             Welcome back,{" "}
-            <span className="text-ink underline decoration-black/20">
+            <span className="text-dash-ink underline decoration-black/20">
               {isLoaded ? user?.firstName || user?.username || "Gamer" : "Gamer"}
             </span>
           </h1>
-          <p className="text-muted text-sm max-w-xl font-mono">
+          <p className="text-dash-muted text-sm max-w-xl font-mono">
             Your Cloud GPU rig is pre-warmed and connected. Zero latency stream ready.
           </p>
         </div>
@@ -113,19 +113,19 @@ export default function OverviewPage() {
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-black/10 font-mono text-xs">
           <div>
-            <span className="text-muted block mb-1">Server Latency</span>
-            <span className="text-ink text-base font-semibold">4 ms</span>
+            <span className="text-dash-muted block mb-1">Server Latency</span>
+            <span className="text-dash-ink text-base font-semibold">4 ms</span>
           </div>
           <div>
-            <span className="text-muted block mb-1">Stream Tier</span>
-            <span className="text-ink text-base font-semibold">4K RTX Ultimate</span>
+            <span className="text-dash-muted block mb-1">Stream Tier</span>
+            <span className="text-dash-ink text-base font-semibold">4K RTX Ultimate</span>
           </div>
           <div>
-            <span className="text-muted block mb-1">Catalog Sync</span>
+            <span className="text-dash-muted block mb-1">Catalog Sync</span>
             <span className="text-emerald-600 text-base font-semibold">● Connected</span>
           </div>
           <div>
-            <span className="text-muted block mb-1">Account Status</span>
+            <span className="text-dash-muted block mb-1">Account Status</span>
             <span className="text-emerald-600 text-base font-semibold">● Active Pro</span>
           </div>
         </div>
@@ -135,15 +135,15 @@ export default function OverviewPage() {
       <section className="rounded-xl bg-white border border-black/10 p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono uppercase text-ink px-2 py-0.5 rounded bg-black/5 border border-black/15 font-semibold">
+            <span className="text-xs font-mono uppercase text-dash-ink px-2 py-0.5 rounded bg-black/5 border border-black/15 font-semibold">
               Personal Windows Rig
             </span>
             <span className="text-xs font-mono text-emerald-600 font-semibold">● VM Running</span>
           </div>
-          <h2 className="text-xl font-display font-bold text-ink">
+          <h2 className="text-xl font-display font-bold text-dash-ink">
             Titan Cloud PC Instance
           </h2>
-          <p className="text-xs text-muted font-mono">
+          <p className="text-xs text-dash-muted font-mono">
             Parsec & WebRTC Low-Latency Stream Active
           </p>
         </div>
@@ -151,7 +151,7 @@ export default function OverviewPage() {
         <div className="flex items-center gap-3 w-full md:w-auto">
           <Link
             href="/dashboard/cloud-pc"
-            className="w-full md:w-auto px-6 py-3 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all text-center"
+            className="w-full md:w-auto px-6 py-3 rounded-xl bg-dash-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all text-center"
           >
             🖥️ LAUNCH CLOUD DESKTOP
           </Link>
@@ -164,17 +164,17 @@ export default function OverviewPage() {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-mono uppercase text-emerald-600 font-bold">● LIVE REELS</span>
-              <h2 className="text-xl font-display font-bold text-ink">
+              <h2 className="text-xl font-display font-bold text-dash-ink">
                 Featured Cloud Titles
               </h2>
             </div>
-            <p className="text-xs font-mono text-muted mt-0.5">
+            <p className="text-xs font-mono text-dash-muted mt-0.5">
               Continuous live stream previews of ready-to-play cloud titles.
             </p>
           </div>
           <Link
             href="/dashboard/library"
-            className="text-xs text-ink hover:underline font-mono font-semibold"
+            className="text-xs text-dash-ink hover:underline font-mono font-semibold"
           >
             Browse Full Library →
           </Link>
@@ -197,21 +197,21 @@ export default function OverviewPage() {
 
       {/* Datacenter Nodes */}
       <section className="rounded-xl bg-white border border-black/10 p-6 space-y-4 shadow-sm">
-        <h2 className="text-lg font-display font-bold text-ink">
+        <h2 className="text-lg font-display font-bold text-dash-ink">
           Global Cloud Datacenter Nodes
         </h2>
         <div className="grid md:grid-cols-3 gap-4">
           {nodes.map((node) => (
             <div
               key={node.region}
-              className="p-4 rounded-lg bg-deep border border-black/10 flex items-center justify-between font-mono text-xs"
+              className="p-4 rounded-lg bg-dash-subtle border border-black/10 flex items-center justify-between font-mono text-xs"
             >
               <div>
-                <span className="text-ink font-semibold block mb-0.5">{node.region}</span>
-                <span className="text-muted">Load: {node.load}</span>
+                <span className="text-dash-ink font-semibold block mb-0.5">{node.region}</span>
+                <span className="text-dash-muted">Load: {node.load}</span>
               </div>
               <div className="text-right">
-                <span className="text-ink font-bold block">{node.ping}</span>
+                <span className="text-dash-ink font-bold block">{node.ping}</span>
                 <span className="text-emerald-600 font-semibold">{node.status}</span>
               </div>
             </div>

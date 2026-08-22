@@ -23,19 +23,38 @@ function InstagramMark({ className }: { className?: string }) {
 const columns = [
   {
     title: "Product",
-    links: ["Library", "Devices", "How it works", "Pricing"],
+    links: [
+      { label: "Library", href: "/#library" },
+      { label: "Devices", href: "/#devices" },
+      { label: "How it works", href: "/#how-it-works" },
+      { label: "Pricing", href: "/#pricing" },
+    ],
   },
   {
     title: "Company",
-    links: ["About", "Careers", "Press", "Contact"],
+    links: [
+      { label: "About", href: "/#top" },
+      { label: "Careers", href: "/#top" },
+      { label: "Press", href: "/#top" },
+      { label: "Contact", href: "mailto:hi@playnimbuz.com" },
+    ],
   },
   {
     title: "Support",
-    links: ["Help center", "System check", "Status", "Community"],
+    links: [
+      { label: "Help center", href: "/#top" },
+      { label: "System check", href: "/#performance" },
+      { label: "Status", href: "/#top" },
+      { label: "Community", href: "https://www.instagram.com/playnimbuzcom" },
+    ],
   },
   {
     title: "Legal",
-    links: ["Terms", "Privacy", "Refunds"],
+    links: [
+      { label: "Terms", href: "/terms" },
+      { label: "Privacy", href: "/privacy" },
+      { label: "Refunds", href: "/refunds" },
+    ],
   },
 ];
 
@@ -55,7 +74,7 @@ export default function Footer() {
             No install, no queue on paid plans, no hardware to outgrow.
           </p>
           <a
-            href="#pricing"
+            href="/#pricing"
             className="mt-10 inline-flex items-center rounded-full bg-plasma-sweep text-white font-medium px-8 py-4 hover:shadow-glow transition-shadow"
           >
             Start streaming free
@@ -94,12 +113,12 @@ export default function Footer() {
               <h4 className="text-sm font-medium text-ink mb-4">{c.title}</h4>
               <ul className="space-y-3">
                 {c.links.map((l) => (
-                  <li key={l}>
+                  <li key={l.label}>
                     <a
-                      href="#top"
+                      href={l.href}
                       className="text-sm text-muted hover:text-ink transition-colors"
                     >
-                      {l}
+                      {l.label}
                     </a>
                   </li>
                 ))}
@@ -122,6 +141,9 @@ export default function Footer() {
                 91 Spring Board, Jhandewalan, Delhi&#8209;110055
               </span>
             </address>
+            <p className="mt-2 font-mono text-[11px] leading-5 text-muted">
+              CIN U72900DL2021PTC388171 · GSTIN 07AAECL7835P1ZT
+            </p>
           </div>
 
           <div>
@@ -182,10 +204,21 @@ export default function Footer() {
         </div>
 
         <div className="container-px py-6 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted text-center sm:text-left">
-          <span>
-            © {new Date().getFullYear()} Lemonade Digital Media Technology
-            Private Limited. All rights reserved.
-          </span>
+          <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
+            <span>
+              © {new Date().getFullYear()} Lemonade Digital Media Technology
+              Private Limited. All rights reserved.
+            </span>
+            <a href="/terms" className="hover:text-ink transition-colors">
+              Terms
+            </a>
+            <a href="/privacy" className="hover:text-ink transition-colors">
+              Privacy Policy
+            </a>
+            <a href="/refunds" className="hover:text-ink transition-colors">
+              Refund Policy
+            </a>
+          </div>
           <span className="font-mono">Nearest node: Mumbai · 11ms</span>
         </div>
       </footer>

@@ -50,7 +50,7 @@ function MyGameCard({
           title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
           className={`absolute top-2.5 right-2.5 p-2 rounded-full backdrop-blur-md transition-all cursor-pointer ${
             isFavorite
-              ? "bg-ink text-white shadow-sm"
+              ? "bg-dash-ink text-white shadow-sm"
               : "bg-black/60 text-white/70 hover:text-white border border-white/10"
           }`}
         >
@@ -67,23 +67,23 @@ function MyGameCard({
       <div className="flex-1 flex flex-col justify-between space-y-3">
         <div>
           <div className="flex justify-between items-start gap-2">
-            <span className="text-[11px] font-mono text-muted">{genreName}</span>
+            <span className="text-[11px] font-mono text-dash-muted">{genreName}</span>
             <span className="text-[11px] font-mono text-emerald-600 font-semibold flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Backend Synced
             </span>
           </div>
           <Link href={`/dashboard/games/${game.slug || game.id}`}>
-            <h3 className="font-display font-bold text-ink text-lg line-clamp-1 hover:text-emerald-600 transition-colors">
+            <h3 className="font-display font-bold text-dash-ink text-lg line-clamp-1 hover:text-emerald-600 transition-colors">
               {game.name}
             </h3>
           </Link>
         </div>
 
         {/* Stats detail */}
-        <div className="space-y-1.5 font-mono text-xs text-muted pt-1">
+        <div className="space-y-1.5 font-mono text-xs text-dash-muted pt-1">
           <div className="flex justify-between">
             <span>Platform Sync:</span>
-            <span className="text-ink font-semibold">{game.parent_platforms?.[0]?.platform?.name || "PC Cloud"}</span>
+            <span className="text-dash-ink font-semibold">{game.parent_platforms?.[0]?.platform?.name || "PC Cloud"}</span>
           </div>
           <div className="flex justify-between">
             <span>Rating:</span>
@@ -91,7 +91,7 @@ function MyGameCard({
           </div>
           <div className="flex justify-between">
             <span>Stream Quality:</span>
-            <span className="text-ink font-semibold">4K @ 120 FPS</span>
+            <span className="text-dash-ink font-semibold">4K @ 120 FPS</span>
           </div>
         </div>
 
@@ -99,13 +99,13 @@ function MyGameCard({
         <div className="flex gap-2">
           <Link
             href={`/dashboard/games/${game.slug || game.id}`}
-            className="flex-1 py-2 rounded-xl text-xs font-mono font-bold text-center bg-deep border border-black/10 text-ink hover:bg-black/5 transition-all block"
+            className="flex-1 py-2 rounded-xl text-xs font-mono font-bold text-center bg-dash-subtle border border-black/10 text-dash-ink hover:bg-black/5 transition-all block"
           >
             Game Details
           </Link>
           <button
             onClick={() => onLaunchStream(game)}
-            className="flex-1 py-2 rounded-xl text-xs font-mono font-bold text-center bg-ink text-white hover:bg-black/80 shadow-sm transition-all cursor-pointer"
+            className="flex-1 py-2 rounded-xl text-xs font-mono font-bold text-center bg-dash-ink text-white hover:bg-black/80 shadow-sm transition-all cursor-pointer"
           >
             ⚡ LAUNCH STREAM
           </button>
@@ -150,10 +150,10 @@ export default function MyGamesPage() {
       {/* Header with Stats */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-display font-bold text-ink">
+          <h1 className="text-3xl font-display font-bold text-dash-ink">
             My Games & Cloud Saves
           </h1>
-          <p className="text-muted text-sm font-mono mt-1">
+          <p className="text-dash-muted text-sm font-mono mt-1">
             Manage your personal game collection, save states, and continuous stream feeds.
           </p>
         </div>
@@ -161,11 +161,11 @@ export default function MyGamesPage() {
         {/* Cloud Save Storage Stat Card */}
         <div className="flex items-center gap-4 bg-white border border-black/10 p-3.5 rounded-2xl font-mono text-xs shadow-sm">
           <div>
-            <span className="text-muted block text-[10px]">Cloud Storage Used</span>
-            <span className="text-ink font-bold text-sm">6.8 GB / 50 GB</span>
+            <span className="text-dash-muted block text-[10px]">Cloud Storage Used</span>
+            <span className="text-dash-ink font-bold text-sm">6.8 GB / 50 GB</span>
           </div>
-          <div className="w-24 bg-deep h-2 rounded-full overflow-hidden border border-black/10">
-            <div className="bg-ink h-full w-[13.6%]" />
+          <div className="w-24 bg-dash-subtle h-2 rounded-full overflow-hidden border border-black/10">
+            <div className="bg-dash-ink h-full w-[13.6%]" />
           </div>
         </div>
       </div>
@@ -176,8 +176,8 @@ export default function MyGamesPage() {
           onClick={() => setActiveTab("all")}
           className={`px-4 py-2 rounded-xl text-xs font-mono transition-colors cursor-pointer whitespace-nowrap ${
             activeTab === "all"
-              ? "bg-ink text-white font-bold shadow-sm"
-              : "text-muted hover:text-ink hover:bg-black/5"
+              ? "bg-dash-ink text-white font-bold shadow-sm"
+              : "text-dash-muted hover:text-dash-ink hover:bg-black/5"
           }`}
         >
           All Owned ({games.length})
@@ -186,8 +186,8 @@ export default function MyGamesPage() {
           onClick={() => setActiveTab("favorites")}
           className={`px-4 py-2 rounded-xl text-xs font-mono transition-colors cursor-pointer whitespace-nowrap ${
             activeTab === "favorites"
-              ? "bg-ink text-white font-bold shadow-sm"
-              : "text-muted hover:text-ink hover:bg-black/5"
+              ? "bg-dash-ink text-white font-bold shadow-sm"
+              : "text-dash-muted hover:text-dash-ink hover:bg-black/5"
           }`}
         >
           ★ Favorites ({favorites.length})
@@ -203,10 +203,10 @@ export default function MyGamesPage() {
         </div>
       ) : filteredGames.length === 0 ? (
         <div className="p-12 text-center rounded-2xl bg-white border border-black/10 space-y-4 font-mono shadow-sm">
-          <p className="text-muted text-xs">No games found in this category.</p>
+          <p className="text-dash-muted text-xs">No games found in this category.</p>
           <Link
             href="/dashboard/store"
-            className="inline-block px-4 py-2 bg-ink text-white rounded-xl font-bold text-xs shadow-sm hover:bg-black/80"
+            className="inline-block px-4 py-2 bg-dash-ink text-white rounded-xl font-bold text-xs shadow-sm hover:bg-black/80"
           >
             🛒 Browse Game Store
           </Link>

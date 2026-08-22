@@ -33,6 +33,14 @@ const config: Config = {
 
         // ── Ember accent (orange — savings badge) ─────────
         ember: "#F97316",
+
+        // ── Dashboard light surface ───────────────────────
+        // The signed-in dashboard inverts the marketing site: white cards on a
+        // light page. The tokens above are all tuned for the dark site and are
+        // unreadable there, so the dashboard uses these instead.
+        "dash-ink":    "#101218",   // primary text on light  (19:1 on white)
+        "dash-muted":  "#585F70",   // secondary text on light (6.3:1 on white)
+        "dash-subtle": "#F4F5F7",   // recessed surface inside a white card
       },
 
       backgroundImage: {

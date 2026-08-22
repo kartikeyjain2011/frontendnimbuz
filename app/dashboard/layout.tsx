@@ -98,10 +98,10 @@ export default function DashboardLayout({
 
   if (!isLoaded || !isSignedIn) {
     return (
-      <div className="min-h-screen bg-white text-ink font-body flex items-center justify-center p-6">
+      <div className="min-h-screen bg-white text-dash-ink font-body flex items-center justify-center p-6">
         <div className="text-center space-y-4">
-          <div className="w-10 h-10 border-2 border-ink border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-xs font-mono tracking-wider text-muted uppercase">
+          <div className="w-10 h-10 border-2 border-dash-ink border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-xs font-mono tracking-wider text-dash-muted uppercase">
             Establishing Encrypted Neural Stream...
           </p>
         </div>
@@ -110,7 +110,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="h-screen w-screen bg-deep text-ink font-body flex overflow-hidden">
+    <div className="h-screen w-screen bg-dash-subtle text-dash-ink font-body flex overflow-hidden">
       {/* Backdrop overlay for mobile sidebar */}
       {isMobileMenuOpen && (
         <div
@@ -131,14 +131,14 @@ export default function DashboardLayout({
           {/* Top Brand Logo Header */}
           <div className="flex items-center justify-between pt-1">
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-9 h-9 rounded-xl bg-ink flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+              <div className="w-9 h-9 rounded-xl bg-dash-ink flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
                 <span className="w-3 h-3 rounded-full bg-white animate-flicker" />
               </div>
               <div>
-                <span className="font-display font-bold text-lg tracking-wider text-ink block leading-none">
+                <span className="font-display font-bold text-lg tracking-wider text-dash-ink block leading-none">
                   NIMBUS
                 </span>
-                <span className="text-[10px] font-mono tracking-widest text-muted uppercase">
+                <span className="text-[10px] font-mono tracking-widest text-dash-muted uppercase">
                   CLOUD GAMING
                 </span>
               </div>
@@ -147,7 +147,7 @@ export default function DashboardLayout({
             {/* Mobile close button */}
             <button
               onClick={() => setIsMobileMenuOpen(false)}
-              className="lg:hidden text-muted hover:text-ink p-1 cursor-pointer"
+              className="lg:hidden text-dash-muted hover:text-dash-ink p-1 cursor-pointer"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -156,18 +156,18 @@ export default function DashboardLayout({
           </div>
 
           {/* User Status Profile Card */}
-          <div className="p-3.5 rounded-xl bg-deep border border-black/10 flex items-center gap-3">
+          <div className="p-3.5 rounded-xl bg-dash-subtle border border-black/10 flex items-center gap-3">
             <div className="relative shrink-0">
-              <div className="w-10 h-10 rounded-full bg-ink flex items-center justify-center font-mono font-bold text-white text-sm">
+              <div className="w-10 h-10 rounded-full bg-dash-ink flex items-center justify-center font-mono font-bold text-white text-sm">
                 {user?.firstName?.[0] || user?.username?.[0] || "G"}
               </div>
               <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="font-display font-semibold text-ink text-sm truncate">
+              <div className="font-display font-semibold text-dash-ink text-sm truncate">
                 {user?.firstName || user?.username || "Gamer"}
               </div>
-              <div className="text-[10px] font-mono text-muted flex items-center gap-1">
+              <div className="text-[10px] font-mono text-dash-muted flex items-center gap-1">
                 <span>PRO ULTIMATE TIER</span>
               </div>
             </div>
@@ -176,7 +176,7 @@ export default function DashboardLayout({
           {/* Navigation Section */}
           <div className="space-y-6 flex-1">
             <div className="space-y-1.5">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-muted px-3 block mb-2">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-dash-muted px-3 block mb-2">
                 Core Station
               </span>
               {mainNavItems.map((item) => {
@@ -191,12 +191,12 @@ export default function DashboardLayout({
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-mono transition-all duration-200 cursor-pointer ${
                       isActive
-                        ? "bg-ink text-white font-bold shadow-sm"
-                        : "text-muted hover:text-ink hover:bg-black/5 border border-transparent"
+                        ? "bg-dash-ink text-white font-bold shadow-sm"
+                        : "text-dash-muted hover:text-dash-ink hover:bg-black/5 border border-transparent"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className={isActive ? "text-white" : "text-muted"}>
+                      <span className={isActive ? "text-white" : "text-dash-muted"}>
                         {item.icon}
                       </span>
                       <span>{item.name}</span>
@@ -206,8 +206,8 @@ export default function DashboardLayout({
                       <span
                         className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
                           isActive
-                            ? "bg-white text-ink border-white font-bold"
-                            : "bg-deep text-muted border-black/10"
+                            ? "bg-white text-dash-ink border-white font-bold"
+                            : "bg-dash-subtle text-dash-muted border-black/10"
                         }`}
                       >
                         {item.badge}
@@ -219,25 +219,25 @@ export default function DashboardLayout({
             </div>
 
             {/* Live System Performance Box */}
-            <div className="p-4 rounded-xl bg-deep border border-black/10 space-y-3 font-mono text-xs">
+            <div className="p-4 rounded-xl bg-dash-subtle border border-black/10 space-y-3 font-mono text-xs">
               <div className="flex justify-between items-center text-[11px]">
-                <span className="text-muted">DATACENTER NODE</span>
+                <span className="text-dash-muted">DATACENTER NODE</span>
                 <span className="text-emerald-600 font-semibold flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> ONLINE
                 </span>
               </div>
               <div className="space-y-1">
                 <div className="flex justify-between text-[11px]">
-                  <span className="text-muted">Node Ping:</span>
-                  <span className="text-ink font-bold">4 ms</span>
+                  <span className="text-dash-muted">Node Ping:</span>
+                  <span className="text-dash-ink font-bold">4 ms</span>
                 </div>
                 <div className="flex justify-between text-[11px]">
-                  <span className="text-muted">GPU Rig:</span>
-                  <span className="text-ink">RTX 4090 Node</span>
+                  <span className="text-dash-muted">GPU Rig:</span>
+                  <span className="text-dash-ink">RTX 4090 Node</span>
                 </div>
                 <div className="flex justify-between text-[11px]">
-                  <span className="text-muted">Stream Quality:</span>
-                  <span className="text-ink">4K @ 120 FPS</span>
+                  <span className="text-dash-muted">Stream Quality:</span>
+                  <span className="text-dash-ink">4K @ 120 FPS</span>
                 </div>
               </div>
             </div>
@@ -247,7 +247,7 @@ export default function DashboardLayout({
           <div className="pt-4 border-t border-black/10 space-y-2 font-mono text-xs">
             <Link
               href="/"
-              className="flex items-center justify-between px-3 py-2 rounded-lg text-muted hover:text-ink hover:bg-black/5 transition-colors"
+              className="flex items-center justify-between px-3 py-2 rounded-lg text-dash-muted hover:text-dash-ink hover:bg-black/5 transition-colors"
             >
               <span className="flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -257,8 +257,8 @@ export default function DashboardLayout({
               </span>
             </Link>
 
-            <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-deep border border-black/10 text-[11px]">
-              <span className="text-muted">User Account</span>
+            <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-dash-subtle border border-black/10 text-[11px]">
+              <span className="text-dash-muted">User Account</span>
               <UserButton />
             </div>
           </div>
@@ -275,7 +275,7 @@ export default function DashboardLayout({
             {/* Mobile Sidebar Toggle Button */}
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-lg bg-deep border border-black/10 text-ink hover:border-black/30 cursor-pointer"
+              className="lg:hidden p-2 rounded-lg bg-dash-subtle border border-black/10 text-dash-ink hover:border-black/30 cursor-pointer"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -285,7 +285,7 @@ export default function DashboardLayout({
             {/* Quick Search Input */}
             <div className="relative max-w-md w-full hidden sm:block">
               <svg
-                className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
+                className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-dash-muted"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -295,9 +295,9 @@ export default function DashboardLayout({
               <input
                 type="text"
                 placeholder="Search games, cloud rigs, datacenter nodes..."
-                className="w-full bg-deep border border-black/10 rounded-lg pl-10 pr-12 py-2 text-xs font-mono text-ink placeholder:text-muted focus:border-black/40 focus:outline-none transition-colors"
+                className="w-full bg-dash-subtle border border-black/10 rounded-lg pl-10 pr-12 py-2 text-xs font-mono text-dash-ink placeholder:text-dash-muted focus:border-black/40 focus:outline-none transition-colors"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-muted bg-white px-1.5 py-0.5 rounded border border-black/10">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-dash-muted bg-white px-1.5 py-0.5 rounded border border-black/10">
                 ⌘K
               </span>
             </div>
@@ -305,14 +305,14 @@ export default function DashboardLayout({
 
           {/* Right Header Status & Action Bar */}
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-deep border border-black/10 text-xs font-mono">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-dash-subtle border border-black/10 text-xs font-mono">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-muted">US-East GPU-01</span>
+              <span className="text-dash-muted">US-East GPU-01</span>
             </div>
 
             <Link
               href="/dashboard/upgrade"
-              className="px-3.5 py-1.5 rounded-lg bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-colors flex items-center gap-1.5"
+              className="px-3.5 py-1.5 rounded-lg bg-dash-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-colors flex items-center gap-1.5"
             >
               <span>⚡</span>
               <span>UPGRADE</span>
@@ -328,7 +328,7 @@ export default function DashboardLayout({
         </main>
 
         {/* Global Footer Bar */}
-        <footer className="border-t border-black/10 py-4 px-6 text-xs font-mono text-muted bg-white shrink-0">
+        <footer className="border-t border-black/10 py-4 px-6 text-xs font-mono text-dash-muted bg-white shrink-0">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px]">
             <div className="flex items-center gap-3">
               <span className="text-emerald-600 flex items-center gap-1">

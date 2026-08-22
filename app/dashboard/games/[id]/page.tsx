@@ -128,11 +128,11 @@ export default function SingleGamePage() {
   if (!gameData) {
     return (
       <div className="text-center py-20 space-y-4 font-mono">
-        <h1 className="text-2xl font-bold text-ink">Game Not Found</h1>
-        <p className="text-sm text-muted">The requested title could not be located in our cloud catalog.</p>
+        <h1 className="text-2xl font-bold text-dash-ink">Game Not Found</h1>
+        <p className="text-sm text-dash-muted">The requested title could not be located in our cloud catalog.</p>
         <Link
           href="/dashboard/store"
-          className="inline-block px-4 py-2 bg-ink text-white rounded-xl font-bold text-xs"
+          className="inline-block px-4 py-2 bg-dash-ink text-white rounded-xl font-bold text-xs"
         >
           ← Back to Game Store
         </Link>
@@ -272,7 +272,7 @@ export default function SingleGamePage() {
       <div className="flex items-center justify-between">
         <Link
           href="/dashboard/store"
-          className="inline-flex items-center gap-2 text-xs font-mono text-muted hover:text-ink transition-colors font-semibold"
+          className="inline-flex items-center gap-2 text-xs font-mono text-dash-muted hover:text-dash-ink transition-colors font-semibold"
         >
           ← Back to Game Store
         </Link>
@@ -282,7 +282,7 @@ export default function SingleGamePage() {
             ✓ OWNED IN LIBRARY
           </span>
         ) : (
-          <span className="text-xs font-mono text-ink bg-black/5 border border-black/15 px-3 py-1 rounded-full font-semibold">
+          <span className="text-xs font-mono text-dash-ink bg-black/5 border border-black/15 px-3 py-1 rounded-full font-semibold">
             STORE ITEM • ₹{priceInINR.toLocaleString()} INR
           </span>
         )}
@@ -332,31 +332,31 @@ export default function SingleGamePage() {
         {/* Content detail sidebar card */}
         <div className="lg:w-1/3 p-6 lg:p-8 flex flex-col justify-between space-y-6 bg-white border-t lg:border-t-0 lg:border-l border-black/10">
           <div className="space-y-3">
-            <div className="flex items-center justify-between text-xs font-mono text-muted">
+            <div className="flex items-center justify-between text-xs font-mono text-dash-muted">
               <span>{gameData.genre}</span>
               <span className="text-amber-500 font-bold">★ {gameData.rating}</span>
             </div>
 
-            <h1 className="text-2xl lg:text-3xl font-display font-bold text-ink leading-tight">
+            <h1 className="text-2xl lg:text-3xl font-display font-bold text-dash-ink leading-tight">
               {gameData.title}
             </h1>
 
-            <div className="space-y-1.5 text-xs font-mono text-muted border-t border-black/10 pt-4">
+            <div className="space-y-1.5 text-xs font-mono text-dash-muted border-t border-black/10 pt-4">
               <div className="flex justify-between">
                 <span>Publisher:</span>
-                <span className="text-ink font-semibold">{gameData.publisher}</span>
+                <span className="text-dash-ink font-semibold">{gameData.publisher}</span>
               </div>
               <div className="flex justify-between">
                 <span>Release Year:</span>
-                <span className="text-ink font-semibold">{gameData.releaseYear}</span>
+                <span className="text-dash-ink font-semibold">{gameData.releaseYear}</span>
               </div>
               <div className="flex justify-between">
                 <span>Install Size:</span>
-                <span className="text-ink font-semibold">{gameData.size}</span>
+                <span className="text-dash-ink font-semibold">{gameData.size}</span>
               </div>
               <div className="flex justify-between">
                 <span>Max Resolution:</span>
-                <span className="text-ink font-semibold">{gameData.resolution}</span>
+                <span className="text-dash-ink font-semibold">{gameData.resolution}</span>
               </div>
             </div>
           </div>
@@ -367,23 +367,23 @@ export default function SingleGamePage() {
               <div className="space-y-2">
                 <button
                   onClick={() => setActiveStream(true)}
-                  className="w-full py-4 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                  className="w-full py-4 rounded-xl bg-dash-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
                 >
                   <span>⚡ STREAM {gameData.title.toUpperCase()} NOW</span>
                 </button>
                 <Link
                   href="/dashboard/my-games"
-                  className="w-full py-2.5 rounded-xl text-xs font-mono text-center block bg-deep border border-black/10 text-muted hover:text-ink transition-colors font-semibold"
+                  className="w-full py-2.5 rounded-xl text-xs font-mono text-center block bg-dash-subtle border border-black/10 text-dash-muted hover:text-dash-ink transition-colors font-semibold"
                 >
                   View in My Games Library
                 </Link>
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="font-mono text-xs text-muted flex justify-between items-center">
+                <div className="font-mono text-xs text-dash-muted flex justify-between items-center">
                   <span>Price:</span>
                   <div className="text-right">
-                    <span className="text-xl font-bold text-ink">${gameData.priceUSD.toFixed(2)}</span>
+                    <span className="text-xl font-bold text-dash-ink">${gameData.priceUSD.toFixed(2)}</span>
                     <span className="text-emerald-600 text-[11px] block font-semibold">(₹{priceInINR.toLocaleString()} INR)</span>
                   </div>
                 </div>
@@ -392,7 +392,7 @@ export default function SingleGamePage() {
                   <button
                     onClick={handleRazorpayBuy}
                     disabled={isProcessing}
-                    className="py-3.5 rounded-xl bg-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all cursor-pointer disabled:opacity-50 shadow-sm text-center"
+                    className="py-3.5 rounded-xl bg-dash-ink text-white font-mono font-bold text-xs hover:bg-black/80 transition-all cursor-pointer disabled:opacity-50 shadow-sm text-center"
                   >
                     {isProcessing ? "PROCESSING..." : "💳 RAZORPAY"}
                   </button>
@@ -415,22 +415,22 @@ export default function SingleGamePage() {
       {/* Description & Specs Grid */}
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 rounded-2xl bg-white border border-black/10 p-6 space-y-4 shadow-sm">
-          <h2 className="text-lg font-display font-bold text-ink">
+          <h2 className="text-lg font-display font-bold text-dash-ink">
             About {gameData.title}
           </h2>
-          <p className="text-sm text-muted font-body leading-relaxed whitespace-pre-line">
+          <p className="text-sm text-dash-muted font-body leading-relaxed whitespace-pre-line">
             {gameData.description}
           </p>
 
           <div className="pt-4 border-t border-black/10 space-y-3">
-            <span className="text-xs font-mono uppercase tracking-wider text-muted block">
+            <span className="text-xs font-mono uppercase tracking-wider text-dash-muted block">
               Feature Tags
             </span>
             <div className="flex flex-wrap gap-2">
               {gameData.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-3 py-1 rounded-full bg-deep border border-black/10 text-xs font-mono text-ink font-medium"
+                  className="px-3 py-1 rounded-full bg-dash-subtle border border-black/10 text-xs font-mono text-dash-ink font-medium"
                 >
                   #{tag}
                 </span>
@@ -442,21 +442,21 @@ export default function SingleGamePage() {
         {/* Cloud Stream Specs */}
         <div className="rounded-2xl bg-white border border-black/10 p-6 space-y-4 flex flex-col justify-between shadow-sm">
           <div className="space-y-3">
-            <h2 className="text-lg font-display font-bold text-ink">
+            <h2 className="text-lg font-display font-bold text-dash-ink">
               Cloud PC Allocation
             </h2>
 
             <div className="space-y-3 font-mono text-xs">
-              <div className="p-3 rounded-xl bg-deep border border-black/10">
-                <span className="text-muted block text-[10px] uppercase">Allocated Stream Quality:</span>
-                <span className="text-ink font-semibold">4K @ 120 FPS / HDR</span>
+              <div className="p-3 rounded-xl bg-dash-subtle border border-black/10">
+                <span className="text-dash-muted block text-[10px] uppercase">Allocated Stream Quality:</span>
+                <span className="text-dash-ink font-semibold">4K @ 120 FPS / HDR</span>
               </div>
-              <div className="p-3 rounded-xl bg-deep border border-black/10">
-                <span className="text-muted block text-[10px] uppercase">Network Codec:</span>
-                <span className="text-ink font-semibold">AV1 / H.265 WebRTC</span>
+              <div className="p-3 rounded-xl bg-dash-subtle border border-black/10">
+                <span className="text-dash-muted block text-[10px] uppercase">Network Codec:</span>
+                <span className="text-dash-ink font-semibold">AV1 / H.265 WebRTC</span>
               </div>
-              <div className="p-3 rounded-xl bg-deep border border-black/10">
-                <span className="text-muted block text-[10px] uppercase">Partner Store Option:</span>
+              <div className="p-3 rounded-xl bg-dash-subtle border border-black/10">
+                <span className="text-dash-muted block text-[10px] uppercase">Partner Store Option:</span>
                 <span className="text-orange-600 font-semibold">● Kinguin Store Enabled</span>
               </div>
             </div>
@@ -464,7 +464,7 @@ export default function SingleGamePage() {
 
           <Link
             href="/dashboard/cloud-pc"
-            className="w-full py-3 rounded-xl bg-ink text-white hover:bg-black/80 font-mono font-bold text-xs text-center transition-all block shadow-sm"
+            className="w-full py-3 rounded-xl bg-dash-ink text-white hover:bg-black/80 font-mono font-bold text-xs text-center transition-all block shadow-sm"
           >
             🖥️ VIEW VIRTUAL CLOUD DESKTOP
           </Link>
@@ -481,17 +481,17 @@ export default function SingleGamePage() {
 
             <div className="space-y-2">
               <span className="text-xs font-mono uppercase text-emerald-600">Payment Verified</span>
-              <h3 className="text-2xl font-display font-bold text-ink">
+              <h3 className="text-2xl font-display font-bold text-dash-ink">
                 {gameData.title}
               </h3>
-              <p className="text-xs font-mono text-muted">
+              <p className="text-xs font-mono text-dash-muted">
                 Game added to your Cloud Library. Pre-installed and ready to stream.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-deep border border-black/10 space-y-2 font-mono">
-              <span className="text-[10px] text-muted uppercase block">Digital Key Code</span>
-              <div className="font-bold text-ink text-lg tracking-widest">
+            <div className="p-4 rounded-xl bg-dash-subtle border border-black/10 space-y-2 font-mono">
+              <span className="text-[10px] text-dash-muted uppercase block">Digital Key Code</span>
+              <div className="font-bold text-dash-ink text-lg tracking-widest">
                 {activationKey}
               </div>
             </div>
@@ -502,13 +502,13 @@ export default function SingleGamePage() {
                   setShowKeyModal(false);
                   setActiveStream(true);
                 }}
-                className="flex-1 py-3 rounded-xl bg-ink text-white font-bold text-xs hover:bg-black/80 transition-all text-center cursor-pointer"
+                className="flex-1 py-3 rounded-xl bg-dash-ink text-white font-bold text-xs hover:bg-black/80 transition-all text-center cursor-pointer"
               >
                 ⚡ STREAM ON CLOUD NOW
               </button>
               <button
                 onClick={() => setShowKeyModal(false)}
-                className="px-6 py-3 rounded-xl bg-white border border-black/15 text-muted hover:text-ink text-xs cursor-pointer font-semibold"
+                className="px-6 py-3 rounded-xl bg-white border border-black/15 text-dash-muted hover:text-dash-ink text-xs cursor-pointer font-semibold"
               >
                 Close
               </button>

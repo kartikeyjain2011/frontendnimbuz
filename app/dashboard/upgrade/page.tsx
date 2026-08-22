@@ -314,13 +314,13 @@ export default function UpgradePage() {
             <div>
               <span className="font-bold text-sm block">⚡ Payment Successful! Plan Activated.</span>
               <span>
-                Payment ID: <code className="text-ink">{paymentSuccess.paymentId}</code> •{" "}
-                <span className="font-bold text-ink">{paymentSuccess.planName}</span> •{" "}
-                Charged: <span className="font-bold text-ink">{formatINR(paymentSuccess.amount)}</span>
+                Payment ID: <code className="text-dash-ink">{paymentSuccess.paymentId}</code> •{" "}
+                <span className="font-bold text-dash-ink">{paymentSuccess.planName}</span> •{" "}
+                Charged: <span className="font-bold text-dash-ink">{formatINR(paymentSuccess.amount)}</span>
               </span>
             </div>
           </div>
-          <button onClick={() => setPaymentSuccess(null)} className="text-muted hover:text-ink text-xs underline cursor-pointer shrink-0">
+          <button onClick={() => setPaymentSuccess(null)} className="text-dash-muted hover:text-dash-ink text-xs underline cursor-pointer shrink-0">
             Dismiss
           </button>
         </div>
@@ -328,14 +328,14 @@ export default function UpgradePage() {
 
       {/* ── Header ── */}
       <div className="text-center max-w-3xl mx-auto space-y-4 pt-2">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-black/5 border border-black/15 text-ink font-mono text-xs uppercase tracking-widest">
-          <span className="w-2 h-2 rounded-full bg-ink animate-pulse" />
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-black/5 border border-black/15 text-dash-ink font-mono text-xs uppercase tracking-widest">
+          <span className="w-2 h-2 rounded-full bg-dash-ink animate-pulse" />
           <span>Razorpay Secure Payment Gateway</span>
         </div>
-        <h1 className="text-3xl md:text-5xl font-display font-bold text-ink tracking-tight">
+        <h1 className="text-3xl md:text-5xl font-display font-bold text-dash-ink tracking-tight">
           Choose Your Plan
         </h1>
-        <p className="text-muted text-sm font-mono leading-relaxed">
+        <p className="text-dash-muted text-sm font-mono leading-relaxed">
           Pay once per billing cycle — UPI, Cards, NetBanking & Wallets accepted via Razorpay.
         </p>
       </div>
@@ -347,7 +347,7 @@ export default function UpgradePage() {
           <button
             onClick={() => setCategory("gaming")}
             className={`px-6 py-2.5 rounded-xl text-xs font-mono font-semibold transition-all cursor-pointer ${
-              category === "gaming" ? "bg-ink text-white shadow-sm" : "text-muted hover:text-ink hover:bg-black/5"
+              category === "gaming" ? "bg-dash-ink text-white shadow-sm" : "text-dash-muted hover:text-dash-ink hover:bg-black/5"
             }`}
           >
             🎮 Cloud Gaming
@@ -355,7 +355,7 @@ export default function UpgradePage() {
           <button
             onClick={() => setCategory("cloud-pc")}
             className={`px-6 py-2.5 rounded-xl text-xs font-mono font-semibold transition-all cursor-pointer ${
-              category === "cloud-pc" ? "bg-ink text-white shadow-sm" : "text-muted hover:text-ink hover:bg-black/5"
+              category === "cloud-pc" ? "bg-dash-ink text-white shadow-sm" : "text-dash-muted hover:text-dash-ink hover:bg-black/5"
             }`}
           >
             🖥️ Cloud PC Rigs
@@ -372,8 +372,8 @@ export default function UpgradePage() {
                 onClick={() => setBillingCycle(cycle.key)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-mono font-semibold transition-all cursor-pointer ${
                   isActive
-                    ? "bg-ink text-white border-ink shadow-sm"
-                    : "bg-white text-muted border-black/10 hover:text-ink hover:border-black/25"
+                    ? "bg-dash-ink text-white border-dash-ink shadow-sm"
+                    : "bg-white text-dash-muted border-black/10 hover:text-dash-ink hover:border-black/25"
                 }`}
               >
                 <span>{cycle.label}</span>
@@ -393,7 +393,7 @@ export default function UpgradePage() {
 
         {/* Savings info strip */}
         {selectedCycle.discount > 0 && (
-          <p className="text-center text-xs font-mono text-muted">
+          <p className="text-center text-xs font-mono text-dash-muted">
             You save{" "}
             <span className="text-emerald-600 font-bold">{Math.round(selectedCycle.discount * 100)}%</span>{" "}
             by committing to {selectedCycle.months} months — billed as one payment.
@@ -416,7 +416,7 @@ export default function UpgradePage() {
               key={plan.id}
               className={`rounded-2xl border flex flex-col justify-between transition-all duration-300 relative overflow-hidden ${
                 plan.isPopular
-                  ? "bg-ink text-white border-ink shadow-xl"
+                  ? "bg-dash-ink text-white border-dash-ink shadow-xl"
                   : "bg-white border-black/10 hover:border-black/25 hover:shadow-md"
               }`}
             >
@@ -424,7 +424,7 @@ export default function UpgradePage() {
               {plan.badge && (
                 <div
                   className={`absolute top-0 right-0 text-[10px] font-mono font-bold px-3 py-1 rounded-bl-xl ${
-                    plan.isPopular ? "bg-white text-ink" : "bg-ink text-white"
+                    plan.isPopular ? "bg-white text-dash-ink" : "bg-dash-ink text-white"
                   }`}
                 >
                   {plan.badge}
@@ -434,23 +434,23 @@ export default function UpgradePage() {
               <div className="p-6 space-y-5">
                 {/* Plan name */}
                 <div>
-                  <span className={`text-[10px] font-mono uppercase tracking-widest ${plan.isPopular ? "text-white/50" : "text-muted"}`}>
+                  <span className={`text-[10px] font-mono uppercase tracking-widest ${plan.isPopular ? "text-white/50" : "text-dash-muted"}`}>
                     {plan.subtitle}
                   </span>
-                  <h3 className={`font-display font-bold text-2xl mt-0.5 ${plan.isPopular ? "text-white" : "text-ink"}`}>
+                  <h3 className={`font-display font-bold text-2xl mt-0.5 ${plan.isPopular ? "text-white" : "text-dash-ink"}`}>
                     {plan.name}
                   </h3>
-                  <p className={`text-xs font-mono mt-1 leading-snug ${plan.isPopular ? "text-white/60" : "text-muted"}`}>
+                  <p className={`text-xs font-mono mt-1 leading-snug ${plan.isPopular ? "text-white/60" : "text-dash-muted"}`}>
                     {plan.tagline}
                   </p>
                 </div>
 
                 {/* Price block */}
                 <div className={`py-4 border-y space-y-1 ${plan.isPopular ? "border-white/15" : "border-black/10"}`}>
-                  <div className={`font-mono font-bold text-3xl ${plan.isPopular ? "text-white" : "text-ink"}`}>
+                  <div className={`font-mono font-bold text-3xl ${plan.isPopular ? "text-white" : "text-dash-ink"}`}>
                     {formatINR(totalPrice)}
                   </div>
-                  <div className={`text-[11px] font-mono ${plan.isPopular ? "text-white/50" : "text-muted"}`}>
+                  <div className={`text-[11px] font-mono ${plan.isPopular ? "text-white/50" : "text-dash-muted"}`}>
                     {selectedCycle.months === 1
                       ? "/ month"
                       : `total for ${selectedCycle.months} months · ${formatINR(plan.monthlyBase)}/mo base`}
@@ -463,22 +463,22 @@ export default function UpgradePage() {
                 </div>
 
                 {/* GPU Spec */}
-                <div className={`p-2.5 rounded-lg border text-xs font-mono ${plan.isPopular ? "bg-white/10 border-white/15" : "bg-deep border-black/10"}`}>
-                  <span className={`block text-[10px] uppercase tracking-wider mb-0.5 ${plan.isPopular ? "text-white/40" : "text-muted"}`}>
+                <div className={`p-2.5 rounded-lg border text-xs font-mono ${plan.isPopular ? "bg-white/10 border-white/15" : "bg-dash-subtle border-black/10"}`}>
+                  <span className={`block text-[10px] uppercase tracking-wider mb-0.5 ${plan.isPopular ? "text-white/40" : "text-dash-muted"}`}>
                     Hardware Node
                   </span>
-                  <span className={`font-semibold ${plan.isPopular ? "text-white" : "text-ink"}`}>{plan.gpuSpec}</span>
+                  <span className={`font-semibold ${plan.isPopular ? "text-white" : "text-dash-ink"}`}>{plan.gpuSpec}</span>
                 </div>
 
                 {/* Features */}
                 <div className="space-y-2">
-                  <span className={`text-[10px] font-mono uppercase tracking-wider ${plan.isPopular ? "text-white/40" : "text-muted"}`}>
+                  <span className={`text-[10px] font-mono uppercase tracking-wider ${plan.isPopular ? "text-white/40" : "text-dash-muted"}`}>
                     Included
                   </span>
                   {plan.features.map((feat) => (
                     <div key={feat} className="flex items-start gap-2 text-xs font-mono">
-                      <span className={`font-bold shrink-0 mt-px ${plan.isPopular ? "text-white" : "text-ink"}`}>✓</span>
-                      <span className={plan.isPopular ? "text-white/80" : "text-ink"}>{feat}</span>
+                      <span className={`font-bold shrink-0 mt-px ${plan.isPopular ? "text-white" : "text-dash-ink"}`}>✓</span>
+                      <span className={plan.isPopular ? "text-white/80" : "text-dash-ink"}>{feat}</span>
                     </div>
                   ))}
                 </div>
@@ -491,13 +491,13 @@ export default function UpgradePage() {
                   disabled={isActive}
                   className={`w-full py-3 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60 ${
                     plan.isPopular
-                      ? "bg-white text-ink hover:bg-white/90"
-                      : "bg-ink text-white hover:bg-black/80"
+                      ? "bg-white text-dash-ink hover:bg-white/90"
+                      : "bg-dash-ink text-white hover:bg-black/80"
                   }`}
                 >
                   {isActive ? (
                     <>
-                      <div className={`w-3.5 h-3.5 border-2 border-t-transparent rounded-full animate-spin ${plan.isPopular ? "border-ink" : "border-white"}`} />
+                      <div className={`w-3.5 h-3.5 border-2 border-t-transparent rounded-full animate-spin ${plan.isPopular ? "border-dash-ink" : "border-white"}`} />
                       <span>Opening Razorpay…</span>
                     </>
                   ) : (
@@ -514,18 +514,18 @@ export default function UpgradePage() {
 
 
       {/* ── Razorpay Payment Methods Banner ── */}
-      <div className="rounded-xl bg-white border border-black/10 p-5 flex flex-col md:flex-row items-center justify-between gap-6 font-mono text-xs text-muted shadow-sm">
+      <div className="rounded-xl bg-white border border-black/10 p-5 flex flex-col md:flex-row items-center justify-between gap-6 font-mono text-xs text-dash-muted shadow-sm">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-black/5 border border-black/10 flex items-center justify-center text-lg">💳</div>
           <div>
-            <span className="text-ink font-bold block text-sm mb-0.5">Supported Payment Methods</span>
+            <span className="text-dash-ink font-bold block text-sm mb-0.5">Supported Payment Methods</span>
             <span>UPI (GPay, PhonePe, Paytm) • Visa / Mastercard / RuPay • NetBanking • Wallets</span>
           </div>
         </div>
         <div className="flex items-center gap-4 shrink-0">
           <span className="text-emerald-600 font-semibold">🔒 256-Bit SSL</span>
-          <span className="text-muted">|</span>
-          <span className="text-ink font-semibold">Powered by Razorpay</span>
+          <span className="text-dash-muted">|</span>
+          <span className="text-dash-ink font-semibold">Powered by Razorpay</span>
         </div>
       </div>
     </div>
